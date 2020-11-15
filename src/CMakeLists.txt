@@ -1,23 +1,37 @@
-#########
-# Setup #
-#########
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost COMPONENTS filesystem program_options REQUIRED)
+find_package(Threads REQUIRED)
 
-# Specify the minimum version for CMake
-cmake_minimum_required(VERSION 2.8)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+file(GLOB_RECURSE SOURCES
+        *.cpp
+        *.cc
+        *.c)
 
-# Message
-message(STATUS "rlrouter develop version")
-message(STATUS ${CMAKE_CURRENT_SOURCE_DIR})
+# inhibit all warning messages from rsyn
+add_compile_definitions(BOOST_ALLOW_DEPRECATED_HEADERS)
+file(GLOB_RECURSE RSYN_SOURCES
+        lib/rsyn/*.cpp
+        lib/rsyn/*.cc
+        lib/rsyn/*.c)
+set_source_files_properties(${RSYN_SOURCES} PROPERTIES COMPILE_FLAGS "-w")
 
-# Find includes in the build directories
+include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+include_directories(SYSTEM lib/rsyn/src)
+include_directories(SYSTEM lib/rsyn/src/rsyn/export)
+include_directories(SYSTEM lib/rsyn/include)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
-# Project's name
-project(rlrouter)
+link_directories(lib/rsyn/lib/linux)
 
-# Set the output folder where your program will be created
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
-set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
+add_executable(${PROJECT_NAME} ${SOURCES})
+#set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS
+#        "-static -Wl,--whole-archive -rdynamic -lpthread -Wl,--no-whole-archive")
 
-set(CMAKE_CXX_STANDARD 14)
+target_link_libraries(${PROJECT_NAME} PUBLIC
+        ${Boost_LIBRARIES}
+        def
+        lef
+        Threads::Threads)
+if (OpenMP_CXX_FOUND)
+    target_link_libraries(${PROJECT_NAME} PUBLIC OpenMP::OpenMP_CXX)
+endif ()

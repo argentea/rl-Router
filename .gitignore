@@ -116,3 +116,7 @@ dmypy.json
 
 # ycm auto complete
 compile_commands.json
+
+# IDE folder
+.vscode
+.idea
