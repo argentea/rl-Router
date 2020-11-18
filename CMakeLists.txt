@@ -21,5 +21,9 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=1 -Wall -Wextra")
 endif ()
 
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost COMPONENTS filesystem program_options REQUIRED)
+#find_package(Threads REQUIRED)
 
 add_subdirectory(src)
+add_subdirectory(thirdparty)
