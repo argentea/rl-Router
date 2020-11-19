@@ -36,8 +36,8 @@ private:
     std::vector<Rsyn::Pin> _rsyn_pins;
     NetList _netlist;
     static BoxT<int64_t> getBoxFromRsynBounds(const Bounds &bounds);
-    int getPinAccessBoxes(Rsyn::PhysicalPort phPort, std::vector<BoxOnLayer> &accessBoxes);
-    int getPinAccessBoxes(Rsyn::PhysicalLibraryPin phLibPin, Rsyn::PhysicalCell phCell,
+    static int getPinAccessBoxes(Rsyn::PhysicalPort phPort, std::vector<BoxOnLayer> &accessBoxes);
+    static int getPinAccessBoxes(Rsyn::PhysicalLibraryPin phLibPin, Rsyn::PhysicalCell phCell,
                           std::vector<BoxOnLayer> &accessBoxes, const DBUxy &origin);
     int initPinAccessBoxes(Rsyn::Pin rsynPin, std::vector<BoxOnLayer> &accessBoxes, int64_t libDBU);
     int initNet(Net &net, int i, const Rsyn::Net &rsyn_net);
