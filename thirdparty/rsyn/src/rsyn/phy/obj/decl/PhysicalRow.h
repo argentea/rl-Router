@@ -48,7 +48,7 @@ public:
 	std::string getName() const;
 	//! @brief Returns the Rsyn::PhysicalRow site name. 
 	std::string getSiteName() const;
-	//! @brief Returns the Rsyn::PhysicalRow width in DBU. 
+	//! @brief Returns the Rsyn::PhysicalRow _width in DBU.
 	DBU getWidth() const;
 	//! @brief Returns the Rsyn::PhysicalRow height in DBU. 
 	DBU getHeight() const ;
@@ -58,13 +58,13 @@ public:
 	DBUxy getOrigin() const;
 	//! @brief Returns the Rsyn::PhysicalRow step length for X or Y.
 	DBU getStep(const Dimension dim) const;
-	//! @brief Returns the Rsyn::PhysicalRow step length. In X is the width while in Y is the height.
+	//! @brief Returns the Rsyn::PhysicalRow step length. In X is the _width while in Y is the height.
 	DBUxy getStep() const;
 	//! @brief Returns the total number of sites in the Rsyn::PhsyicalRow
 	int getNumSites(const Dimension dim) const ;
 	//! @brief Returns the Rsyn::PhysicalSite object.
 	Rsyn::PhysicalSite getPhysicalSite() const;
-	//! @brief Returns the site width in DBU.
+	//! @brief Returns the site _width in DBU.
 	DBU getSiteWidth() const ;
 	//! @brief Returns the site height in DBU.
 	DBU getSiteHeight() const;

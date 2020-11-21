@@ -505,7 +505,7 @@ extern void lefrSetDeltaNumberLines  (int);
 
 // PCR 551229 - Set the parser to be more relax 
 // This api is specific for PKS. 
-// When in relax mode, the parser will not require width, pitch, & direction 
+// When in relax mode, the parser will not require _width, pitch, & direction
 // in routing layers. Also vias in nondefault rules 
 extern void lefrSetRelaxMode ();
 extern void lefrUnsetRelaxMode ();

@@ -13,15 +13,15 @@ enum netIndex {
 
 class Net {
 public:
-    int idx;
+    int _idx;
     std::string _net_name;
-    std::vector<std::vector<BoxOnLayer>> pinAccessBoxes;// (pinIdx, accessBoxIdx) -> BoxOnLayer
+    std::vector<std::vector<BoxOnLayer>> _pin_access_boxes;// (pinIdx, accessBoxIdx) -> BoxOnLayer
 
     // route guides
-    std::vector<BoxOnLayer> routeGuides;
+    std::vector<BoxOnLayer> _route_guides;
 
     // more route guide information
-    std::vector<int> routeGuideVios;
+    std::vector<int> _route_guide_vios;
 };
 }// namespace parser
 }// namespace router

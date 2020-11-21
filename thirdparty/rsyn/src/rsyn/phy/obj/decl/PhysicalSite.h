@@ -47,13 +47,13 @@ public:
 	//! @brief Returns the Rsyn::PhysicalSit class.
 	//! @param Rsyn::PhysicalSiteClass may be 1) PAD or 2) CORE.
 	Rsyn::PhysicalSiteClass getClass() const;
-	//! @brief Returns the site size. In X is the width and in Y is the height.
+	//! @brief Returns the site size. In X is the _width and in Y is the height.
 	DBUxy getSize() const;
-	//! @brief Returns the site width.
+	//! @brief Returns the site _width.
 	DBU getWidth() const;
 	//! @brief Returns the site heigth.
 	DBU getHeight() const;
-	//! @brief Returns site width if Dimension is X. Otherwise, returns the site height.
+	//! @brief Returns site _width if Dimension is X. Otherwise, returns the site height.
 	DBU getLength(const Dimension dim) const;
 	//! @brief Returns the site symmetry
 	Rsyn::PhysicalSymmetry getSymmetry() const;

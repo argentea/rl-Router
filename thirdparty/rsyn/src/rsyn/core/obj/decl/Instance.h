@@ -226,11 +226,11 @@ public:
 	//! @brief Returns the height of this instance.
 	DBU getHeight() const;
 
-	//! @brief Returns the width of this instance.
+	//! @brief Returns the _width of this instance.
 	DBU getWidth() const;
 
 	//! @brief Returns the size of this instance.
-	//! @note  X is the length for abscissa (width) while in Y is the length for
+	//! @note  X is the length for abscissa (_width) while in Y is the length for
 	//!        ordinate (height).
 	DBUxy getSize() const;
 

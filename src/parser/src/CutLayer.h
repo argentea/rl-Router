@@ -25,7 +25,7 @@ public:
 
 class CutLayer {
 public:
-    // Basic infomation
+    // Basic information
     std::string name;
     int idx;// layerIdx (consistent with Rsyn::xxx::getRelativeIndex())
 

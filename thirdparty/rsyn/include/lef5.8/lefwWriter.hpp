@@ -626,14 +626,14 @@ extern int lefwLayerRoutingAntennaLength(double antennaLength);
 // This routine must be called only once after lefwStartLayerRouting.
 // This routine is optional and can be called once.
 // This is a 5.5 syntax.
-// width is the maximum width.
+// _width is the maximum _width.
 // Returns 0 if successful. 
 extern int lefwLayerRoutingMaxwidth(double width);
 
 // This routine must be called only once after lefwStartLayerRouting.
 // This routine is optional and can be called once.
 // This is a 5.5 syntax.
-// width is the maximum width.
+// _width is the maximum _width.
 // Returns 0 if successful. 
 extern int lefwLayerRoutingMinwidth(double width);
 
@@ -642,8 +642,8 @@ extern int lefwLayerRoutingMinwidth(double width);
 // This is a 5.5 syntax.
 // Area is the minimum area size limit for metal that encloses an empty area.
 // Width is optional, it says the rule only applies when a donut is careted
-// from a wire of width <= width.  The parameter width is required for the
-// routine lefwLayerRoutineMinenclosedarea.  If width is optional, a "0"
+// from a wire of _width <= _width.  The parameter _width is required for the
+// routine lefwLayerRoutineMinenclosedarea.  If _width is optional, a "0"
 // value is assigned for that index slot of the array.
 // Returns 0 if successful. 
 extern int lefwLayerRoutingMinenclosedarea(int numMinenclosed, double* area,
@@ -2070,7 +2070,7 @@ extern int lefwMacroPinPortLayer(const char* layerName,
 // This routine is called after lefwStartMacroPinPort.
 // Either this routine or lefwMacroPinPortLayer must be called, but can't
 // be both.
-// width is optional for DesignRuleWidth
+// _width is optional for DesignRuleWidth
 // This is a 5.4 syntax.
 // Returns 0 if successful. 
 extern int lefwMacroPinPortDesignRuleWidth(const char* layerName,

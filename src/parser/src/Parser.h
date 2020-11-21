@@ -52,15 +52,15 @@ private:
     int initNetList();
     int markPinAndObsOccupancy();
 
-    int initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLayer,
-                       const vector<Rsyn::PhysicalTracks> &rsynTracks,
-                       DBU libDBU);
+    static int initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLayer,
+                              const vector<Rsyn::PhysicalTracks> &rsynTracks,
+                              DBU libDBU);
     static int initViaType(ViaType &via_type, Rsyn::PhysicalVia rsynVia);
-    int initCutLayer(CutLayer &cut_layer, const Rsyn::PhysicalLayer &rsynLayer,
-                     const vector<Rsyn::PhysicalVia> &rsynVias,
-                     Direction botDim,
-                     Direction topDim,
-                     DBU libDBU);
+    static int initCutLayer(CutLayer &cut_layer, const Rsyn::PhysicalLayer &rsynLayer,
+                            const vector<Rsyn::PhysicalVia> &rsynVias,
+                            Direction botDim,
+                            Direction topDim,
+                            DBU libDBU);
 
     int initLayerList();
 };

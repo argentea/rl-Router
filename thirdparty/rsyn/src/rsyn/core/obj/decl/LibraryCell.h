@@ -142,7 +142,7 @@ public:
 	//! @brief Returns the Instance height.
 	DBU getHeight() const;
 
-	//! @brief Returns the Instance width.
+	//! @brief Returns the Instance _width.
 	DBU getWidth() const;
 
 	//! @brief Returns the size of this library cell.

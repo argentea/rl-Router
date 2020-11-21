@@ -94,27 +94,27 @@ int Parser::initPinAccessBoxes(Rsyn::Pin rsynPin, std::vector<BoxOnLayer> &acces
     return 0;
 }
 int Parser::initNet(Net &net, int i, const Rsyn::Net &rsyn_net) {
-    net.idx = i;
+    net._idx = i;
     net._net_name = rsyn_net.getName();
 
     // pins
-    net.pinAccessBoxes.reserve(rsyn_net.getNumPins());
+    net._pin_access_boxes.reserve(rsyn_net.getNumPins());
     const Rsyn::Session session;
     const Rsyn::PhysicalDesign &physicalDesign = static_cast<Rsyn::PhysicalService *>(_session.getService("rsyn.physical"))->getPhysicalDesign();
     const DBU libDBU = physicalDesign.getDatabaseUnits(Rsyn::LIBRARY_DBU);
     for (auto RsynPin : rsyn_net.allPins()) {
         _rsyn_pins.push_back(RsynPin);
-        net.pinAccessBoxes.emplace_back();
-        initPinAccessBoxes(RsynPin, net.pinAccessBoxes.back(), libDBU);
+        net._pin_access_boxes.emplace_back();
+        initPinAccessBoxes(RsynPin, net._pin_access_boxes.back(), libDBU);
     }
 
     // route guides
     const Rsyn::NetGuide &netGuide = _routeGuide_service->getGuide(rsyn_net);
     for (const Rsyn::LayerGuide &layerGuide : netGuide.allLayerGuides()) {
         auto bounds = layerGuide.getBounds();
-        net.routeGuides.emplace_back(layerGuide.getLayer().getRelativeIndex(), getBoxFromRsynBounds(bounds));
+        net._route_guides.emplace_back(layerGuide.getLayer().getRelativeIndex(), getBoxFromRsynBounds(bounds));
     }
-    net.routeGuideVios.resize(net.routeGuides.size(), 0);
+    net._route_guide_vios.resize(net._route_guides.size(), 0);
     return 0;
 }
 
@@ -125,7 +125,6 @@ int Parser::initNetList() {
     for (Rsyn::Net rsyn_net : _module.allNets()) {
         switch (rsyn_net.getUse()) {
             case Rsyn::POWER:
-                continue;
             case Rsyn::GROUND:
                 continue;
             default:
@@ -134,7 +133,7 @@ int Parser::initNetList() {
         Net net;
         initNet(net, _database._nets.size(), rsyn_net);
         _database._nets.emplace_back(net);
-        numPins += _database._nets.back().pinAccessBoxes.size();
+        numPins += _database._nets.back()._pin_access_boxes.size();
     }
     logger::Logger::info("The number of nets is " + std::to_string(_database._nets.size()));
     logger::Logger::info("The number of pins is " + std::to_string(_database._nets.size()));
@@ -147,9 +146,9 @@ int Parser::markPinAndObsOccupancy() {
     // STEP 1: get fixed objects
     // Mark pins associated with nets
     for (const auto &net : _database._nets) {
-        for (const auto &accessBoxes : net.pinAccessBoxes) {
+        for (const auto &accessBoxes : net._pin_access_boxes) {
             for (const auto &box : accessBoxes) {
-                fixedMetalVec.emplace_back(box, net.idx);
+                fixedMetalVec.emplace_back(box, net._idx);
             }
         }
     }
@@ -250,7 +249,7 @@ int Parser::markPinAndObsOccupancy() {
                         BoxOnLayer botBox(botLayerIdx);
                         BoxOnLayer topBox(topLayerIdx);
                         for (unsigned dimIdx = 0; dimIdx != 2; ++dimIdx) {
-                            const Dimension dim = static_cast<Dimension>(dimIdx);
+                            const auto dim = static_cast<Dimension>(dimIdx);
                             const DBU origin = via.hasOrigin() ? pos[dim] + via.getOrigin(dim) : pos[dim];
                             const DBU botOff =
                                     via.hasOffset() ? origin + via.getOffset(Rsyn::BOTTOM_VIA_LEVEL, dim) : origin;
@@ -335,7 +334,7 @@ int Parser::initLayerList() {
     _database._cut_layers.clear();
     for (unsigned i = 0; i != rsynCutLayers.size(); ++i) {
         CutLayer cut_layer;
-        initCutLayer(cut_layer, rsynCutLayers[i], rsynVias[i], _database._metal_layers[i].direction, _database._metal_layers[i + 1].direction, libDBU);
+        initCutLayer(cut_layer, rsynCutLayers[i], rsynVias[i], _database._metal_layers[i]._direction, _database._metal_layers[i + 1]._direction, libDBU);
         _database._cut_layers.emplace_back(cut_layer);
     }
 
@@ -345,60 +344,60 @@ int Parser::initLayerList() {
 int Parser::initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLayer, const vector<Rsyn::PhysicalTracks> &rsynTracks, DBU libDBU) {
     // Rsyn::PhysicalLayer (LEF)
     lefiLayer *layer = rsynLayer.getLayer();
-    metal_layer.name = layer->name();
-    metal_layer.direction = strcmp(layer->direction(), "HORIZONTAL") ? X : Y;
-    metal_layer.idx = rsynLayer.getRelativeIndex();
-    metal_layer.width = static_cast<DBU>(std::round(layer->width() * libDBU));
-    metal_layer.minWidth = static_cast<DBU>(std::round(layer->minwidth() * libDBU));
-    metal_layer.widthForSuffOvlp = std::ceil(metal_layer.minWidth * 0.7071);
-    metal_layer.shrinkForSuffOvlp = std::max<DBU>(0, std::ceil(metal_layer.widthForSuffOvlp - metal_layer.width * 0.5));
-    metal_layer.minArea = static_cast<DBU>(std::round(layer->area() * libDBU * libDBU));
-    metal_layer.minLenRaw = metal_layer.minArea / metal_layer.width - metal_layer.width;
+    metal_layer._name = layer->name();
+    metal_layer._direction = strcmp(layer->direction(), "HORIZONTAL") ? X : Y;
+    metal_layer._idx = rsynLayer.getRelativeIndex();
+    metal_layer._width = static_cast<DBU>(std::round(layer->width() * libDBU));
+    metal_layer._min_width = static_cast<DBU>(std::round(layer->minwidth() * libDBU));
+    metal_layer._width_for_suff_ovlp = std::ceil(metal_layer._min_width * 0.7071);
+    metal_layer._shrink_for_suff_ovlp = std::max<DBU>(0, std::ceil(metal_layer._width_for_suff_ovlp - metal_layer._width * 0.5));
+    metal_layer._min_area = static_cast<DBU>(std::round(layer->area() * libDBU * libDBU));
+    metal_layer._min_len_raw = metal_layer._min_area / metal_layer._width - metal_layer._width;
     // default spacing
     const int numSpaceTable = layer->numSpacingTable();
     if (!numSpaceTable) {
         logger::Logger::warning(
-                "For " + metal_layer.name + ", no run spacing table...");
+                "For " + metal_layer._name + ", no run spacing table...");
     } else {
         for (int iSpaceTable = 0; iSpaceTable < numSpaceTable; ++iSpaceTable) {
             if (!layer->spacingTable(iSpaceTable)->isParallel()) {
                 logger::Logger::warning(
-                        "For " + metal_layer.name + ", unidentified spacing table...");
+                        "For " + metal_layer._name + ", unidentified spacing table...");
                 continue;
             }
 
             const lefiParallel *parallel = layer->spacingTable(iSpaceTable)->parallel();
             const int numLength = parallel->numLength();
             if (numLength > 0) {
-                metal_layer.parallelLength.resize(numLength);
+                metal_layer._parallel_length.resize(numLength);
                 for (unsigned iLength = 0; iLength != (unsigned) numLength; ++iLength) {
-                    metal_layer.parallelLength[iLength] = static_cast<DBU>(std::round(parallel->length(iLength) * libDBU));
+                    metal_layer._parallel_length[iLength] = static_cast<DBU>(std::round(parallel->length(static_cast<int>(iLength)) * libDBU));
                 }
             }
             const int numWidth = parallel->numWidth();
             if (numWidth > 0) {
-                metal_layer.parallelWidth.resize(numWidth);
-                metal_layer.parallelWidthSpace.resize(numWidth);
+                metal_layer._parallel_width.resize(numWidth);
+                metal_layer._parallel_width_space.resize(numWidth);
                 for (unsigned iWidth = 0; iWidth != (unsigned) numWidth; ++iWidth) {
-                    metal_layer.parallelWidth[iWidth] = static_cast<DBU>(std::round(parallel->width(iWidth) * libDBU));
-                    metal_layer.parallelWidthSpace[iWidth].resize(std::max(1, numLength), 0);
+                    metal_layer._parallel_width[iWidth] = static_cast<DBU>(std::round(parallel->width(static_cast<int>(iWidth)) * libDBU));
+                    metal_layer._parallel_width_space[iWidth].resize(std::max(1, numLength), 0);
                     for (int iLength = 0; iLength < numLength; ++iLength) {
-                        metal_layer.parallelWidthSpace[iWidth][iLength] =
-                                static_cast<DBU>(std::round(parallel->widthSpacing(iWidth, iLength) * libDBU));
+                        metal_layer._parallel_width_space[iWidth][iLength] =
+                                static_cast<DBU>(std::round(parallel->widthSpacing(static_cast<int>(iWidth), iLength) * libDBU));
                     }
                 }
-                metal_layer.defaultSpace = metal_layer.getParaRunSpace(metal_layer.width);
-                metal_layer.paraRunSpaceForLargerWidth = (metal_layer.parallelWidthSpace.size() > 1) ? metal_layer.parallelWidthSpace[1][0] : metal_layer.defaultSpace;
+                metal_layer._default_space = metal_layer.getParaRunSpace(metal_layer._width);
+                metal_layer._para_run_space_for_larger_width = (metal_layer._parallel_width_space.size() > 1) ? metal_layer._parallel_width_space[1][0] : metal_layer._default_space;
             }
         }
     }
     //  eol spacing
     if (!layer->hasSpacingNumber()) {
         logger::Logger::warning(
-                "For " + metal_layer.name + ", no spacing rules...");
+                "For " + metal_layer._name + ", no spacing rules...");
     } else {
         const int numSpace = layer->numSpacing();
-        metal_layer.spaceRules.reserve(numSpace);
+        metal_layer._space_rules.reserve(numSpace);
         for (int iSpace = 0; iSpace < numSpace; ++iSpace) {
             const DBU space{std::lround(layer->spacing(iSpace) * libDBU)};
             const DBU eolWidth{std::lround(layer->spacingEolWidth(iSpace) * libDBU)};
@@ -406,38 +405,38 @@ int Parser::initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLaye
             const DBU parSpace{std::lround(layer->spacingParSpace(iSpace) * libDBU)};
             const DBU parWithin{std::lround(layer->spacingParWithin(iSpace) * libDBU)};
             if (layer->hasSpacingParellelEdge(iSpace)) {
-                metal_layer.spaceRules.emplace_back(space, eolWidth, eolWithin, parSpace, parWithin);
-                metal_layer.maxEolSpace = std::max(metal_layer.maxEolSpace, space);
-                metal_layer.maxEolWidth = std::max(metal_layer.maxEolWidth, eolWidth);
-                metal_layer.maxEolWithin = std::max(metal_layer.maxEolWithin, eolWithin);
+                metal_layer._space_rules.emplace_back(space, eolWidth, eolWithin, parSpace, parWithin);
+                metal_layer._max_eol_space = std::max(metal_layer._max_eol_space, space);
+                metal_layer._max_eol_width = std::max(metal_layer._max_eol_width, eolWidth);
+                metal_layer._max_eol_within = std::max(metal_layer._max_eol_within, eolWithin);
             } else if (layer->hasSpacingEndOfLine(iSpace)) {
-                metal_layer.spaceRules.emplace_back(space, eolWidth, eolWithin);
-                metal_layer.maxEolSpace = std::max(metal_layer.maxEolSpace, space);
-                metal_layer.maxEolWidth = std::max(metal_layer.maxEolWidth, eolWidth);
-                metal_layer.maxEolWithin = std::max(metal_layer.maxEolWithin, eolWithin);
+                metal_layer._space_rules.emplace_back(space, eolWidth, eolWithin);
+                metal_layer._max_eol_space = std::max(metal_layer._max_eol_space, space);
+                metal_layer._max_eol_width = std::max(metal_layer._max_eol_width, eolWidth);
+                metal_layer._max_eol_within = std::max(metal_layer._max_eol_within, eolWithin);
             } else if (!numSpaceTable) {
-                metal_layer.parallelWidthSpace[0][0] = space;
-                metal_layer.defaultSpace = metal_layer.getParaRunSpace(metal_layer.width);
-            } else if (space != metal_layer.defaultSpace) {
+                metal_layer._parallel_width_space[0][0] = space;
+                metal_layer._default_space = metal_layer.getParaRunSpace(metal_layer._width);
+            } else if (space != metal_layer._default_space) {
                 logger::Logger::warning(
-                        "For " + metal_layer.name + ", mismatched defaultSpace & spacingTable...");
+                        "For " + metal_layer._name + ", mismatched defaultSpace & spacingTable...");
             }
         }
-        if (metal_layer.spaceRules.empty()) {
-            logger::Logger::warning("For " + metal_layer.name + ", no eol spacing rules...");
+        if (metal_layer._space_rules.empty()) {
+            logger::Logger::warning("For " + metal_layer._name + ", no eol spacing rules...");
         }
     }
 
-    for (unsigned iProp = 0; static_cast<int>(iProp) < layer->numProps(); ++iProp) {
+    for (int iProp = 0; static_cast<int>(iProp) < layer->numProps(); ++iProp) {
         if (!strcmp(layer->propName(iProp), "LEF58_CORNERSPACING")) {
             //  corner spacing
             if (metal_layer.hasCornerSpace()) {
-                logger::Logger::warning("For " + metal_layer.name + ", multiple corner spacing rules: " + layer->propValue(iProp) + "...");
+                logger::Logger::warning("For " + metal_layer._name + ", multiple corner spacing rules: " + layer->propValue(iProp) + "...");
                 continue;
             }
 
             std::istringstream iss(layer->propValue(iProp));
-            std::string sBuf("");
+            std::string sBuf;
             double fBuf1{0};
             double fBuf2{0};
             while (iss) {
@@ -447,25 +446,25 @@ int Parser::initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLaye
                 }
 
                 if (sBuf == "EXCEPTEOL") {
-                    metal_layer.cornerExceptEol = true;
+                    metal_layer._corner_except_eol = true;
                     iss >> fBuf1;
-                    metal_layer.cornerEolWidth = std::lround(fBuf1 * libDBU);
+                    metal_layer._corner_eol_width = std::lround(fBuf1 * libDBU);
                 } else if (sBuf == "WIDTH") {
                     iss >> fBuf1 >> sBuf >> fBuf2;
-                    if (fBuf1) {
-                        metal_layer.cornerWidth.push_back(std::lround(fBuf1 * libDBU));
-                        metal_layer.cornerWidthSpace.push_back(std::lround(fBuf2 * libDBU));
+                    if (bool(fBuf1)) {
+                        metal_layer._corner_width.push_back(std::lround(fBuf1 * libDBU));
+                        metal_layer._corner_width_space.push_back(std::lround(fBuf2 * libDBU));
                     } else {
-                        metal_layer.cornerWidthSpace[0] = std::lround(fBuf2 * libDBU);
+                        metal_layer._corner_width_space[0] = std::lround(fBuf2 * libDBU);
                     }
                 } else {
-                    logger::Logger::warning("For " + metal_layer.name + ", corner spacing not identified: " + sBuf + "...\n");
+                    logger::Logger::warning("For " + metal_layer._name + ", corner spacing not identified: " + sBuf + "...\n");
                 }
             }
         } else if (!strcmp(layer->propName(iProp), "LEF57_SPACING")) {
             //  eol spacing
             std::istringstream iss(layer->propValue(iProp));
-            std::string sBuf("");
+            std::string sBuf;
             double space{0};
             double eolWidth{0};
             double eolWithin{0};
@@ -488,55 +487,55 @@ int Parser::initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLaye
                     iss >> parSpace >> sBuf >> parWithin;
                     hasPar = true;
                 } else {
-                    logger::Logger::warning("For " + metal_layer.name + ", eol spacing not identified: " + sBuf + "...");
+                    logger::Logger::warning("For " + metal_layer._name + ", eol spacing not identified: " + sBuf + "...");
                 }
             }
             if (hasPar) {
-                metal_layer.spaceRules.emplace_back(std::lround(space * libDBU),
-                                                    std::lround(eolWidth),
-                                                    std::lround(eolWithin),
-                                                    std::lround(parSpace),
-                                                    std::lround(parWithin));
-                metal_layer.maxEolSpace = std::max(metal_layer.maxEolSpace, std::lround(space * libDBU));
-                metal_layer.maxEolWidth = std::max(metal_layer.maxEolWidth, std::lround(eolWidth * libDBU));
-                metal_layer.maxEolWithin = std::max(metal_layer.maxEolWithin, std::lround(eolWithin * libDBU));
+                metal_layer._space_rules.emplace_back(std::lround(space * libDBU),
+                                                      std::lround(eolWidth),
+                                                      std::lround(eolWithin),
+                                                      std::lround(parSpace),
+                                                      std::lround(parWithin));
+                metal_layer._max_eol_space = std::max(metal_layer._max_eol_space, std::lround(space * libDBU));
+                metal_layer._max_eol_width = std::max(metal_layer._max_eol_width, std::lround(eolWidth * libDBU));
+                metal_layer._max_eol_within = std::max(metal_layer._max_eol_within, std::lround(eolWithin * libDBU));
             } else if (hasEol) {
-                metal_layer.spaceRules.emplace_back(std::lround(space * libDBU), std::lround(eolWidth), std::lround(eolWithin));
-                metal_layer.maxEolSpace = std::max(metal_layer.maxEolSpace, std::lround(space * libDBU));
-                metal_layer.maxEolWidth = std::max(metal_layer.maxEolWidth, std::lround(eolWidth * libDBU));
-                metal_layer.maxEolWithin = std::max(metal_layer.maxEolWithin, std::lround(eolWithin * libDBU));
+                metal_layer._space_rules.emplace_back(std::lround(space * libDBU), std::lround(eolWidth), std::lround(eolWithin));
+                metal_layer._max_eol_space = std::max(metal_layer._max_eol_space, std::lround(space * libDBU));
+                metal_layer._max_eol_width = std::max(metal_layer._max_eol_width, std::lround(eolWidth * libDBU));
+                metal_layer._max_eol_within = std::max(metal_layer._max_eol_within, std::lround(eolWithin * libDBU));
             } else if (!numSpaceTable) {
-                metal_layer.parallelWidthSpace[0][0] = std::lround(space * libDBU);
-                metal_layer.defaultSpace = metal_layer.getParaRunSpace(metal_layer.width);
-            } else if (std::lround(space * libDBU) != metal_layer.defaultSpace) {
-                logger::Logger::warning("For " + metal_layer.name + ", mismatched defaultSpace & spacingTable...");
+                metal_layer._parallel_width_space[0][0] = std::lround(space * libDBU);
+                metal_layer._default_space = metal_layer.getParaRunSpace(metal_layer._width);
+            } else if (std::lround(space * libDBU) != metal_layer._default_space) {
+                logger::Logger::warning("For " + metal_layer._name + ", mismatched defaultSpace & spacingTable...");
             }
         } else {
-            logger::Logger::warning("For " + metal_layer.name + ", unknown prop: " + layer->propName(iProp) + "...");
+            logger::Logger::warning("For " + metal_layer._name + ", unknown prop: " + layer->propName(iProp) + "...");
         }
     }
-    metal_layer.fixedMetalQueryMargin = std::max(metal_layer.maxEolSpace, metal_layer.maxEolWithin);
+    metal_layer.fixedMetalQueryMargin = std::max(metal_layer._max_eol_space, metal_layer._max_eol_within);
 
     // Rsyn::PhysicalTracks (DEF)
     // note: crossPoints will be initialized in LayerList
     if (rsynTracks.empty()) {
         logger::Logger::error(
-                "For " + metal_layer.name + ", tracks is empty...");
-        metal_layer.pitch = metal_layer.width + metal_layer.parallelWidthSpace[0][0];
+                "For " + metal_layer._name + ", tracks is empty...");
+        metal_layer._pitch = metal_layer._width + metal_layer._parallel_width_space[0][0];
     } else {
         for (const Rsyn::PhysicalTracks &rsynTrack : rsynTracks) {
-            if ((rsynTrack.getDirection() == Rsyn::TRACK_HORIZONTAL) == (metal_layer.direction == X)) {
+            if ((rsynTrack.getDirection() == Rsyn::TRACK_HORIZONTAL) == (metal_layer._direction == X)) {
                 continue;
             }
-            metal_layer.pitch = rsynTrack.getSpace();
+            metal_layer._pitch = rsynTrack.getSpace();
             DBU location = rsynTrack.getLocation();
             for (int i = 0; i < rsynTrack.getNumberOfTracks(); ++i) {
-                metal_layer.tracks.emplace_back(location);
-                location += metal_layer.pitch;
+                metal_layer._tracks.emplace_back(location);
+                location += metal_layer._pitch;
             }
         }
-        sort(metal_layer.tracks.begin(), metal_layer.tracks.end(), [](const Track &lhs, const Track &rhs) { return lhs.location < rhs.location; });
-        metal_layer.pitch = metal_layer.tracks[1].location - metal_layer.tracks[0].location;
+        sort(metal_layer._tracks.begin(), metal_layer._tracks.end(), [](const Track &lhs, const Track &rhs) { return lhs._location < rhs._location; });
+        metal_layer._pitch = metal_layer._tracks[1]._location - metal_layer._tracks[0]._location;
     }
     delete rsynLayer.getLayer();
     return 0;
@@ -552,10 +551,10 @@ int Parser::initCutLayer(CutLayer &cut_layer, const Rsyn::PhysicalLayer &rsynLay
     }
 
     if (layer->numProps()) {
-        for (unsigned iProp = 0; static_cast<int>(iProp) < layer->numProps(); ++iProp) {
+        for (int iProp = 0; static_cast<int>(iProp) < layer->numProps(); ++iProp) {
             if (!strcmp(layer->propName(iProp), "LEF58_SPACINGTABLE")) {
                 std::istringstream iss(layer->propValue(iProp));
-                std::string sBuf("");
+                std::string sBuf;
                 double space{0};
                 while (iss) {
                     iss >> sBuf;
@@ -589,8 +588,7 @@ int Parser::initCutLayer(CutLayer &cut_layer, const Rsyn::PhysicalLayer &rsynLay
     }
 
     int defaultViaTypeIdx = -1;
-    const DBU dbuMax =
-            std::numeric_limits<DBU>::has_infinity ? std::numeric_limits<DBU>::infinity() : std::numeric_limits<DBU>::max();
+    const DBU dbuMax = std::numeric_limits<DBU>::max();
     std::tuple<DBU, DBU, DBU, DBU> bestScore(dbuMax, dbuMax, dbuMax, dbuMax);
     for (const Rsyn::PhysicalVia &rsynVia : rsynVias) {
         if (rsynVia.isViaDesign()) {
@@ -622,7 +620,7 @@ int Parser::initCutLayer(CutLayer &cut_layer, const Rsyn::PhysicalLayer &rsynLay
         std::swap(cut_layer.allViaTypes[0], cut_layer.allViaTypes[defaultViaTypeIdx]);
     }
     // init ViaType::idx
-    for (unsigned i = 0; i != cut_layer.allViaTypes.size(); ++i) {
+    for (int i = 0; i != static_cast<int>(cut_layer.allViaTypes.size()); ++i) {
         cut_layer.allViaTypes[i].idx = i;
     }
 

@@ -251,9 +251,9 @@ tracePathOutline(
 // -----------------------------------------------------------------------------
 
 Polygon
-Polygon::createFromLineString(const std::vector<DBUxy> &points, const DBU width) {
+Polygon::createFromLineString(const std::vector<DBUxy> &points, const DBU _width) {
 	std::vector<float2> outline;
-	tracePathOutline(points, width/2.0, outline);
+	tracePathOutline(points, _width/2.0, outline);
 
 	Polygon rsynPolygon;
 	for (const float2 &p : outline) {

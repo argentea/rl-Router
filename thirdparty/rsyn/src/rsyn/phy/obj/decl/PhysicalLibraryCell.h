@@ -45,9 +45,9 @@ public:
 	//! @brief Returns the PhysicalLibraryCell macro. 
 	lefiMacro* getMacro() const;
 	//! @brief Returns the PhysicalLibraryCell size. 
-	//! @brief In dimension X is the PhysicalLibraryCell width while in Y is the PhysicalLibraryCell height.
+	//! @brief In dimension X is the PhysicalLibraryCell _width while in Y is the PhysicalLibraryCell height.
 	DBUxy getSize() const;
-	//! @brief Returns a DBU type that represents the PhysicalLibraryCell width.
+	//! @brief Returns a DBU type that represents the PhysicalLibraryCell _width.
 	DBU getWidth() const;
 	//! @brief Returns a DBU type that represents the PhysicalLibraryCell height.
 	DBU getHeight() const;

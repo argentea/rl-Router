@@ -110,7 +110,7 @@ public:
   void getViaRect(int* deltaX1, int* deltaY1, int* deltaX2, int* deltaY2) const;
   const char* getViaRotationStr() const;   // Return via rotation in string format
   void getViaData(int* numX, int* numY, int* stepX, int* stepY) const;  // 5.4.1
-  int  getWidth() const;        // Get the width.
+  int  getWidth() const;        // Get the _width.
   void getPoint(int* x, int* y) const;// Get the point.
   void getFlushPoint(int* x, int* y, int* ext) const;// Get the point.
   void getVirtualPoint(int* x, int* y) const;

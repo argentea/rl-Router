@@ -275,8 +275,8 @@ public:
 	//! The row height of the first row is returned.
 	//I'm assuming all rows have the same height.
 	DBU getRowHeight() const;
-	//! @brief Returns the row site width. It is assumed all rows have the same site width.
-	//! The row site width of the first row is returned.
+	//! @brief Returns the row site _width. It is assumed all rows have the same site _width.
+	//! The row site _width of the first row is returned.
 	DBU getRowSiteWidth() const;
 	//! @brief Returns the total number of row objects.
 	std::size_t getNumRows() const;

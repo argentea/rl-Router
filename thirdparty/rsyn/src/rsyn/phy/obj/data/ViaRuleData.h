@@ -35,7 +35,7 @@ public:
 	int clsRelativeIndex = -1;
 	Rsyn::PhysicalLayerData * clsLayers [NUM_VIA_LAYERS]; // top or bottom layer levels. Cut is only for generate type
 	Rsyn::PhysicalLayerDirection clsLayerDirection [NUM_VIA_LEVELS]; // Directions for top or bottom layer levels.
-	DBU clsWidth[NUM_VIA_LEVELS][NUM_VIA_RANGES]; // Specifies a wire width range  for bottom and top layer levels. 
+	DBU clsWidth[NUM_VIA_LEVELS][NUM_VIA_RANGES]; // Specifies a wire _width range  for bottom and top layer levels.
 	DBU clsEnclosure1 [NUM_VIA_LEVELS];
 	DBU clsEnclosure2 [NUM_VIA_LEVELS];
 	Bounds clsCutBounds;

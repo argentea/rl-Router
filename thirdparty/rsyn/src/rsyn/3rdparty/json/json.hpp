@@ -5864,7 +5864,7 @@ class basic_json
     Serialize the given JSON value @a j to the output stream @a o. The JSON
     value will be serialized using the @ref dump member function. The
     indentation of the output can be controlled with the member variable
-    `width` of the output stream @a o. For instance, using the manipulator
+    `_width` of the output stream @a o. For instance, using the manipulator
     `std::setw(4)` on @a o sets the indentation level to `4` and the
     serialization result is the same as calling `dump(4)`.
 
@@ -5880,17 +5880,17 @@ class basic_json
     @complexity Linear.
 
     @liveexample{The example below shows the serialization with different
-    parameters to `width` to adjust the indentation level.,operator_serialize}
+    parameters to `_width` to adjust the indentation level.,operator_serialize}
 
     @since version 1.0.0
     */
     friend std::ostream& operator<<(std::ostream& o, const basic_json& j)
     {
-        // read width member and use it as indentation parameter if nonzero
+        // read _width member and use it as indentation parameter if nonzero
         const bool pretty_print = (o.width() > 0);
         const auto indentation = (pretty_print ? o.width() : 0);
 
-        // reset width to 0 for subsequent calls to this stream
+        // reset _width to 0 for subsequent calls to this stream
         o.width(0);
 
         // fix locale problems

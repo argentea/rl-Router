@@ -57,7 +57,7 @@ public:
 	std::string getName() const;
 	//! @brief Returns the layer type (ROUTING, CUT, OVERLAP, MASTERSLICE, or IMPLANT).
 	Rsyn::PhysicalLayerType getType() const;
-	//! @brief Returns the layer width in DBU.
+	//! @brief Returns the layer _width in DBU.
 	DBU getWidth() const;
 	//! @brief Returns the layer index w.r.t to all physical layers. It starts
 	//!        from 0 that is the bottom layer

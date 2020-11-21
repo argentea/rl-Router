@@ -894,9 +894,9 @@ extern int defwSpecialNetSpacing(const char* layer,  /* layerName */
                     double minwidth,      /* optional(0) - minwidth */
                     double maxwidth);     /* optional(0) - maxwidth */
 
-/* This routine is for + WIDTH layerName width */
+/* This routine is for + WIDTH layerName _width */
 extern int defwSpecialNetWidth(const char* layer, /* layerName */
-                    int width);                   /* width */
+                    int width);                   /* _width */
 
 /* This routine is for + SOURCE {NETLIST | DIST | USER | TIMING} */
 extern int defwSpecialNetSource(const char* name);
@@ -988,7 +988,7 @@ extern int defwSpecialNetEndOneNet();
 extern int defwSpecialNetShieldStart(const char* name);
 
 extern int defwSpecialNetShieldLayer(const char* name); /* layerName */
-extern int defwSpecialNetShieldWidth(int width);        /* width */
+extern int defwSpecialNetShieldWidth(int width);        /* _width */
 extern int defwSpecialNetShieldShape(const char* shapeType); // RING | STRIPE |
         // FOLLOWPIN | IOWIRE | COREWIRE | BLOCKWIRE | FILLWIRE | BLOCKAGEWIRE
  
@@ -1122,7 +1122,7 @@ extern int defwNetSubnetEnd();
  * any order. */
 extern int defwNetPathStart(const char* typ); // ROUTED | FIXED | COVER |
                                               // NOSHIELD | NEW 
-extern int defwNetPathWidth(int w);           /* width */
+extern int defwNetPathWidth(int w);           /* _width */
 extern int defwNetPathLayer(const char* name, /* layerName */
                  int isTaper,                 /* 0 - ignore, 1 - TAPER */
                  const char* rulename);       /* only one, isTaper or */

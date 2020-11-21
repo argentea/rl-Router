@@ -57,12 +57,12 @@ public:
 	DBU getY() const;
 	//! @brief Returns the Instance height. It is the length of PhysicalInstance boundaries is Y dimension.
 	DBU getHeight() const;
-	//! @brief Returns the Instance width. It is the length of PhysicalInstance boundaries is X dimension.
+	//! @brief Returns the Instance _width. It is the length of PhysicalInstance boundaries is X dimension.
 	DBU getWidth() const;
 	//! @brief Returns the length of PhysicalInstance boundaries for given dimension
 	DBU getSize(const Dimension dimension) const;
 	//! @brief Returns the length of PhysicalInstance boundaries. 
-	//! In X is the length for abscissa (width) while in Y is the length for ordinate (height).
+	//! In X is the length for abscissa (_width) while in Y is the length for ordinate (height).
 	DBUxy getSize() const;
 	//! @brief Returns the left-lower PhysicalInstance point that is defined as its position.
 	DBUxy getPosition() const;
