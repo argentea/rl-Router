@@ -82,7 +82,7 @@ public:
     T low, high;
 
     template<typename... Args>
-    explicit IntervalT(Args... params) {
+    IntervalT(Args... params) {
         Set(params...);
     }
 

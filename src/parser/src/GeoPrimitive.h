@@ -6,15 +6,9 @@
 
 namespace router {
 namespace parser {
-enum Dimension {
-    X = 0,
-    Y = 1
-};// end enum
-//class Database;
 
 //  BoxOnLayer
 //  A box on a certain layer: primitive for route guide and pin acesss box
-
 class BoxOnLayer : public BoxT<int64_t> {
 public:
     int layerIdx{0};

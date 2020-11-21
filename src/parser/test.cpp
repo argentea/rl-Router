@@ -6,6 +6,5 @@ int main() {
     std::string guideFile = "toys/ispd2018/ispd18_sample/ispd18_sample.input.guide";
     parser::Parser parser;
     parser.read(lefFile, defFile, guideFile);
-    parser.initNetlist();
     return 0;
 }
