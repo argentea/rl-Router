@@ -1,7 +1,7 @@
 #ifndef RL_ROUTER_PARSER_H
 #define RL_ROUTER_PARSER_H
 
-//#include "CutLayer.h"
+#include "CutLayer.h"
 #include "GeoPrimitive.h"
 #include "MetalLayer.h"
 #include "Net.h"
@@ -37,9 +37,11 @@ private:
     std::vector<Rsyn::Pin> _rsyn_pins;
     NetList _netlist;
     std::vector<MetalLayer> _metal_layers;
-//    std::vector<CutLayer> _cut_layers;
+    std::vector<CutLayer> _cut_layers;
 
     static BoxT<int64_t> getBoxFromRsynBounds(const Bounds &bounds);
+    static BoxT<int64_t> getBoxFromRsynGeometries(const vector<Rsyn::PhysicalViaGeometry>& geos);
+
     static int getPinAccessBoxes(Rsyn::PhysicalPort phPort, std::vector<BoxOnLayer> &accessBoxes);
     static int getPinAccessBoxes(Rsyn::PhysicalLibraryPin phLibPin, Rsyn::PhysicalCell phCell,
                                  std::vector<BoxOnLayer> &accessBoxes, const DBUxy &origin);
@@ -50,7 +52,14 @@ private:
 
     int initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLayer,
                        const vector<Rsyn::PhysicalTracks> &rsynTracks,
-                       const DBU libDBU);
+                       DBU libDBU);
+    static int initViaType(ViaType &via_type, Rsyn::PhysicalVia rsynVia);
+    int initCutLayer(CutLayer &cut_layer, const Rsyn::PhysicalLayer &rsynLayer,
+                 const vector<Rsyn::PhysicalVia> &rsynVias,
+                 Direction botDim,
+                 Direction topDim,
+                 DBU libDBU);
+
     int initLayerList();
 };
 }// namespace parser

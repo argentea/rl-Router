@@ -25,6 +25,7 @@ int Parser::read(const std::string &lefFile, const std::string &defFile, const s
 
     initNetList();
     markPinAndObsOccupancy();
+    initLayerList();
     return 0;
 }
 BoxT<int64_t> Parser::getBoxFromRsynBounds(const Bounds &bounds) {
@@ -331,10 +332,17 @@ int Parser::initLayerList() {
         initMetalLayer(metal_layer, rsynLayers[i], physicalDesign.allPhysicalTracks(rsynLayers[i]), libDBU);
         _metal_layers.emplace_back(metal_layer);
     }
+    _cut_layers.clear();
+    for (unsigned i = 0; i != rsynCutLayers.size(); ++i) {
+        CutLayer cut_layer;
+        initCutLayer(cut_layer, rsynCutLayers[i], rsynVias[i], _metal_layers[i].direction, _metal_layers[i + 1].direction, libDBU);
+        _cut_layers.emplace_back(cut_layer);
+    }
+
 
     return 0;
 }
-int Parser::initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLayer, const vector<Rsyn::PhysicalTracks> &rsynTracks, const DBU libDBU) {
+int Parser::initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLayer, const vector<Rsyn::PhysicalTracks> &rsynTracks, DBU libDBU) {
     // Rsyn::PhysicalLayer (LEF)
     lefiLayer *layer = rsynLayer.getLayer();
     metal_layer.name = layer->name();
@@ -531,5 +539,127 @@ int Parser::initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLaye
         metal_layer.pitch = metal_layer.tracks[1].location - metal_layer.tracks[0].location;
     }
     delete rsynLayer.getLayer();
+    return 0;
+}
+int Parser::initCutLayer(CutLayer &cut_layer, const Rsyn::PhysicalLayer &rsynLayer, const vector<Rsyn::PhysicalVia> &rsynVias, Direction botDim, Direction topDim, const DBU libDBU) {
+    cut_layer.name = rsynLayer.getName();
+    cut_layer.idx = rsynLayer.getRelativeIndex();
+    cut_layer.width = rsynLayer.getWidth();
+    //  Rsyn::PhysicalLayer (LEF)
+    const lefiLayer *layer = rsynLayer.getLayer();
+    if (layer->hasSpacingNumber() && layer->numSpacing()) {
+        cut_layer.spacing = std::lround(layer->spacing(0) * libDBU);
+    }
+
+    if (layer->numProps()) {
+        for (unsigned iProp = 0; static_cast<int>(iProp) < layer->numProps(); ++iProp) {
+            if (!strcmp(layer->propName(iProp), "LEF58_SPACINGTABLE")) {
+                std::istringstream iss(layer->propValue(iProp));
+                std::string sBuf("");
+                double space{0};
+                while (iss) {
+                    iss >> sBuf;
+                    if (sBuf == ";") {
+                        continue;
+                    }
+
+                    if (sBuf == "DEFAULT") {
+                        iss >> space;
+                        if (!cut_layer.spacing) {
+                            cut_layer.spacing = std::lround(space * libDBU);
+                        } else if (std::lround(space * libDBU) != cut_layer.spacing) {
+                            logger::Logger::warning("For " + cut_layer.name + ", mismatched defaultSpace & spacingTable... ");
+                        }
+                    }
+                }
+            } else {
+                logger::Logger::warning("For " + cut_layer.name + ", unknown prop: " + layer->propName(iProp) + "...");
+            }
+        }
+    }
+
+    if (!cut_layer.spacing) {
+        logger::Logger::error("For " + cut_layer.name + " CutLayer::init, rsynSpacingRule is empty, init all rules with default 0... ");
+    }
+    delete rsynLayer.getLayer();
+
+    //  Rsyn::PhysicalVia (LEF)
+    if (rsynVias.empty()) {
+        logger::Logger::error("For " + cut_layer.name + " rsynVias is empty...");
+    }
+
+    int defaultViaTypeIdx = -1;
+    const DBU dbuMax =
+            std::numeric_limits<DBU>::has_infinity ? std::numeric_limits<DBU>::infinity() : std::numeric_limits<DBU>::max();
+    std::tuple<DBU, DBU, DBU, DBU> bestScore(dbuMax, dbuMax, dbuMax, dbuMax);
+    for (const Rsyn::PhysicalVia &rsynVia : rsynVias) {
+        if (rsynVia.isViaDesign()) {
+            continue;
+        }
+
+        if ((rsynVia.allBottomGeometries().size() != 1 ||
+             rsynVia.allCutGeometries().size() != 1 ||
+             rsynVia.allTopGeometries().size() != 1)) {
+            logger::Logger::warning("For " + rsynVia.getName() + " , has not exactly one metal layer bound or more than one cut layer bound... ");
+        }
+
+        ViaType via_type;
+        initViaType(via_type, rsynVia);
+        cut_layer.allViaTypes.emplace_back(via_type);
+        const std::tuple<DBU, DBU, DBU, DBU> &score = cut_layer.allViaTypes.back().getDefaultScore(botDim, topDim);
+        if (score < bestScore) {
+            bestScore = score;
+            defaultViaTypeIdx = cut_layer.allViaTypes.size() - 1;
+        }
+    }
+
+    if (defaultViaTypeIdx == -1) {
+        logger::Logger::error("For " + cut_layer.name + " all rsyn vias have not exactly one via bound... ");
+    }
+
+    // make default via the first one
+    if (defaultViaTypeIdx > 0) {
+        std::swap(cut_layer.allViaTypes[0], cut_layer.allViaTypes[defaultViaTypeIdx]);
+    }
+    // init ViaType::idx
+    for (unsigned i = 0; i != cut_layer.allViaTypes.size(); ++i) {
+        cut_layer.allViaTypes[i].idx = i;
+    }
+
+    return 0;
+}
+BoxT<int64_t> Parser::getBoxFromRsynGeometries(const vector<Rsyn::PhysicalViaGeometry> &geos) {
+    BoxT<DBU> box;
+    for (const Rsyn::PhysicalViaGeometry &geo : geos) {
+        box = box.UnionWith(getBoxFromRsynBounds(geo.getBounds()));
+    }
+    return box;
+}
+int Parser::initViaType(ViaType &via_type, Rsyn::PhysicalVia rsynVia) {
+    if (rsynVia.allCutGeometries().size() > 1) via_type.hasMultiCut = true;
+
+    via_type.bot = getBoxFromRsynGeometries(rsynVia.allBottomGeometries());
+    via_type.cut = getBoxFromRsynGeometries(rsynVia.allCutGeometries());
+    via_type.top = getBoxFromRsynGeometries(rsynVia.allTopGeometries());
+    via_type.name = rsynVia.getName();
+
+    if (rsynVia.hasRowCol()) {
+        const DBU xBotEnc = rsynVia.getEnclosure(Rsyn::BOTTOM_VIA_LEVEL, Dimension(X));
+        const DBU yBotEnc = rsynVia.getEnclosure(Rsyn::BOTTOM_VIA_LEVEL, Dimension(Y));
+        const DBU xTopEnc = rsynVia.getEnclosure(Rsyn::TOP_VIA_LEVEL, Dimension(X));
+        const DBU yTopEnc = rsynVia.getEnclosure(Rsyn::TOP_VIA_LEVEL, Dimension(Y));
+        const int numRows = rsynVia.getNumRows();
+        const int numCols = rsynVia.getNumCols();
+        const DBU xCut = (rsynVia.getCutSize(Dimension(X)) * numCols + rsynVia.getSpacing(Dimension(X)) * (numCols - 1) + 1) / 2;
+        const DBU yCut = (rsynVia.getCutSize(Dimension(Y)) * numRows + rsynVia.getSpacing(Dimension(Y)) * (numRows - 1) + 1) / 2;
+        via_type.bot = {-xCut - xBotEnc, -yCut - yBotEnc, xCut + xBotEnc, yCut + yBotEnc};
+        via_type.cut = {-xCut, -yCut, xCut, yCut};
+        via_type.top = {-xCut - xTopEnc, -yCut - yTopEnc, xCut + xTopEnc, yCut + yTopEnc};
+    }
+
+    if (!via_type.bot.IsStrictValid() || !via_type.cut.IsStrictValid() || !via_type.top.IsStrictValid()) {
+        logger::Logger::warning("For " + rsynVia.getName() + " , has non strict valid via layer bound... ");
+    }
+
     return 0;
 }
