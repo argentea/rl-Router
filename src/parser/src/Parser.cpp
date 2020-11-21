@@ -609,7 +609,7 @@ int Parser::initCutLayer(CutLayer &cut_layer, const Rsyn::PhysicalLayer &rsynLay
         const std::tuple<DBU, DBU, DBU, DBU> &score = cut_layer.allViaTypes.back().getDefaultScore(botDim, topDim);
         if (score < bestScore) {
             bestScore = score;
-            defaultViaTypeIdx = cut_layer.allViaTypes.size() - 1;
+            defaultViaTypeIdx = static_cast<int>((cut_layer.allViaTypes.size())) - 1;
         }
     }
 
