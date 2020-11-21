@@ -23,7 +23,6 @@ public:
         layerIdx = layerIndex;
         BoxT<int64_t>::Set(params...);
     }
-
 };
 
 }// namespace parser

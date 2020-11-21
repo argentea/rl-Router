@@ -120,7 +120,7 @@ int Parser::initNet(Net &net, int i, const Rsyn::Net &rsyn_net) {
 
 int Parser::initNetList() {
     logger::Logger::info("Init NetList ...");
-    _netlist.nets.reserve(_design.getNumNets());
+    _database._nets.reserve(_design.getNumNets());
     int numPins = 0;
     for (Rsyn::Net rsyn_net : _module.allNets()) {
         switch (rsyn_net.getUse()) {
@@ -132,12 +132,12 @@ int Parser::initNetList() {
                 break;
         }
         Net net;
-        initNet(net, _netlist.nets.size(), rsyn_net);
-        _netlist.nets.emplace_back(net);
-        numPins += _netlist.nets.back().pinAccessBoxes.size();
+        initNet(net, _database._nets.size(), rsyn_net);
+        _database._nets.emplace_back(net);
+        numPins += _database._nets.back().pinAccessBoxes.size();
     }
-    logger::Logger::info("The number of nets is " + std::to_string(_netlist.nets.size()));
-    logger::Logger::info("The number of pins is " + std::to_string(_netlist.nets.size()));
+    logger::Logger::info("The number of nets is " + std::to_string(_database._nets.size()));
+    logger::Logger::info("The number of pins is " + std::to_string(_database._nets.size()));
     return 0;
 }
 int Parser::markPinAndObsOccupancy() {
@@ -146,7 +146,7 @@ int Parser::markPinAndObsOccupancy() {
 
     // STEP 1: get fixed objects
     // Mark pins associated with nets
-    for (const auto &net : _netlist.nets) {
+    for (const auto &net : _database._nets) {
         for (const auto &accessBoxes : net.pinAccessBoxes) {
             for (const auto &box : accessBoxes) {
                 fixedMetalVec.emplace_back(box, net.idx);
@@ -326,17 +326,17 @@ int Parser::initLayerList() {
     }
 
     // init each MetalLayer
-    _metal_layers.clear();
+    _database._metal_layers.clear();
     for (unsigned i = 0; i != rsynLayers.size(); ++i) {
         MetalLayer metal_layer;
         initMetalLayer(metal_layer, rsynLayers[i], physicalDesign.allPhysicalTracks(rsynLayers[i]), libDBU);
-        _metal_layers.emplace_back(metal_layer);
+        _database._metal_layers.emplace_back(metal_layer);
     }
-    _cut_layers.clear();
+    _database._cut_layers.clear();
     for (unsigned i = 0; i != rsynCutLayers.size(); ++i) {
         CutLayer cut_layer;
-        initCutLayer(cut_layer, rsynCutLayers[i], rsynVias[i], _metal_layers[i].direction, _metal_layers[i + 1].direction, libDBU);
-        _cut_layers.emplace_back(cut_layer);
+        initCutLayer(cut_layer, rsynCutLayers[i], rsynVias[i], _database._metal_layers[i].direction, _database._metal_layers[i + 1].direction, libDBU);
+        _database._cut_layers.emplace_back(cut_layer);
     }
 
 

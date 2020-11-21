@@ -46,7 +46,7 @@ public:
     // Basic infomation
     std::string name;
     Direction direction;// direction of track dimension
-    int idx;      // layerIdx (consistent with Rsyn::xxx::getRelativeIndex())
+    int idx;            // layerIdx (consistent with Rsyn::xxx::getRelativeIndex())
 
     // Track (1D)
     int64_t pitch = 0;

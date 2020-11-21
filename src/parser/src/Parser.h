@@ -1,10 +1,11 @@
 #ifndef RL_ROUTER_PARSER_H
 #define RL_ROUTER_PARSER_H
 
-#include "CutLayer.h"
+//#include "CutLayer.h"
 #include "GeoPrimitive.h"
-#include "MetalLayer.h"
-#include "Net.h"
+//#include "MetalLayer.h"
+//#include "Net.h"
+#include "Database.h"
 #include "rsyn/core/Rsyn.h"
 #include "rsyn/io/reader/ISPD2018Reader.h"
 #include "rsyn/ispd18/RoutingGuide.h"
@@ -22,6 +23,8 @@ public:
     // \brief read the benchmark
     // \return 0: success
     int read(const std::string &lefFile, const std::string &defFile, const std::string &guideFile);
+    Database &getDatabase() { return _database; };
+    int64_t getDatabaseUnit() { return _data_base_unit; };
 
 private:
     int64_t _data_base_unit = 0;
@@ -35,12 +38,11 @@ private:
 
     Rsyn::Net _rsyn_net;
     std::vector<Rsyn::Pin> _rsyn_pins;
-    NetList _netlist;
-    std::vector<MetalLayer> _metal_layers;
-    std::vector<CutLayer> _cut_layers;
+
+    Database _database;
 
     static BoxT<int64_t> getBoxFromRsynBounds(const Bounds &bounds);
-    static BoxT<int64_t> getBoxFromRsynGeometries(const vector<Rsyn::PhysicalViaGeometry>& geos);
+    static BoxT<int64_t> getBoxFromRsynGeometries(const vector<Rsyn::PhysicalViaGeometry> &geos);
 
     static int getPinAccessBoxes(Rsyn::PhysicalPort phPort, std::vector<BoxOnLayer> &accessBoxes);
     static int getPinAccessBoxes(Rsyn::PhysicalLibraryPin phLibPin, Rsyn::PhysicalCell phCell,
@@ -55,10 +57,10 @@ private:
                        DBU libDBU);
     static int initViaType(ViaType &via_type, Rsyn::PhysicalVia rsynVia);
     int initCutLayer(CutLayer &cut_layer, const Rsyn::PhysicalLayer &rsynLayer,
-                 const vector<Rsyn::PhysicalVia> &rsynVias,
-                 Direction botDim,
-                 Direction topDim,
-                 DBU libDBU);
+                     const vector<Rsyn::PhysicalVia> &rsynVias,
+                     Direction botDim,
+                     Direction topDim,
+                     DBU libDBU);
 
     int initLayerList();
 };

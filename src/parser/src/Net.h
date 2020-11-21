@@ -11,7 +11,6 @@ enum netIndex {
     NULL_NET_IDX = -2,// for neither net nor obstacle
 };
 
-
 class Net {
 public:
     int idx;
@@ -24,12 +23,6 @@ public:
     // more route guide information
     std::vector<int> routeGuideVios;
 };
-
-class NetList {
-public:
-    std::vector<Net> nets;
-};
-
 }// namespace parser
 }// namespace router
 
