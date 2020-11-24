@@ -14,8 +14,7 @@
 #include <string>
 
 
-namespace router {
-namespace parser {
+namespace router::parser {
 
 
 class Parser {
@@ -24,7 +23,7 @@ public:
     // \return 0: success
     int read(const std::string &lefFile, const std::string &defFile, const std::string &guideFile);
     Database &getDatabase() { return _database; };
-    int64_t getDatabaseUnit() { return _data_base_unit; };
+    int64_t getDatabaseUnit() const { return _data_base_unit; };
 
 private:
     int64_t _data_base_unit = 0;
@@ -64,7 +63,6 @@ private:
 
     int initLayerList();
 };
-}// namespace parser
 }// namespace router
 
 #endif//RL_ROUTER_PARSER_H

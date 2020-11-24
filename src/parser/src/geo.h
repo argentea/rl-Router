@@ -12,8 +12,7 @@
 #include <limits>
 #include <vector>
 
-namespace router {
-namespace parser {
+namespace router::parser {
 
 // Point template
 template<typename T>
@@ -174,7 +173,7 @@ public:
     bool operator==(const IntervalT &rhs) const {
         return (!IsValid() && !rhs.IsValid()) || (low == rhs.low && high == rhs.high);
     }
-    bool operator!=(const IntervalT &rhs) const { return !(*this == rhs); }
+    bool operator!=(const IntervalT &rhs) const { return *this != rhs; }
 
     friend inline std::ostream &operator<<(std::ostream &os, const IntervalT<T> &interval) {
         os << "(" << interval.low << ", " << interval.high << ")";
@@ -289,7 +288,7 @@ public:
     }
 
     bool operator==(const BoxT &rhs) const { return (x == rhs.x) && (y == rhs.y); }
-    bool operator!=(const BoxT &rhs) const { return !(*this == rhs); }
+    bool operator!=(const BoxT &rhs) const { return *this != rhs; }
 
     friend inline std::ostream &operator<<(std::ostream &os, const BoxT<T> &box) {
         os << "[x: " << box.x << ", y: " << box.y << "]";
@@ -399,7 +398,6 @@ public:
     bool IsRectilinear() const { return BoxT<T>::x() == 0 || BoxT<T>::y() == 0; }
 };
 
-}// namespace parser
-}// namespace router
+}// namespace router::parser
 
 #endif

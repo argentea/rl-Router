@@ -4,8 +4,7 @@
 #include "MetalLayer.h"
 #include "Net.h"
 
-namespace router {
-namespace parser {
+namespace router::parser {
 
 class Database {
 public:
@@ -13,7 +12,6 @@ public:
     std::vector<CutLayer> _cut_layers;
     std::vector<Net> _nets;
 };
-}// namespace parser
 }// namespace router
 
 #endif//RL_ROUTER_DATABASE_H

@@ -1,23 +1,23 @@
-#ifndef RL_ROUTER_LOGGER1_H
-#define RL_ROUTER_LOGGER1_H
+#ifndef RL_ROUTER_LOGGER_H
+#define RL_ROUTER_LOGGER_H
 
+#include "iostream"
+#include <cstdarg>
 #include <string>
 
-namespace router {
-namespace logger {
-class Logger {
-public:
-    static void info(const std::string &msg);
-
-    static void warning(const std::string &msg);
-
-    static void error(const std::string &msg);
-
-private:
-    const static bool _printInfo = true;
-    const static bool _printWarning = true;
-    const static bool _printError = true;
+namespace router::logger {
+// message type for print functions
+enum MessageType {
+    NONE = 0,
+    INFO = 1,
+    WARN = 2,
+    ERROR = 3,
+    DEBUG = 4,
+    ASSERT = 5
 };
-}// namespace logger
-}// namespace router
+
+int print(MessageType message_type, const std::string &msg);
+int print(MessageType message_type, const char *format, ...);
+
+}// namespace router::logger
 #endif//RL_ROUTER_LOGGER_H

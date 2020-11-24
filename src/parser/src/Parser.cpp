@@ -5,7 +5,7 @@ using namespace router::parser;
 using namespace router;
 
 int Parser::read(const std::string &lefFile, const std::string &defFile, const std::string &guideFile) {
-    logger::Logger::info("Start reading benchmarks");
+    logger::print(logger::INFO, "Start reading benchmarks \n");
     _session.init();
     const Rsyn::Json params = {
             {"lefFile", lefFile},
@@ -21,7 +21,7 @@ int Parser::read(const std::string &lefFile, const std::string &defFile, const s
     _design = _session.getDesign();
     _module = _design.getTopModule();
 
-    logger::Logger::info("Finish reading benchmarks");
+    logger::print(logger::INFO, "Finish reading benchmarks \n");
 
     initNetList();
     markPinAndObsOccupancy();
@@ -43,7 +43,7 @@ int Parser::getPinAccessBoxes(Rsyn::PhysicalPort phPort, vector<BoxOnLayer> &acc
 }
 int Parser::getPinAccessBoxes(Rsyn::PhysicalLibraryPin phLibPin, Rsyn::PhysicalCell phCell, std::vector<BoxOnLayer> &accessBoxes, const DBUxy &origin) {
     if (!phLibPin.hasPinGeometries()) {
-        logger::Logger::warning("pin of " + phCell.getName() + " has no pinGeometries");
+        logger::print(logger::WARN, "pin of " + phCell.getName() + " has no pinGeometries \n");
         return 0;
     }
 
@@ -54,7 +54,7 @@ int Parser::getPinAccessBoxes(Rsyn::PhysicalLibraryPin phLibPin, Rsyn::PhysicalC
     auto phPinGeo = phLibPin.allPinGeometries()[0];
     for (Rsyn::PhysicalPinLayer phPinLayer : phPinGeo.allPinLayers()) {
         if (!phPinLayer.hasRectangleBounds()) {
-            logger::Logger::warning("pin has no RectangleBounds");
+            logger::print(logger::INFO, "pin has no RectangleBounds \n");
             continue;
         }
         int layerIdx = phPinLayer.getLayer().getRelativeIndex();
@@ -80,7 +80,8 @@ int Parser::initPinAccessBoxes(Rsyn::Pin rsynPin, std::vector<BoxOnLayer> &acces
     // PhysicalCell
     Rsyn::Instance instance = rsynPin.getInstance();
     if (instance.getType() != Rsyn::CELL) {
-        logger::Logger::warning("pin is not on a cell" + rsynPin.getNetName() + " " + rsynPin.getInstanceName());
+        //        logger::Logger::warning();
+        logger::print(logger::WARN, "pin is not on a cell %s %s \n", rsynPin.getNetName().c_str(), rsynPin.getInstanceName().c_str());
         return 0;
     }
     Rsyn::Cell cell = instance.asCell();
@@ -119,7 +120,7 @@ int Parser::initNet(Net &net, int i, const Rsyn::Net &rsyn_net) {
 }
 
 int Parser::initNetList() {
-    logger::Logger::info("Init NetList ...");
+    logger::print(logger::INFO, "Init NetList ... \n");
     _database._nets.reserve(_design.getNumNets());
     int numPins = 0;
     for (Rsyn::Net rsyn_net : _module.allNets()) {
@@ -135,12 +136,12 @@ int Parser::initNetList() {
         _database._nets.emplace_back(net);
         numPins += _database._nets.back()._pin_access_boxes.size();
     }
-    logger::Logger::info("The number of nets is " + std::to_string(_database._nets.size()));
-    logger::Logger::info("The number of pins is " + std::to_string(_database._nets.size()));
+    logger::print(logger::INFO, "The number of nets is %d \n", _database._nets.size());
+    logger::print(logger::INFO, "The number of pins is %d \n", numPins);
     return 0;
 }
 int Parser::markPinAndObsOccupancy() {
-    logger::Logger::info("Mark pin & obs occupancy on RouteGrid ...");
+    logger::print(logger::INFO, "Mark pin & obs occupancy on RouteGrid ...\n", _database._nets.size());
     vector<std::pair<BoxOnLayer, int>> fixedMetalVec;
 
     // STEP 1: get fixed objects
@@ -271,8 +272,7 @@ int Parser::markPinAndObsOccupancy() {
                     else if (layerIdx == topLayerIdx)
                         layerIdx = botLayerIdx;
                     else {
-                        logger::Logger::error(
-                                "Special net " + specialNet.getNet().clsName + " via " + pt.clsViaName + " on wrong layer " + std::to_string(layerIdx));
+                        logger::print(logger::ERROR, "Special net %s via %s on wrong layer %d \n", specialNet.getNet().clsName.c_str(), pt.clsViaName.c_str(), layerIdx);
                         break;
                     }
                 }
@@ -303,8 +303,7 @@ int Parser::initLayerList() {
         }
     }
     if (rsynCutLayers.size() + 1 != rsynLayers.size()) {
-        logger::Logger::error(
-                "rsynCutLayers.size() is " + std::to_string(rsynCutLayers.size()) + " , rsynLayers.size() is " + std::to_string(rsynLayers.size()) + " , not matched... ");
+        logger::print(logger::ERROR,"rsynCutLayers.size() is %d, rsynLayers.size() is %d , not matched... \n", rsynCutLayers.size(), rsynLayers.size() );
     }
 
     //  Rsyn::PhysicalVia (LEF)
@@ -356,14 +355,11 @@ int Parser::initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLaye
     // default spacing
     const int numSpaceTable = layer->numSpacingTable();
     if (!numSpaceTable) {
-        logger::Logger::warning(
-                "For " + metal_layer._name + ", no run spacing table...");
+        logger::print(logger::WARN, "For %s, no run spacing table ...\n", metal_layer._name.c_str());
     } else {
         for (int iSpaceTable = 0; iSpaceTable < numSpaceTable; ++iSpaceTable) {
             if (!layer->spacingTable(iSpaceTable)->isParallel()) {
-                logger::Logger::warning(
-                        "For " + metal_layer._name + ", unidentified spacing table...");
-                continue;
+                logger::print(logger::WARN, "For %s, unidentified spacing table ...\n", metal_layer._name.c_str());
             }
 
             const lefiParallel *parallel = layer->spacingTable(iSpaceTable)->parallel();
@@ -393,8 +389,7 @@ int Parser::initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLaye
     }
     //  eol spacing
     if (!layer->hasSpacingNumber()) {
-        logger::Logger::warning(
-                "For " + metal_layer._name + ", no spacing rules...");
+        logger::print(logger::WARN, "For %s, no spacing rules...\n", metal_layer._name.c_str());
     } else {
         const int numSpace = layer->numSpacing();
         metal_layer._space_rules.reserve(numSpace);
@@ -418,12 +413,11 @@ int Parser::initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLaye
                 metal_layer._parallel_width_space[0][0] = space;
                 metal_layer._default_space = metal_layer.getParaRunSpace(metal_layer._width);
             } else if (space != metal_layer._default_space) {
-                logger::Logger::warning(
-                        "For " + metal_layer._name + ", mismatched defaultSpace & spacingTable...");
+                logger::print(logger::WARN, "For %s, mismatched defaultSpace & spacingTable...\n", metal_layer._name.c_str());
             }
         }
         if (metal_layer._space_rules.empty()) {
-            logger::Logger::warning("For " + metal_layer._name + ", no eol spacing rules...");
+            logger::print(logger::WARN, "For %s, no eol spacing rules...\n", metal_layer._name.c_str());
         }
     }
 
@@ -431,7 +425,7 @@ int Parser::initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLaye
         if (!strcmp(layer->propName(iProp), "LEF58_CORNERSPACING")) {
             //  corner spacing
             if (metal_layer.hasCornerSpace()) {
-                logger::Logger::warning("For " + metal_layer._name + ", multiple corner spacing rules: " + layer->propValue(iProp) + "...");
+                logger::print(logger::WARN, "For %s, multiple corner spacing rules: %s...\n", metal_layer._name.c_str(), layer->propValue(iProp));
                 continue;
             }
 
@@ -458,7 +452,7 @@ int Parser::initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLaye
                         metal_layer._corner_width_space[0] = std::lround(fBuf2 * libDBU);
                     }
                 } else {
-                    logger::Logger::warning("For " + metal_layer._name + ", corner spacing not identified: " + sBuf + "...\n");
+                    logger::print(logger::WARN, "For %s, corner spacing not identified: %s...\n", metal_layer._name.c_str(), sBuf.c_str());
                 }
             }
         } else if (!strcmp(layer->propName(iProp), "LEF57_SPACING")) {
@@ -487,7 +481,7 @@ int Parser::initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLaye
                     iss >> parSpace >> sBuf >> parWithin;
                     hasPar = true;
                 } else {
-                    logger::Logger::warning("For " + metal_layer._name + ", eol spacing not identified: " + sBuf + "...");
+                    logger::print(logger::WARN, "For %s, eol spacing not identified: %s...\n", metal_layer._name.c_str(), sBuf.c_str());
                 }
             }
             if (hasPar) {
@@ -508,10 +502,10 @@ int Parser::initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLaye
                 metal_layer._parallel_width_space[0][0] = std::lround(space * libDBU);
                 metal_layer._default_space = metal_layer.getParaRunSpace(metal_layer._width);
             } else if (std::lround(space * libDBU) != metal_layer._default_space) {
-                logger::Logger::warning("For " + metal_layer._name + ", mismatched defaultSpace & spacingTable...");
+                logger::print(logger::WARN, "For %s, mismatched defaultSpace & spacingTable...\n", metal_layer._name.c_str());
             }
         } else {
-            logger::Logger::warning("For " + metal_layer._name + ", unknown prop: " + layer->propName(iProp) + "...");
+            logger::print(logger::WARN, "For %s, unknown prop: %s ...\n", metal_layer._name.c_str(), layer->propName(iProp));
         }
     }
     metal_layer.fixedMetalQueryMargin = std::max(metal_layer._max_eol_space, metal_layer._max_eol_within);
@@ -519,8 +513,7 @@ int Parser::initMetalLayer(MetalLayer &metal_layer, Rsyn::PhysicalLayer rsynLaye
     // Rsyn::PhysicalTracks (DEF)
     // note: crossPoints will be initialized in LayerList
     if (rsynTracks.empty()) {
-        logger::Logger::error(
-                "For " + metal_layer._name + ", tracks is empty...");
+        logger::print(logger::ERROR, "For %s, tracks is empty...\n", metal_layer._name.c_str());
         metal_layer._pitch = metal_layer._width + metal_layer._parallel_width_space[0][0];
     } else {
         for (const Rsyn::PhysicalTracks &rsynTrack : rsynTracks) {
@@ -567,24 +560,24 @@ int Parser::initCutLayer(CutLayer &cut_layer, const Rsyn::PhysicalLayer &rsynLay
                         if (!cut_layer.spacing) {
                             cut_layer.spacing = std::lround(space * libDBU);
                         } else if (std::lround(space * libDBU) != cut_layer.spacing) {
-                            logger::Logger::warning("For " + cut_layer.name + ", mismatched defaultSpace & spacingTable... ");
+                            logger::print(logger::WARN, "For " + cut_layer.name + ", mismatched defaultSpace & spacingTable... \n");
                         }
                     }
                 }
             } else {
-                logger::Logger::warning("For " + cut_layer.name + ", unknown prop: " + layer->propName(iProp) + "...");
+                logger::print(logger::WARN, "For " + cut_layer.name + ", unknown prop: " + layer->propName(iProp) + "... \n");
             }
         }
     }
 
     if (!cut_layer.spacing) {
-        logger::Logger::error("For " + cut_layer.name + " CutLayer::init, rsynSpacingRule is empty, init all rules with default 0... ");
+        logger::print(logger::ERROR, "For " + cut_layer.name + " CutLayer::init, rsynSpacingRule is empty, init all rules with default 0... \n");
     }
     delete rsynLayer.getLayer();
 
     //  Rsyn::PhysicalVia (LEF)
     if (rsynVias.empty()) {
-        logger::Logger::error("For " + cut_layer.name + " rsynVias is empty...");
+        logger::print(logger::ERROR, " For " + cut_layer.name + " rsynVias is empty.. \n");
     }
 
     int defaultViaTypeIdx = -1;
@@ -598,7 +591,7 @@ int Parser::initCutLayer(CutLayer &cut_layer, const Rsyn::PhysicalLayer &rsynLay
         if ((rsynVia.allBottomGeometries().size() != 1 ||
              rsynVia.allCutGeometries().size() != 1 ||
              rsynVia.allTopGeometries().size() != 1)) {
-            logger::Logger::warning("For " + rsynVia.getName() + " , has not exactly one metal layer bound or more than one cut layer bound... ");
+            logger::print(logger::WARN, "For " + rsynVia.getName() + " , has not exactly one metal layer bound or more than one cut layer bound... \n");
         }
 
         ViaType via_type;
@@ -612,7 +605,7 @@ int Parser::initCutLayer(CutLayer &cut_layer, const Rsyn::PhysicalLayer &rsynLay
     }
 
     if (defaultViaTypeIdx == -1) {
-        logger::Logger::error("For " + cut_layer.name + " all rsyn vias have not exactly one via bound... ");
+        logger::print(logger::ERROR,"For " + cut_layer.name + " all rsyn vias have not exactly one via bound... \n");
     }
 
     // make default via the first one
@@ -656,7 +649,7 @@ int Parser::initViaType(ViaType &via_type, Rsyn::PhysicalVia rsynVia) {
     }
 
     if (!via_type.bot.IsStrictValid() || !via_type.cut.IsStrictValid() || !via_type.top.IsStrictValid()) {
-        logger::Logger::warning("For " + rsynVia.getName() + " , has non strict valid via layer bound... ");
+        logger::print(logger::WARN, "For " + rsynVia.getName() + " , has non strict valid via layer bound... \n");
     }
 
     return 0;

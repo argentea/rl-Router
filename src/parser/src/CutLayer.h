@@ -2,8 +2,7 @@
 #define RL_ROUTER_CUTLAYER_H
 #include "GeoPrimitive.h"
 
-namespace router {
-namespace parser {
+namespace router::parser {
 
 class ViaType {
 public:
@@ -37,6 +36,5 @@ public:
     std::vector<ViaType> allViaTypes;
 };
 
-}// namespace parser
 }// namespace router
 #endif

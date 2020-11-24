@@ -4,8 +4,7 @@
 #include "geo.h"
 
 
-namespace router {
-namespace parser {
+namespace router::parser {
 
 //  BoxOnLayer
 //  A box on a certain layer: primitive for route guide and pin acesss box
@@ -24,6 +23,5 @@ public:
     }
 };
 
-}// namespace parser
 }// namespace router
 #endif

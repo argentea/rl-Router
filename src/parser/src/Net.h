@@ -1,8 +1,7 @@
 #ifndef RL_ROUTER_NET_H
 #define RL_ROUTER_NET_H
 
-namespace router {
-namespace parser {
+namespace router::parser {
 
 // net index
 // a valid net idx >= 0
@@ -23,7 +22,6 @@ public:
     // more route guide information
     std::vector<int> _route_guide_vios;
 };
-}// namespace parser
 }// namespace router
 
 #endif

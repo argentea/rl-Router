@@ -3,8 +3,7 @@
 
 #include "GeoPrimitive.h"
 
-namespace router {
-namespace parser {
+namespace router::parser {
 
 enum Direction {
     X = 0,
@@ -88,7 +87,6 @@ public:
     int64_t fixedMetalQueryMargin = 0;
 };
 
-}// namespace parser
 }// namespace router
 
 #endif
