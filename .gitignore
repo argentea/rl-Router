@@ -114,8 +114,10 @@ dmypy.json
 # Pyre type checker
 .pyre/
 # other ignore
-./.clangd/
-./.CMakeLists.txt.swp
+.clangd/
+#vim
+*.swp
+.CMakeLists.txt.swp
 
 # ycm auto complete
 compile_commands.json
