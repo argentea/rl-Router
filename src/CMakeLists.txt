@@ -1,23 +1,10 @@
-#########
-# Setup #
-#########
+project(global)
+add_library(${PROJECT_NAME} INTERFACE)
 
-# Specify the minimum version for CMake
-cmake_minimum_required(VERSION 2.8)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+target_include_directories(${PROJECT_NAME}
+	INTERFACE
+		${PROJECT_SOURCE_DIR}
+)
 
-# Message
-message(STATUS "rlrouter develop version")
-message(STATUS ${CMAKE_CURRENT_SOURCE_DIR})
-
-# Find includes in the build directories
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-# Project's name
-project(rlrouter)
-
-# Set the output folder where your program will be created
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
-set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
-
-set(CMAKE_CXX_STANDARD 14)
+# no test
+add_subdirectory(db)
