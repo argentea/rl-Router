@@ -22,6 +22,6 @@ public:
     // more route guide information
     std::vector<int> _route_guide_vios;
 };
-}// namespace router
+}// namespace router::parser
 
 #endif

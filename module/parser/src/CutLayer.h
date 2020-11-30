@@ -36,5 +36,5 @@ public:
     std::vector<ViaType> allViaTypes;
 };
 
-}// namespace router
+}// namespace router::parser
 #endif

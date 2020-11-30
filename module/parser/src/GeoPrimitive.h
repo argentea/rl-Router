@@ -14,7 +14,7 @@ public:
 
     //  constructors
     template<typename... Args>
-    explicit BoxOnLayer(int layerIndex = -1, Args... params) : BoxT<int64_t>(params...), _layer_idx(layerIndex) {};
+    explicit BoxOnLayer(int layerIndex = -1, Args... params) : BoxT<int64_t>(params...), _layer_idx(layerIndex){};
 
     // inherit setters from BoxT in batch
     template<typename... Args>
@@ -23,5 +23,5 @@ public:
     }
 };
 
-}// namespace router
+}// namespace router::parser
 #endif

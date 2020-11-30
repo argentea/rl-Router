@@ -87,6 +87,6 @@ public:
     int64_t fixedMetalQueryMargin = 0;
 };
 
-}// namespace router
+}// namespace router::parser
 
 #endif

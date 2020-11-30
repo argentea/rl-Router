@@ -25,5 +25,5 @@ set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost COMPONENTS filesystem program_options REQUIRED)
 #find_package(Threads REQUIRED)
 
-add_subdirectory(src)
+add_subdirectory(module)
 add_subdirectory(thirdparty)

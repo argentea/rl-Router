@@ -1,11 +1,8 @@
 #ifndef RL_ROUTER_PARSER_H
 #define RL_ROUTER_PARSER_H
 
-//#include "CutLayer.h"
-#include "GeoPrimitive.h"
-//#include "MetalLayer.h"
-//#include "Net.h"
 #include "Database.h"
+#include "GeoPrimitive.h"
 #include "rsyn/core/Rsyn.h"
 #include "rsyn/io/reader/ISPD2018Reader.h"
 #include "rsyn/ispd18/RoutingGuide.h"
@@ -20,7 +17,6 @@ namespace router::parser {
 class Parser {
 public:
     // \brief read the benchmark
-    // \return 0: success
     int read(const std::string &lefFile, const std::string &defFile, const std::string &guideFile);
     Database &getDatabase() { return _database; };
     int64_t getDatabaseUnit() const { return _data_base_unit; };
@@ -63,6 +59,6 @@ private:
 
     int initLayerList();
 };
-}// namespace router
+}// namespace router::parser
 
 #endif//RL_ROUTER_PARSER_H

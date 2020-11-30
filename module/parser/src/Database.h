@@ -12,6 +12,6 @@ public:
     std::vector<CutLayer> _cut_layers;
     std::vector<Net> _nets;
 };
-}// namespace router
+}// namespace router::parser
 
 #endif//RL_ROUTER_DATABASE_H

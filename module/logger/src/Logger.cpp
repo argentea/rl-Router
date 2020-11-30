@@ -53,7 +53,7 @@ int print2stream(MessageType message_type, FILE *stream, const char *format, ...
 }
 
 int print(MessageType message_type, const std::string &msg) {
-    int ret = print2stream(message_type, stdout,  msg.c_str());
+    int ret = print2stream(message_type, stdout, msg.c_str());
     return ret;
 }
 int print(MessageType message_type, const char *format, ...) {

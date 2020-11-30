@@ -303,7 +303,7 @@ int Parser::initLayerList() {
         }
     }
     if (rsynCutLayers.size() + 1 != rsynLayers.size()) {
-        logger::print(logger::ERROR,"rsynCutLayers.size() is %d, rsynLayers.size() is %d , not matched... \n", rsynCutLayers.size(), rsynLayers.size() );
+        logger::print(logger::ERROR, "rsynCutLayers.size() is %d, rsynLayers.size() is %d , not matched... \n", rsynCutLayers.size(), rsynLayers.size());
     }
 
     //  Rsyn::PhysicalVia (LEF)
@@ -605,7 +605,7 @@ int Parser::initCutLayer(CutLayer &cut_layer, const Rsyn::PhysicalLayer &rsynLay
     }
 
     if (defaultViaTypeIdx == -1) {
-        logger::print(logger::ERROR,"For " + cut_layer.name + " all rsyn vias have not exactly one via bound... \n");
+        logger::print(logger::ERROR, "For " + cut_layer.name + " all rsyn vias have not exactly one via bound... \n");
     }
 
     // make default via the first one
