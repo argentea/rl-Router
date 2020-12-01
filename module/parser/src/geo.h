@@ -1,9 +1,7 @@
 //
 // Some class templates for geometry primitives (point, interval, box)
 //
-
-#ifndef RL_ROUTER_GEO_H
-#define RL_ROUTER_GEO_H
+#pragma once
 
 #include <algorithm>
 #include <cassert>
@@ -399,5 +397,3 @@ public:
 };
 
 }// namespace router::parser
-
-#endif

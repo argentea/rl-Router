@@ -1,3 +1,4 @@
+#pragma once
 #include "Layer.h"
 
 namespace router::db {

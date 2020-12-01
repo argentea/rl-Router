@@ -1,5 +1,4 @@
-#ifndef RL_ROUTER_GEOPRIMITIVE_H
-#define RL_ROUTER_GEOPRIMITIVE_H
+#pragma once
 #include "functional"
 #include "geo.h"
 
@@ -24,4 +23,3 @@ public:
 };
 
 }// namespace router::parser
-#endif

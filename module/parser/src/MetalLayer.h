@@ -1,5 +1,4 @@
-#ifndef RL_ROUTER_METALLAYER_H
-#define RL_ROUTER_METALLAYER_H
+#pragma once
 
 #include "GeoPrimitive.h"
 
@@ -88,5 +87,3 @@ public:
 };
 
 }// namespace router::parser
-
-#endif

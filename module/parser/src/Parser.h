@@ -1,5 +1,4 @@
-#ifndef RL_ROUTER_PARSER_H
-#define RL_ROUTER_PARSER_H
+#pragma once
 
 #include "Database.h"
 #include "GeoPrimitive.h"
@@ -61,4 +60,3 @@ private:
 };
 }// namespace router::parser
 
-#endif//RL_ROUTER_PARSER_H

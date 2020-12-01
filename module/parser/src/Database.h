@@ -1,5 +1,4 @@
-#ifndef RL_ROUTER_DATABASE_H
-#define RL_ROUTER_DATABASE_H
+#pragma once
 #include "CutLayer.h"
 #include "MetalLayer.h"
 #include "Net.h"
@@ -13,5 +12,3 @@ public:
     std::vector<Net> _nets;
 };
 }// namespace router::parser
-
-#endif//RL_ROUTER_DATABASE_H

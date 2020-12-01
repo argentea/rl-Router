@@ -1,5 +1,4 @@
-#ifndef RL_ROUTER_LOGGER_H
-#define RL_ROUTER_LOGGER_H
+#pragma once
 
 #include "iostream"
 #include <cstdarg>
@@ -20,4 +19,3 @@ int print(MessageType message_type, const std::string &msg);
 int print(MessageType message_type, const char *format, ...);
 
 }// namespace router::logger
-#endif//RL_ROUTER_LOGGER_H

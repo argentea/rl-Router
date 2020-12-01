@@ -1,5 +1,4 @@
-#ifndef RL_ROUTER_NET_H
-#define RL_ROUTER_NET_H
+#pragma once
 
 namespace router::parser {
 
@@ -23,5 +22,3 @@ public:
     std::vector<int> _route_guide_vios;
 };
 }// namespace router::parser
-
-#endif
