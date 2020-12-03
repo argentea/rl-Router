@@ -19,6 +19,6 @@ target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ../../thirdparty/rsyn/s
 target_link_libraries(${PROJECT_NAME} PUBLIC rsyn)
 
 # test
-add_executable(${PROJECT_NAME}_test test.cpp)
-target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+#add_executable(${PROJECT_NAME}_test test.cpp)
+#target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
 
