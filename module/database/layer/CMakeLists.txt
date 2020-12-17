@@ -7,8 +7,9 @@ file(GLOB SOURCES
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 
 # parser
-target_link_libraries(${PROJECT_NAME} STATIC parser)
+#target_link_libraries(${PROJECT_NAME} STATIC /home/kunpengjiang/project/rl-router/module/parser/parser)
+
 
 # test
 add_executable(${PROJECT_NAME}_test test.cpp)
-target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME}_test PUBLIC ${PROJECT_NAME} parser)
