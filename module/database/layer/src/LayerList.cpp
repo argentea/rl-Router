@@ -1,61 +1,40 @@
 #include "LayerList.h"
+#include "parser/src/Parser.h"
 
-namespace db {
-/*
-void LayerList::init() {
-    const Rsyn::Session session;
-    Rsyn::PhysicalDesign physicalDesign =
-        static_cast<Rsyn::PhysicalService*>(session.getService("rsyn.physical"))->getPhysicalDesign();
-    const DBU libDBU = physicalDesign.getDatabaseUnits(Rsyn::LIBRARY_DBU);
-
+namespace router::db {
+void LayerList::init(router::parser::Parser& parser) {
     //  Rsyn::PhysicalLayer (LEF)
-    vector<Rsyn::PhysicalLayer> rsynLayers;
-    vector<Rsyn::PhysicalLayer> rsynCutLayers;
-    for (const Rsyn::PhysicalLayer& rsynLayer : physicalDesign.allPhysicalLayers()) {
-        switch (rsynLayer.getType()) {
-            case Rsyn::ROUTING:
-                assert(rsynLayer.getRelativeIndex() == rsynLayers.size());
-                rsynLayers.push_back(rsynLayer);
-                break;
-            case Rsyn::CUT:
-                rsynCutLayers.push_back(rsynLayer);
-                break;
-            default:
-                break;
-        }
-    }
-    if (rsynCutLayers.size() + 1 != rsynLayers.size()) {
-        log() << "Error in " << __func__ << ": rsynCutLayers.size() is " << rsynCutLayers.size()
-              << " , rsynLayers.size() is " << rsynLayers.size() << " , not matched...\n";
-    }
-
+	int64_t libDBU = parser.getDatabaseUnit();
+    vector<router::parser::MetalLayer>& parserLayers = parser.getDatabase()._metal_layers;
+    vector<router::parser::CutLayer>& parserCutLayers = parser.getDatabase()._cut_layers;
     //  Rsyn::PhysicalVia (LEF)
-    vector<vector<Rsyn::PhysicalVia>> rsynVias(rsynCutLayers.size());
-    for (const Rsyn::PhysicalVia& rsynVia : physicalDesign.allPhysicalVias()) {
-        rsynVias[rsynVia.getCutLayer().getRelativeIndex()].push_back(rsynVia);
-    }
+//    vector<vector<Rsyn::PhysicalVia>> rsynVias(rsynCutLayers.size());
+//    for (const Rsyn::PhysicalVia& rsynVia : physicalDesign.allPhysicalVias()) {
+//        rsynVias[rsynVia.getCutLayer().getRelativeIndex()].push_back(rsynVia);
+//    }
 
     //  Rsyn::PhysicalTracks (DEF)
     //  init each MetalLayer
-    layers.clear();
-    for (unsigned i = 0; i != rsynLayers.size(); ++i) {
-        layers.emplace_back(rsynLayers[i], physicalDesign.allPhysicalTracks(rsynLayers[i]), libDBU);
+   	_layers.clear();
+    for (unsigned i = 0; i != parserLayers.size(); ++i) {
+        _layers.emplace_back(parserLayers[i], parserLayers[i]._tracks, libDBU);
     }
 
     //  init MetalLayer::CrossPointSet
-    initCrossPoints();
+///    initCrossPoints();
 
-    cutLayers.clear();
-    for (unsigned i = 0; i != rsynCutLayers.size(); ++i) {
-        cutLayers.emplace_back(rsynCutLayers[i], rsynVias[i], layers[i].direction, layers[i + 1].direction, libDBU);
+    _cut_layers.clear();
+    for (unsigned i = 0; i != parserCutLayers.size(); ++i) {
+///todo cut layer init        _cut_layers.emplace_back(parserCutLayers[i], rsynVias[i], _layers[i].direction, _layers[i + 1].direction, libDBU);
     }
 
     // via area equivalent length (conservative)
-    for (int i = 0, sz = rsynLayers.size(); i < sz; i++) {
-        MetalLayer& layer = layers[i];
+	/*
+    for (int i = 0, sz = parserLayers.size(); i < sz; i++) {
+        MetalLayer& layer = _layers[i];
 
-        auto dir = layer.direction;
-        auto width = layer.width;
+        auto dir = layer._direction;
+        auto width = layer._width;
 
         auto getEqLen = [&](const utils::BoxT<DBU>& rect, DBU& viaLenEqLen, DBU& viaWidthEqLen) {
             DBU minViaLen = min(abs(rect[1 - dir].low), abs(rect[1 - dir].high));  // conservative
@@ -70,8 +49,8 @@ void LayerList::init() {
         DBU topViaWidthEqLen = INT_MAX;
         DBU botViaWidthEqLen = INT_MAX;
 
-        if (i != 0) getEqLen(cutLayers[i - 1].defaultViaType().top, botViaLenEqLen, botViaWidthEqLen);
-        if (i != sz - 1) getEqLen(cutLayers[i].defaultViaType().bot, topViaLenEqLen, topViaWidthEqLen);
+        if (i != 0) getEqLen(_cut_layers[i - 1].defaultViaType().top, botViaLenEqLen, botViaWidthEqLen);
+        if (i != sz - 1) getEqLen(_cut_layers[i].defaultViaType().bot, topViaLenEqLen, topViaWidthEqLen);
 
         layer.viaLenEqLen = min(topViaLenEqLen, botViaLenEqLen);
         layer.viaWidthEqLen = min(topViaWidthEqLen, botViaWidthEqLen);
@@ -85,8 +64,8 @@ void LayerList::init() {
         } else if (i == sz - 1) {
             layer.viaOvlpDist = 0;
         } else {
-            auto intvl1 = cutLayers[i - 1].defaultViaType().top[1 - dir];
-            auto intvl2 = cutLayers[i].defaultViaType().bot[1 - dir];
+            auto intvl1 = _cut_layers[i - 1].defaultViaType().top[1 - dir];
+            auto intvl2 = _cut_layers[i].defaultViaType().bot[1 - dir];
             layer.viaOvlpDist = max(abs(intvl1.high) + abs(intvl2.low), abs(intvl1.low) + abs(intvl2.high));
             layer.viaOvlpDist = min(layer.viaOvlpDist, intvl1.range());
             layer.viaOvlpDist = min(layer.viaOvlpDist, intvl2.range());
@@ -96,12 +75,12 @@ void LayerList::init() {
         layer.minLenTwoVia = max((DBU)0, layer.minLenTwoVia);
         layer.minLenRaw = max((DBU)0, layer.minLenRaw);
     }
-
+*/
     //  init CutLayer::viaAccess
-    initViaForbidRegions();
-    initViaConfLUT();
+///    initViaForbidRegions();
+///    initViaConfLUT();
 }
-
+/*
 bool LayerList::isValid(const GridPoint& gridPt) const {
     return gridPt.layerIdx >= 0 && gridPt.layerIdx < layers.size() && layers[gridPt.layerIdx].isValid(gridPt);
 }

@@ -10,5 +10,7 @@ public:
     std::vector<MetalLayer> _metal_layers;
     std::vector<CutLayer> _cut_layers;
     std::vector<Net> _nets;
+
+	void init();
 };
 }// namespace router::parser
