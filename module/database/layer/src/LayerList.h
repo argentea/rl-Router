@@ -1,19 +1,23 @@
 #pragma once
 #include "Layer.h"
+#include "parser/src/Parser.h"
+#include <vector>
 
 namespace router::db {
 
 class LayerList {
 public:
-    Dimension getLayerDir(int layerIdx) const { return layers[layerIdx].direction; }
+	void init(router::parser::Parser& parser);
+    Dimension getLayerDir(int layerIdx) const { return _layers[layerIdx]._direction; }
 
-    const MetalLayer &getLayer(int layerIdx) const { return layers[layerIdx]; }
+    const MetalLayer &getLayer(int layerIdx) const { return _layers[layerIdx]; }
 
     //    const CutLayer& getCutLayer(int cutLayerIdx) const { return cutLayers[cutLayerIdx]; }
-    unsigned getLayerNum() const noexcept { return layers.size(); }
+    unsigned getLayerNum() const noexcept { return _layers.size(); }
 
 protected:
-    std::vector<MetalLayer> layers;
+    std::vector<MetalLayer> _layers;
+	std::vector<MetalLayer> _cut_layers;
 
     int numGridPoints;
     int64_t totalTrackLength;

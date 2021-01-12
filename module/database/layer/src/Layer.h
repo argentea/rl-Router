@@ -1,4 +1,6 @@
 #pragma once
+#include "parser/src/MetalLayer.h"
+#include <parser/src/Parser.h>
 #include <cstdint>
 #include <iostream>
 #include <vector>
@@ -56,37 +58,38 @@ enum Dimension {
 // note: for operations on GeoPrimitives, all checking is down in LayerList for low level efficiency
 class MetalLayer {
 public:
+	MetalLayer(router::parser::MetalLayer,const vector<router::parser::Track>&, const int64_t libDBU);
     // Basic infomation
-    std::string name;
-    Dimension direction;// direction of track dimension
-    int idx;            // layerIdx (consistent with Rsyn::xxx::getRelativeIndex())
+    std::string _name;
+    Dimension _direction;// direction of track dimension
+    int _idx;            // layerIdx (consistent with Rsyn::xxx::getRelativeIndex())
 
     // Track (1D)
-    int64_t pitch = 0;
-    std::vector<Track> tracks;
-    int numTracks() const { return tracks.size(); }
-    int64_t firstTrackLoc() const { return tracks.front().location; }
-    int64_t lastTrackLoc() const { return tracks.back().location; }
+    int64_t _pitch = 0;
+    std::vector<Track> _tracks;
+    int numTracks() const { return _tracks.size(); }
+    int64_t firstTrackLoc() const { return _tracks.front().location; }
+    int64_t lastTrackLoc() const { return _tracks.back().location; }
 
     // CrossPoint (1D)
-    std::vector<CrossPoint> crossPoints;
-    int numCrossPoints() const { return crossPoints.size(); }
-    int64_t firstCrossPointLoc() const { return crossPoints.front().location; }
-    int64_t lastCrossPointLoc() const { return crossPoints.back().location; }
-    std::vector<int64_t> accCrossPointDistCost;
+    std::vector<CrossPoint> _crossPoints;
+    int numCrossPoints() const { return _crossPoints.size(); }
+    int64_t firstCrossPointLoc() const { return _crossPoints.front().location; }
+    int64_t lastCrossPointLoc() const { return _crossPoints.back().location; }
+    std::vector<int64_t> _accCrossPointDistCost;
 
     // GridPoint (2D) = Track (1D) x CrossPoint (1D)
-    int numGridPoints() const { return tracks.size() * crossPoints.size(); }
+    int numGridPoints() const { return _tracks.size() * _crossPoints.size(); }
 
     // Design rules
     // width
-    int64_t width = 0;
-    int64_t minWidth = 0;
-    int64_t widthForSuffOvlp = 0;
-    int64_t shrinkForSuffOvlp = 0;
+    int64_t _width = 0;
+    int64_t _min_width = 0;
+    int64_t _width_for_suff_ovlp = 0;
+    int64_t _shrink_for_suff_ovlp = 0;
     // minArea
-    int64_t minArea = 0;
-    int64_t minLenRaw = 0;
+    int64_t _min_area = 0;
+    int64_t _min_len_raw = 0;
     int64_t minLenOneVia = 0;
     int64_t minLenTwoVia = 0;
     int64_t viaOvlpDist = 0;
@@ -94,7 +97,7 @@ public:
     int64_t viaWidthEqLen = 0;
     bool hasMinLenVio(int64_t len) const { return len < getMinLen(); }
     bool hasMinLenVioAcc(int64_t len) const { return len < getMinLenAcc(len); }
-    int64_t getMinLen() const { return minLenRaw; }
+    int64_t getMinLen() const { return _min_len_raw; }
     int64_t getMinLenAcc(int64_t len) const { return len < viaOvlpDist ? minLenOneVia : minLenTwoVia; }
     // parallel spacing
     std::vector<int64_t> parallelWidth{0};
@@ -117,7 +120,7 @@ public:
     bool hasCornerSpace() const { return cornerWidthSpace.size() > 1 || cornerWidthSpace[0]; }
 
     // margin for multi-thread safe and others
-    int64_t minAreaMargin = 0;
+    int64_t _minAreaMargin = 0;
     int64_t confLutMargin = 0;
     int64_t fixedMetalQueryMargin = 0;
     int64_t mtSafeMargin = 0;

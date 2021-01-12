@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7.0)
+cmake_minimum_required(VERSION 3.12)
 
 project(rl-router)
 
@@ -21,8 +21,16 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmax-errors=1 -Wall -Wextra")
 endif ()
+set(BOOST_ROOT /home/yibo/libraries/boost_1_62_0/)
+set(Boost_NO_BOOST_CMAKE TRUE)
+#set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_STATIC_LIBS        OFF) 
+find_package(Boost COMPONENTS filesystem program_options REQUIRED)
+message(STATUS "Boost_INCLUDE_DIR = ${Boost_INCLUDE_DIR}")
+message(STATUS "Boost_LIBRARIES = ${Boost_LIBRARIES}")
 
-set(Boost_USE_STATIC_LIBS ON)
+
+
 find_package(Boost COMPONENTS filesystem program_options REQUIRED)
 #find_package(Threads REQUIRED)
 
