@@ -8,3 +8,4 @@ target_include_directories(${PROJECT_NAME}
 add_subdirectory(logger)
 add_subdirectory(parser)
 add_subdirectory(database)
+#add_subdirectory(router)
