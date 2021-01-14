@@ -2,17 +2,30 @@
 
 #include "database/topo/src/topo.h"
 #include "parser/src/Parser.h"
+using namespace router::parser;
 
 namespace db {
 
-class Database : public RouteGrid/*, public NetList*/ {
+class Database/* : public RouteGrid, public NetList*/ {
 public:
     utils::BoxT<DBU> dieRegion;
 
     void init();
-    void clear() { RouteGrid::clear(); }
-    void reset() { RouteGrid::reset(); }
-    void stash() { RouteGrid::stash(); }
+    void clear() {
+		//todo
+		//RouteGrid::clear();
+		return;
+	}
+    void reset() {
+		//todo
+		//RouteGrid::reset();
+		return;
+	}
+    void stash() {
+		//todo
+		//RouteGrid::stash();
+		return;
+		}
 
     void writeDEFWireSegment(Net& dbNet, const utils::PointT<DBU>& u, const utils::PointT<DBU>& v, int layerIdx);
     void writeDEFVia(Net& dbNet, const utils::PointT<DBU>& point, const ViaType& viaType, int layerIdx);
