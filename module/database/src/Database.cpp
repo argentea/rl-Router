@@ -2,45 +2,32 @@
 #include "parser/src/Parser.h"
 #include "logger/src/Logger.h"
 
-db::Database database;
-
 namespace db {
 
-void Database::init() {
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
-        log() << std::endl;
-        log() << "################################################################" << std::endl;
-        log() << "Start initializing database" << std::endl;
-        log() << std::endl;
-    }
-    rsynService.init();
+void Database::init(Parser parser) {
+	
 
-    auto dieBound = rsynService.physicalDesign.getPhysicalDie().getBounds();
-    dieRegion = getBoxFromRsynBounds(dieBound);
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
-        log() << "Die region (in DBU): " << dieRegion << std::endl;
-        log() << std::endl;
-    }
+//    auto dieBound = rsynService.physicalDesign.getPhysicalDie().getBounds();
+//    dieRegion = getBoxFromRsynBounds(dieBound);
+//    RouteGrid::init();
 
-    RouteGrid::init();
+//    NetList::init(rsynService);
 
-    NetList::init(rsynService);
+//    markPinAndObsOccupancy();
 
-    markPinAndObsOccupancy();
+//    initMTSafeMargin();
 
-    initMTSafeMargin();
+//    sliceRouteGuides();
 
-    sliceRouteGuides();
+//    constructRouteGuideRTrees();
 
-    constructRouteGuideRTrees();
-
-    log() << "Finish initializing database" << std::endl;
-    log() << "MEM: cur=" << utils::mem_use::get_current() << "MB, peak=" << utils::mem_use::get_peak() << "MB"
-          << std::endl;
-    log() << std::endl;
+//    log() << "Finish initializing database" << std::endl;
+  //  log() << "MEM: cur=" << utils::mem_use::get_current() << "MB, peak=" << utils::mem_use::get_peak() << "MB"
+    //      << std::endl;
+//    log() << std::endl;
 }
 
-void Database::writeDEF(const std::string& filename) {
+/*void Database::writeDEF(const std::string& filename) {
     DEFControlParser defParser;
     DefDscp def;
     def.clsDesignName = rsynService.design.getName();
@@ -279,8 +266,8 @@ void Database::writeDEF(const std::string& filename) {
 
     defParser.writeFullDEF(filename, def);
 }
-
-void Database::markPinAndObsOccupancy() {
+*/
+/*void Database::markPinAndObsOccupancy() {
     if (db::setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         log() << "Mark pin & obs occupancy on RouteGrid ..." << std::endl;
     }
@@ -729,43 +716,7 @@ void Database::getGridPinAccessBoxes(const Net& net, vector<vector<db::GridBoxOn
         }
     }
 }
-
+*/
 }  // namespace db
 
-MTStat runJobsMT(int numJobs, const std::function<void(int)>& handle) {
-    int numThreads = min(numJobs, db::setting.numThreads);
-    MTStat mtStat(max(1, db::setting.numThreads));
-    if (numThreads <= 1) {
-        utils::timer threadTimer;
-        for (int i = 0; i < numJobs; ++i) {
-            handle(i);
-        }
-        mtStat.durations[0] = threadTimer.elapsed();
-    } else {
-        int globalJobIdx = 0;
-        std::mutex mtx;
-        utils::timer threadTimer;
-        auto thread_func = [&](int threadIdx) {
-            int jobIdx;
-            while (true) {
-                mtx.lock();
-                jobIdx = globalJobIdx++;
-                mtx.unlock();
-                if (jobIdx >= numJobs) {
-                    mtStat.durations[threadIdx] = threadTimer.elapsed();
-                    break;
-                }
-                handle(jobIdx);
-            }
-        };
 
-        std::thread threads[numThreads];
-        for (int i = 0; i < numThreads; i++) {
-            threads[i] = std::thread(thread_func, i);
-        }
-        for (int i = 0; i < numThreads; i++) {
-            threads[i].join();
-        }
-    }
-    return mtStat;
-}

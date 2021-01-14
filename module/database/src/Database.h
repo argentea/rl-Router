@@ -1,7 +1,7 @@
 #pragma once
 
-#include "database/topo/src/topo.h"
-#include "parser/src/Parser.h"
+#include"database/topo/src/topo.h"
+#include"parser/src/Parser.h"
 using namespace router::parser;
 
 namespace db {
@@ -10,7 +10,7 @@ class Database/* : public RouteGrid, public NetList*/ {
 public:
     utils::BoxT<DBU> dieRegion;
 
-    void init();
+    void init(Parser parser);
     void clear() {
 		//todo
 		//RouteGrid::clear();
@@ -27,10 +27,10 @@ public:
 		return;
 		}
 
-    void writeDEFWireSegment(Net& dbNet, const utils::PointT<DBU>& u, const utils::PointT<DBU>& v, int layerIdx);
-    void writeDEFVia(Net& dbNet, const utils::PointT<DBU>& point, const ViaType& viaType, int layerIdx);
-    void writeDEFFillRect(Net& dbNet, const utils::BoxT<DBU>& rect, const int layerIdx);
-    void writeDEF(const std::string& filename);
+//    void writeDEFWireSegment(Net& dbNet, const utils::PointT<DBU>& u, const utils::PointT<DBU>& v, int layerIdx);
+//    void writeDEFVia(Net& dbNet, const utils::PointT<DBU>& point, const ViaType& viaType, int layerIdx);
+//    void writeDEFFillRect(Net& dbNet, const utils::BoxT<DBU>& rect, const int layerIdx);
+//    void writeDEF(const std::string& filename);
 
     // get girdPinAccessBoxes
     // TODO: better way to differetiate same-layer and diff-layer girdPinAccessBoxes

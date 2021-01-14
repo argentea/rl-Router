@@ -32,22 +32,22 @@ public:
 
     // print
     void printBasics(ostream& os) const;
-    void printResult(ostream& os) const;
-    void print(ostream& os = std::cout) const {
-        printBasics(os);
-        printResult(os);
-    }
+//    void printResult(ostream& os) const;
+//    void print(ostream& os = std::cout) const {
+//        printBasics(os);
+//        printResult(os);
+//    }
 };
 
 class Net : public NetBase {
 public:
-    Net(int i, Net net);
+    Net(int i, router::parser::Net net);
 
     // more route guide information
     std::vector<int> routeGuideVios;
 //    RTrees routeGuideRTrees;
     std::vector<int> routeGuideVios_copy;
-    RTrees routeGuideRTrees_copy;
+//    RTrees routeGuideRTrees_copy;
 //
     // for initialization
     void initPinAccessBoxes(Rsyn::Pin rsynPin, std::vector<BoxOnLayer>& accessBoxes, const DBU libDBU);
