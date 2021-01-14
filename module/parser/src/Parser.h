@@ -42,7 +42,7 @@ private:
     static int getPinAccessBoxes(Rsyn::PhysicalLibraryPin phLibPin, Rsyn::PhysicalCell phCell,
                                  std::vector<BoxOnLayer> &accessBoxes, const DBUxy &origin);
     int initPinAccessBoxes(Rsyn::Pin rsynPin, std::vector<BoxOnLayer> &accessBoxes, int64_t libDBU);
-    int initNet(Net &net, int i, const Rsyn::Net &rsyn_net);
+    int initNet(ParserNet &net, int i, const Rsyn::Net &rsyn_net);
     int initNetList();
     int markPinAndObsOccupancy();
 

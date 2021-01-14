@@ -1,5 +1,5 @@
 #include<iostream>
 int main() {
-	cout << "net test\n";
+	std::cout << "net test\n";
     return 0;
 }

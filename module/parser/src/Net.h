@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "GeoPrimitive.h"
 
 namespace router::parser {
 
@@ -11,7 +12,7 @@ enum netIndex {
     NULL_NET_IDX = -2,// for neither net nor obstacle
 };
 
-class Net {
+class ParserNet {
 public:
     int _idx;
     std::string _net_name;

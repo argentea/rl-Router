@@ -1,5 +1,6 @@
 #pragma once
 
+#include "parser/src/Net.h"
 #include "parser/src/Parser.h"
 #include "database/topo/src/topo.h"
 #include <cstdlib>
@@ -12,11 +13,11 @@ public:
     ~NetBase();
 
     int idx;
-    Net parser_net;
+    ParserNet parser_net;
     const std::string& getName() const { return parser_net._net_name; }
 
     // pins
-    std::vector<Rsyn::Pin> rsynPins;
+//    std::vector<Rsyn::Pin> rsynPins;
     std::vector<std::vector<BoxOnLayer>> pinAccessBoxes;  // (pinIdx, accessBoxIdx) -> BoxOnLayer
     unsigned numOfPins() const noexcept { return pinAccessBoxes.size(); }
     BoxOnLayer getMaxAccessBox(int pinIdx) const;
@@ -41,7 +42,7 @@ public:
 
 class Net : public NetBase {
 public:
-    Net(int i, router::parser::Net net);
+    Net(int i, router::parser::ParserNet net);
 
     // more route guide information
     std::vector<int> routeGuideVios;
@@ -50,7 +51,6 @@ public:
 //    RTrees routeGuideRTrees_copy;
 //
     // for initialization
-    void initPinAccessBoxes(Rsyn::Pin rsynPin, std::vector<BoxOnLayer>& accessBoxes, const DBU libDBU);
     static void getPinAccessBoxes(Rsyn::PhysicalPort phPort, std::vector<BoxOnLayer>& accessBoxes);
     static void getPinAccessBoxes(Rsyn::PhysicalLibraryPin phLibPin,
                                   Rsyn::PhysicalCell phCell,
@@ -69,7 +69,7 @@ class NetList {
 public:
     std::vector<Net> nets;
 
-    void init();
+    void init(Database db);
     void writeNetTopo(const std::string& filename);
 };
 
