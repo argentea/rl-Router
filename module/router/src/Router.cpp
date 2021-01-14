@@ -1,8 +1,10 @@
 #include "Router.h"
-#include "Scheduler.h"
-#include "logger/src/Logger.h"
+//#include "Scheduler.h"
+//#include "logger/src/Logger.h"
 
 void Router::run() {
+	return;
+	/*
     allNetStatus.resize(database.nets.size(), db::RouteStatus::FAIL_UNPROCESSED);
     for (iter = 0; iter < db::setting.rrrIterLimit; iter++) {
         log() << std::endl;
@@ -59,10 +61,12 @@ void Router::run() {
     if (db::setting.multiNetVerbose >= +db::VerboseLevelT::MIDDLE) {
         printStat(true);
     }
+	*/
 }
 
 vector<int> Router::getNetsToRoute() {
     vector<int> netsToRoute;
+	/*
     _netsCost.clear();
     if (iter == 0) {
         for (int i = 0; i < database.nets.size(); i++) {
@@ -78,24 +82,29 @@ vector<int> Router::getNetsToRoute() {
             }
         }
     }
-
+	*/
     return netsToRoute;
 }
 
 void Router::ripup(const vector<int>& netsToRoute) {
-    for (auto netIdx : netsToRoute) {
+	return;
+/*    for (auto netIdx : netsToRoute) {
         UpdateDB::clearRouteResult(database.nets[netIdx]);
         allNetStatus[netIdx] = db::RouteStatus::FAIL_UNPROCESSED;
-    }
+    }*/
 }
 
 void Router::updateCost(const vector<int>& netsToRoute) {
+	return;
+	/*
     database.addHistCost();
     database.fadeHistCost(netsToRoute);
+	*/
 }
 
 void Router::route(const vector<int>& netsToRoute) {
     // init SingleNetRouters
+	/*
     vector<SingleNetRouter> routers;
     routers.reserve(netsToRoute.size());
     for (int netIdx : netsToRoute) {
@@ -104,23 +113,10 @@ void Router::route(const vector<int>& netsToRoute) {
 
     // pre route
     auto preMT = runJobsMT(netsToRoute.size(), [&](int netIdx) { routers[netIdx].preRoute(); });
-    if (db::setting.multiNetVerbose >= +db::VerboseLevelT::MIDDLE) {
-        printlog("preMT", preMT);
-        printStat();
-    }
 
     // schedule
-    if (db::setting.multiNetVerbose >= +db::VerboseLevelT::MIDDLE) {
-        log() << "Start multi-thread scheduling. There are " << netsToRoute.size() << " nets to route." << std::endl;
-    }
     Scheduler scheduler(routers);
     const vector<vector<int>>& batches = scheduler.schedule();
-    if (db::setting.multiNetVerbose >= +db::VerboseLevelT::MIDDLE) {
-        log() << "Finish multi-thread scheduling" << ((db::setting.numThreads == 0) ? " using simple mode" : "")
-              << ". There will be " << batches.size() << " batches." << std::endl;
-        log() << std::endl;
-    }
-
     // maze route and commit DB by batch
     int iBatch = 0;
     MTStat allMazeMT, allCommitMT, allGetViaTypesMT, allCommitViaTypesMT;
@@ -160,15 +156,12 @@ void Router::route(const vector<int>& netsToRoute) {
         }
         iBatch++;
     }
-    if (db::setting.multiNetVerbose >= +db::VerboseLevelT::MIDDLE) {
-        printlog("allMazeMT", allMazeMT);
-        printlog("allCommitMT", allCommitMT);
-        printlog("allGetViaTypesMT", allGetViaTypesMT);
-        printlog("allCommitViaTypesMT", allCommitViaTypesMT);
-    }
+	*/
 }
 
 void Router::finish() {
+	return;
+	/*
     PostScheduler postScheduler(database.nets);
     const vector<vector<int>>& batches = postScheduler.schedule();
     if (db::setting.multiNetVerbose >= +db::VerboseLevelT::MIDDLE) {
@@ -238,13 +231,16 @@ void Router::finish() {
         }
         if (count > 0) log() << "#nets connected by STT: " << count << std::endl;
     }
+	*/
 }
 
 void Router::unfinish() {
-    runJobsMT(database.nets.size(), [&](int netIdx) { database.nets[netIdx].clearPostRouteResult(); });
+//    runJobsMT(database.nets.size(), [&](int netIdx) { database.nets[netIdx].clearPostRouteResult(); });
 }
 
 void Router::printStat(bool major) {
+	return;
+	/*
     log() << std::endl;
     log() << "----------------------------------------------------------------" << std::endl;
     db::routeStat.print();
@@ -253,4 +249,5 @@ void Router::printStat(bool major) {
     }
     log() << "----------------------------------------------------------------" << std::endl;
     log() << std::endl;
+	*/
 }

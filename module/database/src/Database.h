@@ -2,11 +2,12 @@
 
 #include"database/topo/src/topo.h"
 #include"parser/src/Parser.h"
+#include"database/net/src/net.h"
 using namespace router::parser;
 
 namespace db {
 
-class Database/* : public RouteGrid, public NetList*/ {
+class Database : /*public RouteGrid,*/ public NetList {
 public:
     utils::BoxT<DBU> dieRegion;
 

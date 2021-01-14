@@ -1,4 +1,4 @@
-project(db)
+project(database)
 file(GLOB SOURCES
         src/*.cpp
         src/*.cc
@@ -13,6 +13,8 @@ add_library(${PROJECT_NAME} STATIC ${SOURCES})
 target_link_libraries(${PROJECT_NAME} PUBLIC parser)
 # topo
 target_link_libraries(${PROJECT_NAME} PUBLIC topo)
+# net
+target_link_libraries(${PROJECT_NAME} PUBLIC net)
 
 
 # test
