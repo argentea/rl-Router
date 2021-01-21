@@ -3,12 +3,12 @@
 #include "parser/src/Parser.h"
 #include <vector>
 
-namespace router::db {
+namespace db {
 
 class LayerList {
 public:
 	void init(router::parser::Parser& parser);
-    Dimension getLayerDir(int layerIdx) const { return _layers[layerIdx]._direction; }
+    Dimension getLayerDir(int layerIdx) const { return _layers[layerIdx].direction; }
 
     const MetalLayer &getLayer(int layerIdx) const { return _layers[layerIdx]; }
 

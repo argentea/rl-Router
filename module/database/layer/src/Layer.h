@@ -1,35 +1,38 @@
 #pragma once
-#include "parser/src/MetalLayer.h"
-#include <parser/src/Parser.h>
-#include <cstdint>
-#include <iostream>
-#include <vector>
 
-namespace router::db {
+#include "parser/src/MetalLayer.h"
+#include"parser/src/Parser.h"
+#include "database/topo/src/topo.h"
+
+namespace db {
 
 class Track {
 public:
-    explicit Track(int64_t loc, int lowerIdx = -1, int upperIdx = -1) : location(loc), lowerCPIdx(lowerIdx), upperCPIdx(upperIdx) {}
-    int64_t location;
+    Track(DBU loc, int lowerIdx = -1, int upperIdx = -1) : location(loc), lowerCPIdx(lowerIdx), upperCPIdx(upperIdx) {}
+    DBU location;
     int lowerCPIdx;
     int upperCPIdx;
+
+    friend ostream& operator<<(ostream& os, const Track& track);
 };
 
 // Cross points are projection of tracks from upper and lower layers
 class CrossPoint {
 public:
-    explicit CrossPoint(int64_t loc, int lowerIdx = -1, int upperIdx = -1)
+    CrossPoint(DBU loc, int lowerIdx = -1, int upperIdx = -1)
         : location(loc), lowerTrackIdx(lowerIdx), upperTrackIdx(upperIdx) {}
-    int64_t location;
+    DBU location;
     int lowerTrackIdx;
     int upperTrackIdx;
+
+    friend ostream& operator<<(ostream& os, const CrossPoint& cp);
 };
 
 class SpaceRule {
 public:
-    SpaceRule(const int64_t space, const int64_t eolWidth, const int64_t eolWithin)
+    SpaceRule(const DBU space, const DBU eolWidth, const DBU eolWithin)
         : space(space), hasEol(true), eolWidth(eolWidth), eolWithin(eolWithin) {}
-    SpaceRule(const int64_t space, const int64_t eolWidth, const int64_t eolWithin, const int64_t parSpace, const int64_t parWithin)
+    SpaceRule(const DBU space, const DBU eolWidth, const DBU eolWithin, const DBU parSpace, const DBU parWithin)
         : space(space),
           hasEol(true),
           eolWidth(eolWidth),
@@ -38,95 +41,141 @@ public:
           parSpace(parSpace),
           parWithin(parWithin) {}
 
-    int64_t space = 0;
+    DBU space = 0;
     bool hasEol = false;
-    int64_t eolWidth = 0;
-    int64_t eolWithin = 0;
+    DBU eolWidth = 0;
+    DBU eolWithin = 0;
     bool hasPar = false;
-    int64_t parSpace = 0;
-    int64_t parWithin = 0;
+    DBU parSpace = 0;
+    DBU parWithin = 0;
 };
 
-enum class AggrParaRunSpace { DEFAULT,
-                              LARGER_WIDTH,
-                              LARGER_LENGTH };
-enum Dimension {
-    X = 0,
-    Y = 1
-};
+enum class AggrParaRunSpace { DEFAULT, LARGER_WIDTH, LARGER_LENGTH };
 
 // note: for operations on GeoPrimitives, all checking is down in LayerList for low level efficiency
 class MetalLayer {
 public:
-	MetalLayer(router::parser::MetalLayer,const vector<router::parser::Track>&, const int64_t libDBU);
+    MetalLayer(router::parser::MetalLayer parser_metalLayer, const vector<router::parser::Track>& parser_tracks);
+
     // Basic infomation
-    std::string _name;
-    Dimension _direction;// direction of track dimension
-    int _idx;            // layerIdx (consistent with Rsyn::xxx::getRelativeIndex())
+    std::string name;
+    Dimension direction;  // direction of track dimension
+    int idx;              // layerIdx (consistent with Rsyn::xxx::getRelativeIndex())
 
     // Track (1D)
-    int64_t _pitch = 0;
-    std::vector<Track> _tracks;
-    int numTracks() const { return _tracks.size(); }
-    int64_t firstTrackLoc() const { return _tracks.front().location; }
-    int64_t lastTrackLoc() const { return _tracks.back().location; }
+    DBU pitch = 0;
+    vector<Track> tracks;
+    int numTracks() const { return tracks.size(); }
+    DBU firstTrackLoc() const { return tracks.front().location; }
+    DBU lastTrackLoc() const { return tracks.back().location; }
+    bool isTrackRangeValid(const utils::IntervalT<int>& trackRange) const;
+    bool isTrackRangeWeaklyValid(const utils::IntervalT<int>& trackRange) const;
+    utils::IntervalT<int> getUpperCrossPointRange(const utils::IntervalT<int>& trackRange) const;
+    utils::IntervalT<int> getLowerCrossPointRange(const utils::IntervalT<int>& trackRange) const;
+    // search by location (range) (result may be invalid/empty)
+    utils::IntervalT<int> getSurroundingTrack(DBU loc) const;
+    utils::IntervalT<int> rangeSearchTrack(const utils::IntervalT<DBU>& locRange, bool includeBound = true) const;
 
     // CrossPoint (1D)
-    std::vector<CrossPoint> _crossPoints;
-    int numCrossPoints() const { return _crossPoints.size(); }
-    int64_t firstCrossPointLoc() const { return _crossPoints.front().location; }
-    int64_t lastCrossPointLoc() const { return _crossPoints.back().location; }
-    std::vector<int64_t> _accCrossPointDistCost;
+    vector<CrossPoint> crossPoints;
+    int numCrossPoints() const { return crossPoints.size(); }
+    DBU firstCrossPointLoc() const { return crossPoints.front().location; }
+    DBU lastCrossPointLoc() const { return crossPoints.back().location; }
+    bool isCrossPointRangeValid(const utils::IntervalT<int>& crossPointRange) const;
+    // base grid cost without congestion penalty
+    // edge cost = accCrossPointCost[crossPointRange.high + 1] - accCrossPointCost[crossPointRange.low]
+    // cost is directly posed on grids instead of edges (easier to cross layers & handle corners)
+    vector<DBU> accCrossPointDistCost;
+    void initAccCrossPointDistCost();
+    DBU getCrossPointRangeDistCost(const utils::IntervalT<int>& crossPointRange) const;
+    DBU getCrossPointRangeDist(const utils::IntervalT<int>& crossPointRange) const;
 
     // GridPoint (2D) = Track (1D) x CrossPoint (1D)
-    int numGridPoints() const { return _tracks.size() * _crossPoints.size(); }
+    int numGridPoints() const { return tracks.size() * crossPoints.size(); }
+    bool isValid(const GridPoint& gridPt) const;
+    bool isValid(const GridBoxOnLayer& gridBox) const;
+    utils::PointT<DBU> getLoc(const GridPoint& grid) const;
+    BoxOnLayer getLoc(const GridBoxOnLayer& gridBox) const;
+    std::pair<utils::PointT<DBU>, utils::PointT<DBU>> getLoc(const GridEdge& edge) const;
+    GridPoint getUpper(const GridPoint& cur) const;
+    GridPoint getLower(const GridPoint& cur) const;
 
     // Design rules
     // width
-    int64_t _width = 0;
-    int64_t _min_width = 0;
-    int64_t _width_for_suff_ovlp = 0;
-    int64_t _shrink_for_suff_ovlp = 0;
+    DBU width = 0;
+    DBU minWidth = 0;
+    DBU widthForSuffOvlp = 0;
+    DBU shrinkForSuffOvlp = 0;
     // minArea
-    int64_t _min_area = 0;
-    int64_t _min_len_raw = 0;
-    int64_t minLenOneVia = 0;
-    int64_t minLenTwoVia = 0;
-    int64_t viaOvlpDist = 0;
-    int64_t viaLenEqLen = 0;
-    int64_t viaWidthEqLen = 0;
-    bool hasMinLenVio(int64_t len) const { return len < getMinLen(); }
-    bool hasMinLenVioAcc(int64_t len) const { return len < getMinLenAcc(len); }
-    int64_t getMinLen() const { return _min_len_raw; }
-    int64_t getMinLenAcc(int64_t len) const { return len < viaOvlpDist ? minLenOneVia : minLenTwoVia; }
+    DBU minArea = 0;
+    DBU minLenRaw = 0;
+    DBU minLenOneVia = 0;
+    DBU minLenTwoVia = 0;
+    DBU viaOvlpDist = 0;
+    DBU viaLenEqLen = 0;
+    DBU viaWidthEqLen = 0;
+    bool hasMinLenVio(DBU len) const { return len < getMinLen(); }
+    bool hasMinLenVioAcc(DBU len) const { return len < getMinLenAcc(len); }
+    DBU getMinLen() const { return minLenRaw; }
+    DBU getMinLenAcc(DBU len) const { return len < viaOvlpDist ? minLenOneVia : minLenTwoVia; }
     // parallel spacing
-    std::vector<int64_t> parallelWidth{0};
-    std::vector<int64_t> parallelLength{0};
-    std::vector<std::vector<int64_t>> parallelWidthSpace{{0}};
-    int64_t defaultSpace = 0;
-    int64_t paraRunSpaceForLargerWidth = 0;
-    //    int64_t getParaRunSpace(const utils::BoxT<int64_t>& targetMetal, const int64_t length = 0) const;
+    vector<DBU> parallelWidth{0};
+    vector<DBU> parallelLength{0};
+    vector<vector<DBU>> parallelWidthSpace{{0}};
+    DBU defaultSpace = 0;
+    DBU paraRunSpaceForLargerWidth = 0;
+    DBU getParaRunSpace(const DBU width, const DBU length = 0) const;
+    DBU getParaRunSpace(const utils::BoxT<DBU>& targetMetal, const DBU length = 0) const;
     // eol spacing
     // TODO: handle multiple spaceRules
-    std::vector<SpaceRule> spaceRules;
-    int64_t maxEolSpace = 0;
-    int64_t maxEolWidth = 0;
-    int64_t maxEolWithin = 0;
+    vector<SpaceRule> spaceRules;
+    DBU maxEolSpace = 0;
+    DBU maxEolWidth = 0;
+    DBU maxEolWithin = 0;
+    DBU getEolSpace(const DBU width) const;
+    bool isEolViolation(const DBU space, const DBU width, const DBU within) const;
+    bool isEolViolation(const utils::BoxT<DBU>& lhs, const utils::BoxT<DBU>& rhs) const;
     // corner spacing
     bool cornerExceptEol = false;
-    int64_t cornerEolWidth = 0;
-    std::vector<int64_t> cornerWidth{0};
-    std::vector<int64_t> cornerWidthSpace{0};
+    DBU cornerEolWidth = 0;
+    vector<DBU> cornerWidth{0};
+    vector<DBU> cornerWidthSpace{0};
     bool hasCornerSpace() const { return cornerWidthSpace.size() > 1 || cornerWidthSpace[0]; }
+    DBU getCornerSpace(const DBU width) const;
+    DBU getCornerSpace(const utils::BoxT<DBU>& targetMetal) const;
 
+    // Translate design rule
+    // either both parallel-run spacing or eol spacing
+    DBU getSpace(const utils::BoxT<DBU>& targetMetal, int dir, AggrParaRunSpace aggr) const;
+    // there is parallel-run spacing with negative length if the targetMetal is not eol dominated
+    bool isEolDominated(const utils::BoxT<DBU>& targetMetal) const {
+        return max(targetMetal.x.range(), targetMetal.y.range()) < maxEolWidth;
+    }
     // margin for multi-thread safe and others
-    int64_t _minAreaMargin = 0;
-    int64_t confLutMargin = 0;
-    int64_t fixedMetalQueryMargin = 0;
-    int64_t mtSafeMargin = 0;
+    DBU minAreaMargin = 0;
+    DBU confLutMargin = 0;
+    DBU fixedMetalQueryMargin = 0;
+    DBU mtSafeMargin = 0;
 
+    // Via conflict lookup table (true means "available" / no conflict)
+    // 1. wire-via conflict (viaTypeIdx, crossPointIdx, trackIdx, crossPointIdx)
+    vector<vector<vector<vector<bool>>>> wireBotVia;
+    vector<vector<vector<vector<bool>>>> wireTopVia;
+    vector<vector<vector<bool>>> mergedWireBotVia;
+    vector<vector<vector<bool>>> mergedWireTopVia;
+    bool isWireViaMultiTrack = false;
+    // 2. wire-wire conflict (crossPointIdx, crossPointIdx)
+    vector<utils::IntervalT<int>> wireRange;
+
+    void initWireRange();
+
+    ostream& printBasics(ostream& os) const;
+    ostream& printDesignRules(ostream& os) const;
+    ostream& printViaOccupancyLUT(ostream& os) const;
+    friend ostream& operator<<(ostream& os, const MetalLayer& layer);
 
 private:
+    void check() const;
 };
 
-}// namespace router::db
+}  // namespace db

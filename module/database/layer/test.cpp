@@ -9,8 +9,8 @@ int main() {
     std::string guideFile = "/home/kunpengjiang/project/rl-router/toys/ispd2018/ispd18_sample/ispd18_sample.input.guide";
 	router::parser::Parser parser;
     parser.read(lefFile, defFile, guideFile);
-	router::db::MetalLayer metalTest =  router::db::MetalLayer(parser.getDatabase()._metal_layers[0], parser.getDatabase()._metal_layers[0]._tracks, 0);
+	db::MetalLayer metalTest =  db::MetalLayer(parser.getDatabase()._metal_layers[0], parser.getDatabase()._metal_layers[0]._tracks);
 
-	std::cout << metalTest._idx << " " << metalTest._name << "\n";
+	std::cout << metalTest.idx << " " << metalTest.name << "\n";
     return 0;
 }

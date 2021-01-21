@@ -1,10 +1,9 @@
 #include "LayerList.h"
 #include "parser/src/Parser.h"
 
-namespace router::db {
+namespace db {
 void LayerList::init(router::parser::Parser& parser) {
     //  Rsyn::PhysicalLayer (LEF)
-	int64_t libDBU = parser.getDatabaseUnit();
     vector<router::parser::MetalLayer>& parserLayers = parser.getDatabase()._metal_layers;
     vector<router::parser::CutLayer>& parserCutLayers = parser.getDatabase()._cut_layers;
     //  Rsyn::PhysicalVia (LEF)
@@ -17,7 +16,7 @@ void LayerList::init(router::parser::Parser& parser) {
     //  init each MetalLayer
    	_layers.clear();
     for (unsigned i = 0; i != parserLayers.size(); ++i) {
-        _layers.emplace_back(parserLayers[i], parserLayers[i]._tracks, libDBU);
+        _layers.emplace_back(parserLayers[i], parserLayers[i]._tracks);
     }
 
     //  init MetalLayer::CrossPointSet
