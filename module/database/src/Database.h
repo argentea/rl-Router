@@ -3,11 +3,14 @@
 #include"database/topo/src/topo.h"
 #include"parser/src/Parser.h"
 #include"database/net/src/net.h"
+#include"database/layer/src/LayerList.h"
+
 using namespace router::parser;
+
 
 namespace db {
 
-class Database : /*public RouteGrid,*/ public NetList {
+class Database : public LayerList, public NetList {
 public:
     utils::BoxT<DBU> dieRegion;
 
@@ -35,7 +38,7 @@ public:
 
     // get girdPinAccessBoxes
     // TODO: better way to differetiate same-layer and diff-layer girdPinAccessBoxes
-//    void getGridPinAccessBoxes(const Net& net, vector<vector<db::GridBoxOnLayer>>& gridPinAccessBoxes) const;
+    void getGridPinAccessBoxes(const Net& net, vector<vector<db::GridBoxOnLayer>>& gridPinAccessBoxes) const;
 
 private:
 

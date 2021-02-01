@@ -601,7 +601,7 @@ void Database::writeDEFFillRect(Net& dbNet, const utils::BoxT<DBU>& rect, const 
     segment.clsRoutingPoints[0].clsRect = {0, 0, rect.hx() - rect.lx(), rect.hy() - rect.ly()};
     segment.clsLayerName = getLayer(layerIdx).name;
 }
-
+*/
 void Database::getGridPinAccessBoxes(const Net& net, vector<vector<db::GridBoxOnLayer>>& gridPinAccessBoxes) const {
     gridPinAccessBoxes.resize(net.numOfPins());
     for (unsigned pinIdx = 0; pinIdx != net.numOfPins(); ++pinIdx) {
@@ -674,11 +674,10 @@ void Database::getGridPinAccessBoxes(const Net& net, vector<vector<db::GridBoxOn
                 }
             }
         }
-        if (gridPinAccessBoxes[pinIdx].empty()) {
-            log() << "Error: Net " << net.getName() << " Pin " << pinIdx << " has empty grid pin access boxes\n";
-        }
 
         // assign diff-layer access point if all poor
+		// todo
+/*
         bool allPinTapPoor = true;
         for (auto& gridBox : gridPinAccessBoxes[pinIdx]) {
             for (int trackIdx = gridBox.trackRange.low; trackIdx <= gridBox.trackRange.high; ++trackIdx) {
@@ -696,6 +695,7 @@ void Database::getGridPinAccessBoxes(const Net& net, vector<vector<db::GridBoxOn
             }
             if (!allPinTapPoor) break;
         }
+		
         if (allPinTapPoor) {
             auto bestBox = net.getMaxAccessBox(pinIdx);
             auto addDiffLayerGridPinAccessBox = [&](const BoxOnLayer& pinBox) {
@@ -714,9 +714,10 @@ void Database::getGridPinAccessBoxes(const Net& net, vector<vector<db::GridBoxOn
                 addDiffLayerGridPinAccessBox(pinBox);
             }
         }
+		*/
     }
 }
-*/
+
 }  // namespace db
 
 

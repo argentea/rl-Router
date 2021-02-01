@@ -79,13 +79,13 @@ void LayerList::init(router::parser::Parser& parser) {
 ///    initViaForbidRegions();
 ///    initViaConfLUT();
 }
-/*
+
 bool LayerList::isValid(const GridPoint& gridPt) const {
-    return gridPt.layerIdx >= 0 && gridPt.layerIdx < layers.size() && layers[gridPt.layerIdx].isValid(gridPt);
+    return gridPt.layerIdx >= 0 && gridPt.layerIdx < _layers.size() && _layers[gridPt.layerIdx].isValid(gridPt);
 }
 
 bool LayerList::isValid(const GridBoxOnLayer& gridBox) const {
-    return gridBox.layerIdx >= 0 && gridBox.layerIdx < layers.size() && layers[gridBox.layerIdx].isValid(gridBox);
+    return gridBox.layerIdx >= 0 && gridBox.layerIdx < _layers.size() && _layers[gridBox.layerIdx].isValid(gridBox);
 }
 
 bool LayerList::isValid(const ViaBox& viaBox) const {
@@ -94,7 +94,7 @@ bool LayerList::isValid(const ViaBox& viaBox) const {
 }
 
 BoxOnLayer LayerList::getMetalRectForbidRegion(const BoxOnLayer& metalRect, AggrParaRunSpace aggr) const {
-    const MetalLayer& layer = layers[metalRect.layerIdx];
+    const MetalLayer& layer = _layers[metalRect.layerIdx];
     DBU margin[2];  // x, y
     for (int dir = 0; dir < 2; ++dir) {
         margin[dir] = layer.getSpace(metalRect, dir, aggr);
@@ -108,7 +108,7 @@ BoxOnLayer LayerList::getMetalRectForbidRegion(const BoxOnLayer& metalRect, Aggr
 }
 
 vector<utils::BoxT<DBU>> LayerList::getAccurateMetalRectForbidRegions(const BoxOnLayer& metalRect) const {
-    const MetalLayer& layer = layers[metalRect.layerIdx];
+    const MetalLayer& layer = _layers[metalRect.layerIdx];
     vector<utils::BoxT<DBU>> results;
     for (int dir = 0; dir < 2; ++dir) {
         const DBU range = metalRect[1 - dir].range();
@@ -131,7 +131,7 @@ vector<utils::BoxT<DBU>> LayerList::getAccurateMetalRectForbidRegions(const BoxO
 }
 
 void LayerList::expandBox(BoxOnLayer& box, int numPitchToExtend) const {
-    DBU margin = layers[box.layerIdx].pitch * numPitchToExtend;
+    DBU margin = _layers[box.layerIdx].pitch * numPitchToExtend;
     box.lx() -= margin;
     box.ly() -= margin;
     box.hx() += margin;
@@ -139,113 +139,111 @@ void LayerList::expandBox(BoxOnLayer& box, int numPitchToExtend) const {
 }
 
 void LayerList::expandBox(BoxOnLayer& box, int numPitchToExtend, int dir) const {
-    DBU margin = layers[box.layerIdx].pitch * numPitchToExtend;
+    DBU margin = _layers[box.layerIdx].pitch * numPitchToExtend;
     box[dir].low -= margin;
     box[dir].high += margin;
 }
 
 utils::IntervalT<int> LayerList::getSurroundingTrack(int layerIdx, DBU loc) const {
-    assert(layerIdx >= 0 && layerIdx < layers.size());
-    return layers[layerIdx].getSurroundingTrack(loc);
+    assert(layerIdx >= 0 && layerIdx < _layers.size());
+    return _layers[layerIdx].getSurroundingTrack(loc);
 }
 
 utils::IntervalT<int> LayerList::getSurroundingCrossPoint(int layerIdx, DBU loc) const {
     if (layerIdx == 0) {
-        return layers[1].getSurroundingTrack(loc);
-    } else if (layerIdx == layers.size() - 1) {
-        return layers[layerIdx - 1].getSurroundingTrack(loc);
+        return _layers[1].getSurroundingTrack(loc);
+    } else if (layerIdx == _layers.size() - 1) {
+        return _layers[layerIdx - 1].getSurroundingTrack(loc);
     } else {
-        const utils::IntervalT<int>& upperTrack = layers[layerIdx + 1].getSurroundingTrack(loc);
-        const utils::IntervalT<int>& lowerTrack = layers[layerIdx - 1].getSurroundingTrack(loc);
-        const utils::IntervalT<int>& fromUpperTrack = layers[layerIdx + 1].getLowerCrossPointRange(upperTrack);
-        const utils::IntervalT<int>& fromLowerTrack = layers[layerIdx - 1].getUpperCrossPointRange(lowerTrack);
+        const utils::IntervalT<int>& upperTrack = _layers[layerIdx + 1].getSurroundingTrack(loc);
+        const utils::IntervalT<int>& lowerTrack = _layers[layerIdx - 1].getSurroundingTrack(loc);
+        const utils::IntervalT<int>& fromUpperTrack = _layers[layerIdx + 1].getLowerCrossPointRange(upperTrack);
+        const utils::IntervalT<int>& fromLowerTrack = _layers[layerIdx - 1].getUpperCrossPointRange(lowerTrack);
         return fromUpperTrack.IntersectWith(fromLowerTrack);
     }
 }
 
 GridBoxOnLayer LayerList::getSurroundingGrid(int layerIdx, utils::PointT<DBU> loc) const {
-    auto dir = layers[layerIdx].direction;
+    auto dir = _layers[layerIdx].direction;
     return {layerIdx, getSurroundingTrack(layerIdx, loc[dir]), getSurroundingCrossPoint(layerIdx, loc[1 - dir])};
 }
 
 utils::IntervalT<int> LayerList::rangeSearchTrack(int layerIdx,
                                                   const utils::IntervalT<DBU>& locRange,
                                                   bool includeBound) const {
-    assert(layerIdx >= 0 && layerIdx < layers.size());
-    return layers[layerIdx].rangeSearchTrack(locRange, includeBound);
+    assert(layerIdx >= 0 && layerIdx < _layers.size());
+    return _layers[layerIdx].rangeSearchTrack(locRange, includeBound);
 }
 
 utils::IntervalT<int> LayerList::rangeSearchCrossPoint(int layerIdx,
                                                        const utils::IntervalT<DBU>& locRange,
                                                        bool includeBound) const {
-    assert(layerIdx >= 0 && layerIdx < layers.size());
+    assert(layerIdx >= 0 && layerIdx < _layers.size());
     if (layerIdx == 0) {
-        return layers[1].rangeSearchTrack(locRange, includeBound);
-    } else if (layerIdx == layers.size() - 1) {
-        return layers[layerIdx - 1].rangeSearchTrack(locRange, includeBound);
+        return _layers[1].rangeSearchTrack(locRange, includeBound);
+    } else if (layerIdx == _layers.size() - 1) {
+        return _layers[layerIdx - 1].rangeSearchTrack(locRange, includeBound);
     } else {
-        const utils::IntervalT<int>& upperTrack = layers[layerIdx + 1].rangeSearchTrack(locRange, includeBound);
-        const utils::IntervalT<int>& lowerTrack = layers[layerIdx - 1].rangeSearchTrack(locRange, includeBound);
-        bool upperValid = layers[layerIdx + 1].isTrackRangeValid(upperTrack);
-        bool lowerValid = layers[layerIdx - 1].isTrackRangeValid(lowerTrack);
+        const utils::IntervalT<int>& upperTrack = _layers[layerIdx + 1].rangeSearchTrack(locRange, includeBound);
+        const utils::IntervalT<int>& lowerTrack = _layers[layerIdx - 1].rangeSearchTrack(locRange, includeBound);
+        bool upperValid = _layers[layerIdx + 1].isTrackRangeValid(upperTrack);
+        bool lowerValid = _layers[layerIdx - 1].isTrackRangeValid(lowerTrack);
         if (upperValid && lowerValid) {
             // the most typical case
-            const utils::IntervalT<int>& fromUpperTrack = layers[layerIdx + 1].getLowerCrossPointRange(upperTrack);
-            const utils::IntervalT<int>& fromLowerTrack = layers[layerIdx - 1].getUpperCrossPointRange(lowerTrack);
+            const utils::IntervalT<int>& fromUpperTrack = _layers[layerIdx + 1].getLowerCrossPointRange(upperTrack);
+            const utils::IntervalT<int>& fromLowerTrack = _layers[layerIdx - 1].getUpperCrossPointRange(lowerTrack);
             return fromUpperTrack.UnionWith(fromLowerTrack);
-        } else if (upperValid || (!lowerValid && layers[layerIdx + 1].isTrackRangeWeaklyValid(upperTrack))) {
-            return layers[layerIdx + 1].getLowerCrossPointRange(upperTrack);
-        } else if (layers[layerIdx - 1].isTrackRangeWeaklyValid(lowerTrack)) {
-            return layers[layerIdx - 1].getUpperCrossPointRange(lowerTrack);
+        } else if (upperValid || (!lowerValid && _layers[layerIdx + 1].isTrackRangeWeaklyValid(upperTrack))) {
+            return _layers[layerIdx + 1].getLowerCrossPointRange(upperTrack);
+        } else if (_layers[layerIdx - 1].isTrackRangeWeaklyValid(lowerTrack)) {
+            return _layers[layerIdx - 1].getUpperCrossPointRange(lowerTrack);
         } else {
             return {0, -1};  // a little bit safer than default {inf, -inf}
         }
     }
 }
-
 GridBoxOnLayer LayerList::rangeSearch(const BoxOnLayer& box, bool includeBound) const {
-    auto dir = layers[box.layerIdx].direction;
+    auto dir = _layers[box.layerIdx].direction;
     return {box.layerIdx,
             rangeSearchTrack(box.layerIdx, box[dir], includeBound),
             rangeSearchCrossPoint(box.layerIdx, box[1 - dir], includeBound)};
 }
-
 utils::PointT<DBU> LayerList::getLoc(const GridPoint& gridPt) const {
     assert(isValid(gridPt));
-    return layers[gridPt.layerIdx].getLoc(gridPt);
+    return _layers[gridPt.layerIdx].getLoc(gridPt);
 }
 
 BoxOnLayer LayerList::getLoc(const GridBoxOnLayer& gridBox) const {
     assert(isValid(gridBox));
-    return layers[gridBox.layerIdx].getLoc(gridBox);
+    return _layers[gridBox.layerIdx].getLoc(gridBox);
 }
 
 std::pair<utils::PointT<DBU>, utils::PointT<DBU>> LayerList::getLoc(const GridEdge& edge) const {
     assert(edge.isTrackSegment() || edge.isWrongWaySegment());
-    return layers[edge.u.layerIdx].getLoc(edge);
+    return _layers[edge.u.layerIdx].getLoc(edge);
 }
 
 GridPoint LayerList::getUpper(const GridPoint& cur) const {
-    assert(isValid(cur) && cur.layerIdx < (int)layers.size() - 1);
-    return layers[cur.layerIdx].getUpper(cur);
+    assert(isValid(cur) && cur.layerIdx < (int)_layers.size() - 1);
+    return _layers[cur.layerIdx].getUpper(cur);
 }
 
 GridPoint LayerList::getLower(const GridPoint& cur) const {
     assert(isValid(cur) && cur.layerIdx > 0);
-    return layers[cur.layerIdx].getLower(cur);
+    return _layers[cur.layerIdx].getLower(cur);
 }
 
 GridBoxOnLayer LayerList::getUpper(const GridBoxOnLayer& cur) const {
-    assert(isValid(cur) && cur.layerIdx < (int)layers.size() - 1);
+    assert(isValid(cur) && cur.layerIdx < (int)_layers.size() - 1);
     return GridBoxOnLayer(
         // layer
         cur.layerIdx + 1,
         // track
-        layers[cur.layerIdx + 1].rangeSearchTrack(
-            {layers[cur.layerIdx].crossPoints[cur.crossPointRange.low].location,
-             layers[cur.layerIdx].crossPoints[cur.crossPointRange.high].location}),
+        _layers[cur.layerIdx + 1].rangeSearchTrack(
+            {_layers[cur.layerIdx].crossPoints[cur.crossPointRange.low].location,
+             _layers[cur.layerIdx].crossPoints[cur.crossPointRange.high].location}),
         // cross point
-        layers[cur.layerIdx].getUpperCrossPointRange(cur.trackRange));
+        _layers[cur.layerIdx].getUpperCrossPointRange(cur.trackRange));
 }
 
 GridBoxOnLayer LayerList::getLower(const GridBoxOnLayer& cur) const {
@@ -254,11 +252,11 @@ GridBoxOnLayer LayerList::getLower(const GridBoxOnLayer& cur) const {
         // layer
         cur.layerIdx - 1,
         // track
-        layers[cur.layerIdx - 1].rangeSearchTrack(
-            {layers[cur.layerIdx].crossPoints[cur.crossPointRange.low].location,
-             layers[cur.layerIdx].crossPoints[cur.crossPointRange.high].location}),
+        _layers[cur.layerIdx - 1].rangeSearchTrack(
+            {_layers[cur.layerIdx].crossPoints[cur.crossPointRange.low].location,
+             _layers[cur.layerIdx].crossPoints[cur.crossPointRange.high].location}),
         // cross point
-        layers[cur.layerIdx].getLowerCrossPointRange(cur.trackRange));
+        _layers[cur.layerIdx].getLowerCrossPointRange(cur.trackRange));
 }
 
 ViaBox LayerList::getViaBoxBetween(const BoxOnLayer& lower, const BoxOnLayer& upper) {
@@ -272,7 +270,7 @@ ViaBox LayerList::getViaBoxBetween(const BoxOnLayer& lower, const BoxOnLayer& up
     if (!isValid(lowerGridBox)) return ViaBox();  // invalid
     return ViaBox(lowerGridBox, upperGridBox);
 }
-
+/*
 bool LayerList::isConnected(const GridBoxOnLayer& lhs, const GridBoxOnLayer& rhs) {
     if (!isValid(lhs) || !isValid(rhs)) {
         return false;

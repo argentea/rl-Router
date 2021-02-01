@@ -5,6 +5,8 @@ file(GLOB SOURCES
         src/*.c)
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/..")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/topo/src")
+
+
 message(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
@@ -15,6 +17,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC parser)
 target_link_libraries(${PROJECT_NAME} PUBLIC topo)
 # net
 target_link_libraries(${PROJECT_NAME} PUBLIC net)
+# grid
+#target_link_libraries(${PROJECT_NAME} PUBLIC grid)
 
 
 # test
@@ -24,3 +28,4 @@ target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME} parser)
 add_subdirectory(topo)
 add_subdirectory(layer)
 add_subdirectory(net)
+#add_subdirectory(grid)

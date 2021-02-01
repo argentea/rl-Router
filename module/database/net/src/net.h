@@ -46,7 +46,7 @@ public:
 
     // more route guide information
     std::vector<int> routeGuideVios;
-//    RTrees routeGuideRTrees;
+    RTrees routeGuideRTrees;
     std::vector<int> routeGuideVios_copy;
 //    RTrees routeGuideRTrees_copy;
 //
