@@ -270,7 +270,7 @@ ViaBox LayerList::getViaBoxBetween(const BoxOnLayer& lower, const BoxOnLayer& up
     if (!isValid(lowerGridBox)) return ViaBox();  // invalid
     return ViaBox(lowerGridBox, upperGridBox);
 }
-/*
+
 bool LayerList::isConnected(const GridBoxOnLayer& lhs, const GridBoxOnLayer& rhs) {
     if (!isValid(lhs) || !isValid(rhs)) {
         return false;
@@ -298,16 +298,16 @@ bool LayerList::isAdjacent(const GridBoxOnLayer& lhs, const GridBoxOnLayer& rhs)
     }
 }
 
-void LayerList::initCrossPoints() {
-    for (unsigned i = 0; i != layers.size(); ++i) {
-        vector<CrossPoint>& crossPoints = layers[i].crossPoints;
+void LayerList::initCrossPoints(router::parser::Parser parser) {
+    for (unsigned i = 0; i != _layers.size(); ++i) {
+        vector<CrossPoint>& crossPoints = _layers[i].crossPoints;
         vector<Track> emptyTrackSet;
-        vector<Track>& lowerTrackSet = (i > 0) ? layers[i - 1].tracks : emptyTrackSet;
-        vector<Track>& upperTrackSet = (i < (layers.size() - 1)) ? layers[i + 1].tracks : emptyTrackSet;
+        vector<Track>& lowerTrackSet = (i > 0) ? _layers[i - 1].tracks : emptyTrackSet;
+        vector<Track>& upperTrackSet = (i < (_layers.size() - 1)) ? _layers[i + 1].tracks : emptyTrackSet;
 
         // merge cross points to lower and upper layers
         int iLo = 0, iUp = 0;  // track indexes
-        DBU lastBoth = 0;
+//        DBU lastBoth = 0;
         while (iLo < lowerTrackSet.size() || iUp < upperTrackSet.size()) {
             if (iUp >= upperTrackSet.size()) {
                 crossPoints.emplace_back(lowerTrackSet[iLo].location, iLo, -1);
@@ -336,10 +336,10 @@ void LayerList::initCrossPoints() {
             }
         }
 
-        layers[i].initAccCrossPointDistCost();
+        _layers[i].initAccCrossPointDistCost();
     }
 }
-
+/*
 void LayerList::initOppLUT(const vector<vector<vector<bool>>>& ori, vector<vector<vector<bool>>>& opp) {
     const size_t nCPs = ori.size();
     size_t xSize = 0;
@@ -389,11 +389,11 @@ void LayerList::initOppLUT(const vector<vector<vector<bool>>>& ori, vector<vecto
     }
     travelCPs(fillTable);
 }
-
+*/
 void LayerList::initViaWire(const int layerIdx,
                             const utils::BoxT<DBU>& viaMetal,
                             vector<vector<vector<bool>>>& viaWireLUT) {
-    const MetalLayer& layer = layers[layerIdx];
+    const MetalLayer& layer = _layers[layerIdx];
     const DBU halfWidth = ceil(layer.width / 2.0);
     const DBU viaMetalWidth = viaMetal[layer.direction].range();
     const DBU viaMetalHeight = viaMetal[1 - layer.direction].range();
@@ -452,10 +452,10 @@ void LayerList::initViaWire(const int layerIdx,
         vvb.resize(minXSize * 2 + 1);
     }
 }
-
+/*
 void LayerList::initViaConfLUT() {
-    for (unsigned i = 0; i != cutLayers.size(); ++i) {
-        CutLayer& cutLayer = cutLayers[i];
+    for (unsigned i = 0; i != _cut_layers.size(); ++i) {
+        MetalLayer& cutLayer = _cut_layers[i];
         // Loops for init all-all via-via LUTs
         for (unsigned j = 0; j != cutLayer.allViaTypes.size(); ++j) {
             ViaType& viaType1 = cutLayer.allViaTypes[j];
@@ -476,9 +476,9 @@ void LayerList::initViaConfLUT() {
             // Loops for init all-all via-via LUTs
             for (unsigned j = 0; j != cutLayer.allViaTypes.size(); ++j) {
                 ViaType& viaType1 = cutLayer.allViaTypes[j];
-                viaType1.allViaBotVia.resize(cutLayers[i - 1].allViaTypes.size());
-                for (unsigned k = 0; k != cutLayers[i - 1].allViaTypes.size(); ++k) {
-                    ViaType& viaType2 = cutLayers[i - 1].allViaTypes[k];
+                viaType1.allViaBotVia.resize(_cut_layers[i - 1].allViaTypes.size());
+                for (unsigned k = 0; k != _cut_layers[i - 1].allViaTypes.size(); ++k) {
+                    ViaType& viaType2 = _cut_layers[i - 1].allViaTypes[k];
                     viaType2.allViaTopVia.resize(cutLayer.allViaTypes.size());
                     auto& viaBotVia = viaType1.allViaBotVia[k];
                     auto& viaTopVia = viaType2.allViaTopVia[j];
@@ -504,8 +504,8 @@ void LayerList::initViaConfLUT() {
     }
 
     // Merge LUTs
-    for (unsigned i = 0; i != cutLayers.size(); ++i) {
-        CutLayer& cutLayer = cutLayers[i];
+    for (unsigned i = 0; i != _cut_layers.size(); ++i) {
+        CutLayer& cutLayer = _cut_layers[i];
         for (unsigned j = 0; j != cutLayer.allViaTypes.size(); ++j) {
             ViaType& viaType = cutLayer.allViaTypes[j];
             viaType.mergedAllViaMetal = mergeLUTs(viaType.allViaMetal);
@@ -514,7 +514,7 @@ void LayerList::initViaConfLUT() {
                     viaType.mergedAllViaBotVia = mergeLUTsCP(viaType.allViaBotVia);
                 }
             }
-            if (i < cutLayers.size()) {
+            if (i < _cut_layers.size()) {
                 for (int k = 0; k != viaType.allViaTopVia.size(); ++k) {
                     viaType.mergedAllViaTopVia = mergeLUTsCP(viaType.allViaTopVia);
                 }
@@ -541,14 +541,16 @@ void LayerList::initViaConfLUT() {
     //  writeDefConflictLUTs("debugConflictLUTa.log");
     //  exit(0);
 }
-
+*/
+//todo viatype
+/*
 void LayerList::initSameLayerViaConfLUT(const int layerIdx,
                                         ViaType& viaT1,
                                         ViaType& viaT2,
                                         vector<vector<bool>>& viaCut,
                                         vector<vector<bool>>& viaMetal,
                                         vector<vector<int>>& viaMetalNum) {
-    CutLayer& cutLayer = cutLayers[layerIdx];
+    CutLayer& cutLayer = _cut_layers[layerIdx];
     MetalLayer& botLayer = layers[layerIdx];
     MetalLayer& topLayer = layers[layerIdx + 1];
     const Dimension botDim = botLayer.direction;
@@ -636,7 +638,8 @@ void LayerList::initSameLayerViaConfLUT(const int layerIdx,
     }
     if (minMetalXSize < metalXSize) viaMetal.resize(minMetalXSize + 1);
 }
-
+*/
+/*
 void LayerList::initDiffLayerViaConfLUT(const int layerIdx,
                                         ViaType& viaT1,
                                         ViaType& viaT2,
@@ -702,10 +705,11 @@ void LayerList::initDiffLayerViaConfLUT(const int layerIdx,
     }
     LayerList::initOppLUT(viaBotVia, viaTopVia);
 }
-
+*/
+/*
 void LayerList::initViaForbidRegions() {
-    for (int i = 0; i < cutLayers.size(); ++i) {
-        auto& cutLayer = cutLayers[i];
+    for (int i = 0; i < _cut_layers.size(); ++i) {
+        auto& cutLayer = _cut_layers[i];
         cutLayer.botMaxForbidRegion = cutLayer.defaultViaType().bot;
         cutLayer.topMaxForbidRegion = cutLayer.defaultViaType().top;
         for (auto& viaType : cutLayer.allViaTypes) {
@@ -720,7 +724,7 @@ void LayerList::initViaForbidRegions() {
         }
     }
 }
-
+*/
 void LayerList::mergeLUT(vector<vector<bool>>& lhs, const vector<vector<bool>>& rhs) {
     const unsigned lhsXSize = lhs.size() / 2;
     const unsigned lhsYSize = lhs[0].size() / 2;
@@ -770,6 +774,7 @@ vector<vector<vector<bool>>> LayerList::mergeLUTsCP(const vector<vector<vector<v
 
     return mergedLUTs;
 }
+/*
 
 void LayerList::print() {
     log() << "METAL LAYERS" << std::endl;

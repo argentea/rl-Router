@@ -10,7 +10,7 @@ add_library(${PROJECT_NAME} STATIC ${SOURCES})
 # parser
 target_link_libraries(${PROJECT_NAME} PUBLIC parser)
 # layer
-target_link_libraries(${PROJECT_NAME} PUBLIC layer)
+#target_link_libraries(${PROJECT_NAME} PUBLIC layer)
 
 
 # test

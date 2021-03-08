@@ -7,9 +7,9 @@ namespace db {
 
 class ViaData;
 
-using CostT = double;
-using HistUsageT = double;
-
+//rl todo: change it back
+//using CostT = double;
+//using HistUsageT = double;
 struct mutex_wrapper : std::mutex {
     mutex_wrapper() = default;
     mutex_wrapper(mutex_wrapper const&) noexcept : std::mutex() {}

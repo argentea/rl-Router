@@ -602,7 +602,7 @@ void Database::writeDEFFillRect(Net& dbNet, const utils::BoxT<DBU>& rect, const 
     segment.clsLayerName = getLayer(layerIdx).name;
 }
 */
-void Database::getGridPinAccessBoxes(const Net& net, vector<vector<db::GridBoxOnLayer>>& gridPinAccessBoxes) const {
+/*void Database::getGridPinAccessBoxes(const Net& net, vector<vector<db::GridBoxOnLayer>>& gridPinAccessBoxes) const {
     gridPinAccessBoxes.resize(net.numOfPins());
     for (unsigned pinIdx = 0; pinIdx != net.numOfPins(); ++pinIdx) {
         vector<vector<db::GridBoxOnLayer>> pins(getLayerNum());
@@ -677,7 +677,7 @@ void Database::getGridPinAccessBoxes(const Net& net, vector<vector<db::GridBoxOn
 
         // assign diff-layer access point if all poor
 		// todo
-/*
+
         bool allPinTapPoor = true;
         for (auto& gridBox : gridPinAccessBoxes[pinIdx]) {
             for (int trackIdx = gridBox.trackRange.low; trackIdx <= gridBox.trackRange.high; ++trackIdx) {
@@ -714,9 +714,10 @@ void Database::getGridPinAccessBoxes(const Net& net, vector<vector<db::GridBoxOn
                 addDiffLayerGridPinAccessBox(pinBox);
             }
         }
-		*/
+		
     }
 }
+*/
 
 }  // namespace db
 

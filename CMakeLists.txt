@@ -36,5 +36,3 @@ find_package(Boost COMPONENTS filesystem program_options REQUIRED)
 
 add_subdirectory(module)
 add_subdirectory(thirdparty)
-
-target_include_directories(database PUBLIC ${BOOST_ROOT})

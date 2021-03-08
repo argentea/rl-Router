@@ -9,6 +9,8 @@ using namespace router::parser;
 
 
 namespace db {
+using CostT = double;
+using HistUsageT = double;
 
 class Database : public LayerList, public NetList {
 public:

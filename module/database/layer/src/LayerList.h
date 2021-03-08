@@ -62,6 +62,12 @@ public:
     ViaBox getViaBoxBetween(const GridBoxOnLayer& lower, const GridBoxOnLayer& upper) {
         return getViaBoxBetween(getLoc(lower), getLoc(upper));
     }
+    bool isConnected(const GridBoxOnLayer& lhs, const GridBoxOnLayer& rhs);
+    bool isAdjacent(const GridBoxOnLayer& lhs, const GridBoxOnLayer& rhs);
+
+    void mergeLUT(vector<vector<bool>>& lhs, const vector<vector<bool>>& rhs);
+    vector<vector<bool>> mergeLUTs(const vector<vector<vector<bool>>>& LUTs);
+    vector<vector<vector<bool>>> mergeLUTsCP(const vector<vector<vector<vector<bool>>>>& LUTs);
 
 
 protected:
@@ -71,6 +77,11 @@ protected:
     int numGridPoints;
     int64_t totalTrackLength;
     int numVias;
+	void initCrossPoints(router::parser::Parser parser);
+    void initViaWire(const int layerIdx, const utils::BoxT<DBU>& viaMetal, vector<vector<vector<bool>>>& viaWireLUT);
+//    void initViaConfLUT();
+//    void initViaForbidRegions();
+
 };
 
 }// namespace router::db
