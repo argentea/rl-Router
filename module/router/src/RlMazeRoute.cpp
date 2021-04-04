@@ -17,13 +17,13 @@ bool MazeRoute::route(int startPin) {
 
     // init from startPin
     for (auto vertex : graph.getVertices(startPin)) {
-        updateSol(std::make_shared<Solution>(
-            graph.getCost(startPin, vertex), graph.getCost(startPin, vertex), vertex, nullptr));
+        updateSol(std::make_shared<Solution>(vertex));
     }
     std::unordered_set<int> visitedPin = {startPin};
-    int nPinToConnect = graph.numOfPins() - 1;
+    int nPinToConnect = localNet.numOfPins() - 1;
 
     while (nPinToConnect != 0) {
+		printf("RL::pinLeft: %d\n", nPinToConnect);
         std::shared_ptr<Solution> dstVertex;
         int dstPinIdx = -1;
 
@@ -43,10 +43,10 @@ bool MazeRoute::route(int startPin) {
             // pruning by upper bound
             if (vertexCostUBs[u] < newSol->cost) continue;
 
-            for (auto v : graph.getNeighbor(u)) {
+            for (auto v : graph.getNeighbor(newSol)) {
 			
-                db::CostT newCost = newSol->cost + graph.getCost(u, v);
-                db::CostT potentialPenalty = graph.getPotentialPenalty(u, v);
+                db::CostT newCost = newSol->cost + graph.getCost(newSol, v);
+                db::CostT potentialPenalty = graph.getPotentialPenalty(newSol, v);
 				
                 if (newCost < vertexCostUBs[v]) {
                     updateSol(std::make_shared<Solution>(newCost, newCost + potentialPenalty, v, newSol));
@@ -71,8 +71,7 @@ bool MazeRoute::route(int startPin) {
         // mark all the accessbox of the pin to be almost zero
         for (auto vertex : graph.getVertices(dstPinIdx)) {
             if (vertex == dstVertex->vertex) continue;
-            updateSol(std::make_shared<Solution>(
-                graph.getVertexCost(vertex), graph.getVertexCost(vertex), vertex, nullptr));
+ 			updateSol(std::make_shared<Solution>(vertex));
         }
 
         visitedPin.insert(dstPinIdx);

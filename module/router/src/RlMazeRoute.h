@@ -5,20 +5,6 @@
 #include "router/src/LocalNet.h"
 #include "router/src/RouterGraph.h"
 
-class Solution {
-public:
-    db::CostT cost;
-//    DBU len;           // length on current track
-    db::CostT costUB;  // cost upper bound
-    int vertex;
-    std::shared_ptr<Solution> prev;
-
-    Solution(db::CostT c, db::CostT ub, int v, const std::shared_ptr<Solution> &p)
-        : cost(c), costUB(ub), vertex(v), prev(p) {}
-
-    friend ostream &operator<<(ostream &os, const Solution &sol);
-};
-
 class MazeRoute {
 public:
     MazeRoute(LocalNet &localNetData) : localNet(localNetData) {}

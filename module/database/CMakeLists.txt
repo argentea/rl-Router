@@ -18,7 +18,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC topo)
 # net
 target_link_libraries(${PROJECT_NAME} PUBLIC net)
 # grid
-#target_link_libraries(${PROJECT_NAME} PUBLIC grid)
+target_link_libraries(${PROJECT_NAME} PUBLIC grid)
 
 
 # test
@@ -29,4 +29,4 @@ target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME} database)
 add_subdirectory(topo)
 add_subdirectory(layer)
 add_subdirectory(net)
-#add_subdirectory(grid)
+add_subdirectory(grid)

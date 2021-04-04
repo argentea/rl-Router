@@ -1,6 +1,8 @@
 #include "RouterGraph.h"
+#include "database/layer/src/Layer.h"
 
 #include <fstream>
+
 
 void RouterGraph::init(int nNodes) {
     conn.resize(nNodes, {-1, -1, -1, -1, -1, -1});
@@ -25,6 +27,80 @@ int RouterGraph::getPinIdx(int u) const {
     return (it != vertexToPin.end()) ? it->second : -1;
 }
 
+db::CostT RouterGraph::getCost(std::shared_ptr<Solution> sol, int v){
+	int u = sol->vertex;
+    const db::MetalLayer &uLayer = database.getLayer(getGridPoint(u).layerIdx);
+	const db::MetalLayer &vLayer = database.getLayer(getGridPoint(v).layerIdx);
+	EdgeDirection direction;
+	for (auto dir : directions) {
+		if(v == getEdgeEndPoint(u, dir)) {
+			direction = dir;
+			break;
+		}
+	}
+    bool areOverlappedVertexes = (switchLayer(direction) && getEdgeCost(u, direction) == 0);
+    db::CostT w = areOverlappedVertexes ? 0 : getEdgeCost(u, direction) + getVertexCost(v);
+	db::CostT penalty = 0;
+    if (!areOverlappedVertexes && switchLayer(direction)) {
+        if (uLayer.hasMinLenVioAcc(sol->len)) {
+        	if (isMinAreaFixable(u) || getPinIdx(u) != -1) {
+            	penalty = uLayer.getMinLen() - sol->len;
+            } else {
+            	penalty = database.getUnitMinAreaVioCost();
+				printf("RL:: minArea vio cost%lf\n", database.getUnitMinAreaVioCost());
+            }
+        }
+   	}
+	return w + penalty;
+}
+
+db::CostT RouterGraph::getPotentialPenalty(std::shared_ptr<Solution> sol, int v){
+	DBU newLen;
+	int u = sol->vertex;
+    const db::MetalLayer &uLayer = database.getLayer(getGridPoint(u).layerIdx);
+	const db::MetalLayer &vLayer = database.getLayer(getGridPoint(v).layerIdx);
+    const db::GridPoint &vPoint = getGridPoint(v);
+    if (getGridPoint(u).layerIdx == getGridPoint(v).layerIdx) {
+    	const db::GridPoint &uPoint = getGridPoint(u);
+        newLen = sol->len;
+        utils::IntervalT<int> cpRange =
+            uPoint.crossPointIdx < vPoint.crossPointIdx
+                ? utils::IntervalT<int>(uPoint.crossPointIdx, vPoint.crossPointIdx)
+                : utils::IntervalT<int>(vPoint.crossPointIdx, uPoint.crossPointIdx);
+        utils::IntervalT<int> trackRange = uPoint.trackIdx < vPoint.trackIdx
+                                               ? utils::IntervalT<int>(uPoint.trackIdx, vPoint.trackIdx)
+                                               : utils::IntervalT<int>(vPoint.trackIdx, uPoint.trackIdx);
+        newLen += uLayer.getCrossPointRangeDist(cpRange);
+        newLen += uLayer.pitch * trackRange.range();
+    } else {
+        newLen = 0;
+    }
+    newLen = min(newLen, database.getLayer(getGridPoint(v).layerIdx).getMinLen());
+
+    // potential minArea penalty
+    db::CostT potentialPenalty = 0;
+    if (vLayer.hasMinLenVioAcc(newLen)) {
+        if (isMinAreaFixable(v) || getPinIdx(v) != -1) {
+            potentialPenalty = vLayer.getMinLen() - newLen;
+        } else {
+            potentialPenalty = database.getUnitMinAreaVioCost();
+        }
+    }
+}
+
+vector<int> RouterGraph::getNeighbor(std::shared_ptr<Solution> sol){
+	vector<int> neighbor;
+	int u = sol->vertex;
+    for (auto direction : directions) {
+        if (!hasEdge(u, direction) ||
+            (sol->prev && getEdgeEndPoint(u, direction) == sol->prev->vertex)) {
+            continue;
+        }
+
+		neighbor.push_back(getEdgeEndPoint(u, direction));
+	}
+	return neighbor;
+}
 
 /*
 void GridGraph::writeDebugFile(const std::string& fn) const {

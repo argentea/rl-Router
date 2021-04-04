@@ -1,5 +1,6 @@
 #pragma once
 #include "Layer.h"
+#include "CutLayer.h"
 #include "parser/src/Parser.h"
 #include <vector>
 
@@ -79,8 +80,8 @@ protected:
     int numVias;
 	void initCrossPoints(router::parser::Parser parser);
     void initViaWire(const int layerIdx, const utils::BoxT<DBU>& viaMetal, vector<vector<vector<bool>>>& viaWireLUT);
-//    void initViaConfLUT();
-//    void initViaForbidRegions();
+    void initViaConfLUT();
+    void initViaForbidRegions();
 
 };
 
