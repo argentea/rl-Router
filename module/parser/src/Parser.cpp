@@ -94,7 +94,7 @@ int Parser::initPinAccessBoxes(Rsyn::Pin rsynPin, std::vector<BoxOnLayer> &acces
     getPinAccessBoxes(phLibPin, phCell, accessBoxes, origin);
     return 0;
 }
-int Parser::initNet(Net &net, int i, const Rsyn::Net &rsyn_net) {
+int Parser::initNet(ParserNet &net, int i, const Rsyn::Net &rsyn_net) {
     net._idx = i;
     net._net_name = rsyn_net.getName();
 
@@ -131,7 +131,7 @@ int Parser::initNetList() {
             default:
                 break;
         }
-        Net net;
+        ParserNet net;
         initNet(net, _database._nets.size(), rsyn_net);
         _database._nets.emplace_back(net);
         numPins += _database._nets.back()._pin_access_boxes.size();

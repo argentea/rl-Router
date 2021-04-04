@@ -3,6 +3,7 @@
 #include"geo.h"
 #include <cstdlib>
 #include <iostream>
+#include"parser/src/GeoPrimitive.h"
 
 namespace db {
 
@@ -15,7 +16,8 @@ public:
 
     //  constructors
     template <typename... Args>
-    BoxOnLayer(int layerIndex = -1, Args... params) :  utils::BoxT<DBU>(params...), layerIdx(layerIndex) {}
+    BoxOnLayer(int layerIndex = -1, Args... params) :  utils::BoxT<DBU>(params...), layerIdx(layerIndex) {};
+	BoxOnLayer(router::parser::BoxOnLayer parser_box): utils::BoxT<DBU>(parser_box), layerIdx(parser_box._layer_idx){};
 
     // inherit setters from utils::BoxT in batch
     template <typename... Args>

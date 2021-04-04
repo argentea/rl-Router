@@ -1,69 +1,44 @@
 #include "Layer.h"
 #include "parser/src/MetalLayer.h"
 
-namespace router::db {
+namespace db {
 
-/*ostream& operator<<(ostream& os, const Track& track) {
-    os << "track(lo=" << track.lowerCPIdx << ", up=" << track.upperCPIdx << ", loc=" << track.location << ")";
-    return os;
-}
 
-ostream& operator<<(ostream& os, const CrossPoint& cp) {
-    os << "crossPt(lo=" << cp.lowerTrackIdx << ", up=" << cp.upperTrackIdx << ", loc=" << cp.location << ")";
-    return os;
-}
-*/
-MetalLayer::MetalLayer( router::parser::MetalLayer parserLayer, 
-						const vector<router::parser::Track>& parserTracks,
-						const int64_t libDBU) {
+
+MetalLayer::MetalLayer( router::parser::MetalLayer parser_metalLayer,
+						const vector<router::parser::Track>& parser_tracks) {
     // Rsyn::PhysicalLayer (LEF)
-    _name = parserLayer._name;
-//    direction = parserLayer._direction;
-    _idx = parserLayer._idx;
-    _width = parserLayer._width;
-    _min_width = parserLayer._min_width;
-	_width_for_suff_ovlp = parserLayer._width_for_suff_ovlp;
-    _shrink_for_suff_ovlp = parserLayer._shrink_for_suff_ovlp;
-    _min_area = parserLayer._min_area;
-    _min_len_raw = parserLayer._min_len_raw;
-///todu space rule
-/*
-	// default spacing
-    const int numSpaceTable = layer->numSpacingTable();
-    if (!numSpaceTable) {
-        log() << "Warning in " << __func__ << ": For " << name << ", no run spacing table..." << std::endl;
-    } else {
-        for (int iSpaceTable = 0; iSpaceTable < numSpaceTable; ++iSpaceTable) {
-            if (!layer->spacingTable(iSpaceTable)->isParallel()) {
-                log() << "Warning in " << __func__ << ": For " << name << ", unidentified spacing table...\n";
-                continue;
-            }
+	name = parser_metalLayer._name;
+    direction = (parser_metalLayer._direction == router::parser::Direction::X)?X:Y;
+	idx = parser_metalLayer._idx;
+	width = parser_metalLayer._width;
+	minWidth = parser_metalLayer._min_width;
+    widthForSuffOvlp = std::ceil(minWidth * 0.7071);
+    shrinkForSuffOvlp = std::max<DBU>(0, std::ceil(widthForSuffOvlp - width * 0.5));
+	shrinkForSuffOvlp = parser_metalLayer._shrink_for_suff_ovlp;
+	minArea = parser_metalLayer._min_area;
+    minLenRaw = minArea / width - width;
+    // default spacing
+	unsigned int numLength = parser_metalLayer._parallel_length.size();
+	parallelLength.resize(numLength);
+	for(unsigned int i = 0; i < numLength; i++){
+		parallelLength[i] = parser_metalLayer._parallel_length[i];
+	}
+	unsigned int numWidth = parser_metalLayer._parallel_width.size();
+	parallelWidth.reserve(numWidth);
+	parallelWidthSpace.resize(numWidth);
+	for(unsigned int i = 0; i < numWidth; i++){
+		parallelWidth[i] = parser_metalLayer._parallel_width[i];
+		parallelWidthSpace[i].resize(numLength);
+		for(unsigned int j = 0; j < numLength; j++){
+			parallelWidthSpace[i][j] = parser_metalLayer._parallel_width_space[i][j];
+		}
+	}
+	defaultSpace = parser_metalLayer._default_space;
+	paraRunSpaceForLargerWidth = parser_metalLayer._para_run_space_for_larger_width;
 
-            const lefiParallel* parallel = layer->spacingTable(iSpaceTable)->parallel();
-            const int numLength = parallel->numLength();
-            if (numLength > 0) {
-                parallelLength.resize(numLength);
-                for (unsigned iLength = 0; iLength != (unsigned)numLength; ++iLength) {
-                    parallelLength[iLength] = static_cast<DBU>(std::round(parallel->length(iLength) * libDBU));
-                }
-            }
-            const int numWidth = parallel->numWidth();
-            if (numWidth > 0) {
-                parallelWidth.resize(numWidth);
-                parallelWidthSpace.resize(numWidth);
-                for (unsigned iWidth = 0; iWidth != (unsigned)numWidth; ++iWidth) {
-                    parallelWidth[iWidth] = static_cast<DBU>(std::round(parallel->width(iWidth) * libDBU));
-                    parallelWidthSpace[iWidth].resize(std::max(1, numLength), 0);
-                    for (int iLength = 0; iLength < numLength; ++iLength) {
-                        parallelWidthSpace[iWidth][iLength] =
-                            static_cast<DBU>(std::round(parallel->widthSpacing(iWidth, iLength) * libDBU));
-                    }
-                }
-                defaultSpace = getParaRunSpace(width);
-                paraRunSpaceForLargerWidth = (parallelWidthSpace.size() > 1) ? parallelWidthSpace[1][0] : defaultSpace;
-            }
-        }
-    }
+/*
+
     //  eol spacing
     if (!layer->hasSpacingNumber()) {
         log() << "Warning in " << __func__ << ": For " << name << ", no spacing rules...\n";
@@ -98,8 +73,7 @@ MetalLayer::MetalLayer( router::parser::MetalLayer parserLayer,
             log() << "Warning in " << __func__ << ": For " << name << ", no eol spacing rules..." << std::endl;
         }
     }
-*/
-/*
+
     for (unsigned iProp = 0; static_cast<int>(iProp) < layer->numProps(); ++iProp) {
         if (!strcmp(layer->propName(iProp), "LEF58_CORNERSPACING")) {
             //  corner spacing
@@ -197,25 +171,25 @@ MetalLayer::MetalLayer( router::parser::MetalLayer parserLayer,
 
     // Rsyn::PhysicalTracks (DEF)
     // note: crossPoints will be initialized in LayerList
-    if (parserTracks.empty()) {
-		std::cout << "Error in " << __func__ << ": For " << _name << ", tracks is empty...\n";
-        _pitch = _width + parallelWidthSpace[0][0];
+    if (parser_tracks.empty()) {
+		std::cerr << "Error in " << __func__ << ": For " << name << ", tracks is empty...\n";
+        pitch = width + parallelWidthSpace[0][0];
     } else {
-        for (const router::parser::Track& parserTrack : parserTracks) {
-			_tracks.emplace_back(parserTrack._location);
-            }
+        for (const router::parser::Track&  parser_track : parser_metalLayer._tracks) {
+			tracks.emplace_back(parser_track._location);
         }
-        sort(_tracks.begin(), _tracks.end(), [](const Track& lhs, const Track& rhs) { return lhs.location < rhs.location; });
-///        pitch = tracks[1].location - tracks[0].location;
+        sort(tracks.begin(), tracks.end(), [](const Track& lhs, const Track& rhs) { return lhs.location < rhs.location; });
+        pitch = tracks[1].location - tracks[0].location;
+    }
 
     // safe margin
-///    minAreaMargin = ceil(((minArea / width) + width) * 1.0 / pitch) * pitch * 2;
+    minAreaMargin = ceil(((minArea / width) + width) * 1.0 / pitch) * pitch * 2;
 
     // Check consistency between LEF and DEF
-///    check();
+    check();
 }
 
-/*bool MetalLayer::isTrackRangeValid(const utils::IntervalT<int>& trackRange) const {
+bool MetalLayer::isTrackRangeValid(const utils::IntervalT<int>& trackRange) const {
     return trackRange.low >= 0 && trackRange.high < tracks.size() && trackRange.IsValid();
 }
 
@@ -238,8 +212,7 @@ utils::IntervalT<int> MetalLayer::getSurroundingTrack(DBU loc) const {
         (std::min(std::max(firstTrackLoc(), loc), lastTrackLoc()) - firstTrackLoc()) / static_cast<double>(pitch);
     return {floor(floatingTrackIdx), ceil(floatingTrackIdx)};
 }
-*/
-/*
+
 utils::IntervalT<int> MetalLayer::rangeSearchTrack(const utils::IntervalT<DBU>& locRange, bool includeBound) const {
     auto locRangeCopy = locRange;
     // invalid range (low >= high) will still be invalid
@@ -434,12 +407,12 @@ ostream& MetalLayer::printBasics(ostream& os) const {
 
 ostream& MetalLayer::printDesignRules(ostream& os) const {
     os << name << ": width=" << width << ", paraSpace=(default=" << defaultSpace;
-    for (int i = 0; i < parallelWidth.size(); ++i) {
-        os << ", " << parallelWidth[i] << ":" << parallelWidthSpace[i];
+    for (unsigned int i = 0; i < parallelWidth.size(); ++i) {
+//        os << ", " << parallelWidth[i] << ":" << parallelWidthSpace[i];
     }
     os << "), eolSpace=(";
     for (const SpaceRule& spaceRule : spaceRules) {
-///this delete a comment        if (spaceRule.hasEol  && !spaceRule.hasPar ) {
+        if (spaceRule.hasEol /* && !spaceRule.hasPar */) {
             os << spaceRule.eolWidth << ':' << spaceRule.space << ", ";
         }
     }
@@ -483,16 +456,16 @@ ostream& operator<<(ostream& os, const MetalLayer& layer) { return layer.printBa
 
 void MetalLayer::check() const {
     if (width < minWidth) {
-        log() << "Warning: In layer " << name << ", width = " << width << " < minWidth = " << minWidth << std::endl;
+		std::cerr << "Warning: In layer " << name << ", width = " << width << " < minWidth = " << minWidth << std::endl;
     }
     if (width > maxEolWidth) {
-        log() << "Warning: In layer " << name << ", width = " << width << " > maxEolWidth = " << maxEolWidth
+        std::cerr << "Warning: In layer " << name << ", width = " << width << " > maxEolWidth = " << maxEolWidth
               << std::endl;
     }
     if (width + defaultSpace > pitch) {
-        log() << "Warning: In layer " << name << ", width + defaultSpace =" << width + defaultSpace
+        std::cerr << "Warning: In layer " << name << ", width + defaultSpace =" << width + defaultSpace
               << " > picth = " << pitch << std::endl;
     }
 }
-*/
-}  // namespace db
+
+}

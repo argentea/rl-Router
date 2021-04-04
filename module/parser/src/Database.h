@@ -9,7 +9,7 @@ class Database {
 public:
     std::vector<MetalLayer> _metal_layers;
     std::vector<CutLayer> _cut_layers;
-    std::vector<Net> _nets;
+    std::vector<ParserNet> _nets;
 
 	void init();
 };

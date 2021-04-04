@@ -1,19 +1,20 @@
 #pragma once
 #include "functional"
-#include "geo.h"
+#include "database/topo/src/geo.h"
+
 
 
 namespace router::parser {
-
+using namespace utils;
 //  BoxOnLayer
 //  A box on a certain layer: primitive for route guide and pin acesss box
-class BoxOnLayer : public BoxT<int64_t> {
+class BoxOnLayer : public utils::BoxT<DBU> {
 public:
     int _layer_idx{-1};
 
     //  constructors
     template<typename... Args>
-    explicit BoxOnLayer(int layerIndex = -1, Args... params) : BoxT<int64_t>(params...), _layer_idx(layerIndex){};
+    explicit BoxOnLayer(int layerIndex = -1, Args... params) : BoxT<DBU>(params...), _layer_idx(layerIndex){};
 
     // inherit setters from BoxT in batch
     template<typename... Args>
