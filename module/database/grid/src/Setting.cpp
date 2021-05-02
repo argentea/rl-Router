@@ -1,6 +1,5 @@
 #include "Setting.h"
-#include "Database.h"
-
+#include "database/src/Database.h"
 namespace db {
 
 void Setting::makeItSilent() {
@@ -10,10 +9,10 @@ void Setting::makeItSilent() {
 }
 
 void Setting::adapt() {
-    if (database.nets.size() < 10000) {
+    if (database->nets.size() < 10000) {
         ++rrrIterLimit;
     }
-    else if (database.nets.size() > 800000) {
+    else if (database->nets.size() > 800000) {
         --rrrIterLimit;
     }
 }
@@ -28,7 +27,7 @@ void RrrIterSetting::update(int iter) {
     } else {
         defaultGuideExpand += iter * 2;
         wrongWayPointDensity = std::min(1.0, wrongWayPointDensity + 0.1);
-        if (database.nets.size() < 200000) {
+        if (database->nets.size() < 200000) {
             // high-effort mode (exclude million-net test case)
             addDiffLayerGuides = true;
         }
@@ -37,9 +36,10 @@ void RrrIterSetting::update(int iter) {
 }
 
 void RrrIterSetting::print() const {
-    printlog("defaultGuideExpand =", defaultGuideExpand);
-    printlog("wrongWayPointDensity =", wrongWayPointDensity);
-    printlog("addDiffLayerGuides =", addDiffLayerGuides);
+//    printlog("defaultGuideExpand =", defaultGuideExpand);
+//    printlog("wrongWayPointDensity =", wrongWayPointDensity);
+//    printlog("addDiffLayerGuides =", addDiffLayerGuides);
+	return;
 }
 
 RrrIterSetting rrrIterSetting;

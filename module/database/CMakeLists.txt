@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.12)
 project(database)
 file(GLOB SOURCES
         src/*.cpp
@@ -23,8 +24,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC grid)
 
 # test
 add_executable(${PROJECT_NAME}_test test.cpp)
-target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME} parser)
-target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME} database)
+target_link_libraries(${PROJECT_NAME}_test parser)
+target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME})
 
 add_subdirectory(topo)
 add_subdirectory(layer)

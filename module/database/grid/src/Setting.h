@@ -1,8 +1,11 @@
 #pragma once
+#ifndef SETTING_H
+#define SETTING_H 
 
 #include "global.h"
 
 namespace db {
+class Database;
 
 BETTER_ENUM(VerboseLevelT, int, LOW = 0, MIDDLE = 1, HIGH = 2);
 
@@ -13,6 +16,7 @@ public:
     std::string outputFile;
     int numThreads = 1;  // 0 for simple scheduling
     int tat = std::numeric_limits<int>::max();
+	db::Database* database;
 
     // multi_net
     VerboseLevelT multiNetVerbose = VerboseLevelT::MIDDLE;
@@ -66,11 +70,11 @@ public:
     void adapt();
 };
 
-extern Setting setting;
 
 // setting that changes in each rrr iteration
 class RrrIterSetting {
 public:
+	db::Database* database;
     int defaultGuideExpand;
     double wrongWayPointDensity;
     bool addDiffLayerGuides;
@@ -80,6 +84,6 @@ public:
     void print() const;
 };
 
-extern RrrIterSetting rrrIterSetting;
-
 }  //   namespace db
+
+#endif

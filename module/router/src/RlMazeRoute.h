@@ -7,13 +7,13 @@
 
 class MazeRoute {
 public:
-    MazeRoute(LocalNet &localNetData) : localNet(localNetData) {}
+    MazeRoute(LocalNet &localNetData, RouterGraph &graphData) : localNet(localNetData), graph(graphData) {}
 
     bool run();
 
 private:
     LocalNet &localNet;
-    RouterGraph graph;
+    RouterGraph &graph;
 
     vector<db::CostT> vertexCostUBs;       // min cost upper bound for each vertex
     // vector<db::CostT> vertexCostLBs;       // cost lower bound corresponding to the min-upper-bound solution for each vertex

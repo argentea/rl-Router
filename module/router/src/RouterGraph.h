@@ -21,6 +21,7 @@ public:
 	bool isFakePin;
 	
 };
+class RouterGraph;
 class Solution {
 public:
     db::CostT cost;
@@ -31,7 +32,10 @@ public:
 
     Solution(db::CostT c, DBU l, db::CostT ub, int v, const std::shared_ptr<Solution> &p)
         : cost(c), len(l), costUB(ub), vertex(v), prev(p) {}
-	Solution(int v);
+
+    Solution(db::CostT newCost,
+			int v, std::shared_ptr<Solution> &prev, RouterGraph& graph);
+	Solution(int v, RouterGraph& graph);
 
 	bool addVertex(int v);
 
@@ -51,7 +55,7 @@ public:
 
 private:
     int edgeCount;
-	db::Database database;
+	db::Database& database;
 
     // vertex properties
     std::unordered_map<int, int> vertexToPin;  // vertexIdx to pinIdx

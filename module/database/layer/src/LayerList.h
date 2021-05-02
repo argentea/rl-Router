@@ -37,7 +37,7 @@ public:
 
     const MetalLayer &getLayer(int layerIdx) const { return _layers[layerIdx]; }
 
-    //    const CutLayer& getCutLayer(int cutLayerIdx) const { return cutLayers[cutLayerIdx]; }
+    const CutLayer& getCutLayer(int cutLayerIdx) const { return _cut_layers[cutLayerIdx]; }
     unsigned getLayerNum() const noexcept { return _layers.size(); }
     utils::IntervalT<int> rangeSearchTrack(int layerIdx,
                                            const utils::IntervalT<DBU>& locRange,
@@ -73,7 +73,7 @@ public:
 
 protected:
     std::vector<MetalLayer> _layers;
-	std::vector<MetalLayer> _cut_layers;
+	std::vector<CutLayer> _cut_layers;
 
     int numGridPoints;
     int64_t totalTrackLength;

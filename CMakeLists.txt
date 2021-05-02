@@ -32,7 +32,15 @@ message(STATUS "Boost_LIBRARIES = ${Boost_LIBRARIES}")
 
 
 find_package(Boost COMPONENTS filesystem program_options REQUIRED)
-#find_package(Threads REQUIRED)
+find_package(Threads REQUIRED)
+
+add_executable(test ./main.cpp)
 
 add_subdirectory(module)
 add_subdirectory(thirdparty)
+
+set_target_properties(test PROPERTIES LINK_FLAGS "-Wl,--whole-archive -rdynamic -lpthread -Wl,--no-whole-archive")
+target_link_libraries(test parser)
+target_link_libraries(test database)
+target_link_libraries(test router)
+

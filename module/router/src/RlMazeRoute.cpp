@@ -17,7 +17,7 @@ bool MazeRoute::route(int startPin) {
 
     // init from startPin
     for (auto vertex : graph.getVertices(startPin)) {
-        updateSol(std::make_shared<Solution>(vertex));
+        updateSol(std::make_shared<Solution>(vertex, graph));
     }
     std::unordered_set<int> visitedPin = {startPin};
     int nPinToConnect = localNet.numOfPins() - 1;
@@ -46,10 +46,9 @@ bool MazeRoute::route(int startPin) {
             for (auto v : graph.getNeighbor(newSol)) {
 			
                 db::CostT newCost = newSol->cost + graph.getCost(newSol, v);
-                db::CostT potentialPenalty = graph.getPotentialPenalty(newSol, v);
 				
                 if (newCost < vertexCostUBs[v]) {
-                    updateSol(std::make_shared<Solution>(newCost, newCost + potentialPenalty, v, newSol));
+                    updateSol(std::make_shared<Solution>(newCost, v, newSol));
                 }
             }
         }
@@ -81,3 +80,48 @@ bool MazeRoute::route(int startPin) {
     return true;
 }
 
+void MazeRoute::getResult() {
+    std::unordered_map<int, std::shared_ptr<db::GridSteiner>> visited;
+
+    // back track from pin to source
+    for (unsigned p = 0; p < localNet.numOfPins(); p++) {
+        std::unordered_map<int, std::shared_ptr<db::GridSteiner>> curVisited;
+        auto cur = pinSols[p];
+        std::shared_ptr<db::GridSteiner> prevS;
+        while (cur) {
+            auto it = visited.find(cur->vertex);
+            if (it != visited.end()) {
+                // graft to an existing node
+                if (prevS) {
+                    db::GridSteiner::setParent(prevS, it->second);
+                }
+                break;
+            } else {
+                // get curS
+                auto curS = std::make_shared<db::GridSteiner>(
+                    graph.getGridPoint(cur->vertex), graph.getPinIdx(cur->vertex), graph.isFakePin(cur->vertex));
+                if (prevS) {
+                    db::GridSteiner::setParent(prevS, curS);
+                }
+                if (curVisited.find(cur->vertex) != curVisited.end() && db::setting.singleNetVerbose >= +db::VerboseLevelT::MIDDLE) {
+                    printlog("Warning: self loop found in a path for net", localNet.getName(), "for pin", p);
+                }
+                curVisited.emplace(cur->vertex, curS);
+                // store tree root
+                if (!(cur->prev)) {
+                    localNet.gridTopo.push_back(curS);
+                    break;
+                }
+                // prep for the next loop
+                prevS = curS;
+                cur = cur->prev;
+            }
+        }
+        for (const auto &v : curVisited) visited.insert(v);
+    }
+
+    // remove redundant Steiner nodes
+    for (auto &tree : localNet.gridTopo) {
+        db::GridSteiner::mergeNodes(tree);
+    }
+}

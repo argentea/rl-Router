@@ -1,6 +1,7 @@
 #pragma once
 
 #include "database/topo/src/topo.h"
+#include "parser/src/Parser.h"
 
 namespace db {
 using std::vector;

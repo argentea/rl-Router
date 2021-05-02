@@ -1,4 +1,6 @@
 #pragma once
+#ifndef ROUTEGRID_H
+#define ROUTEGRID_H 
 
 #include "database/layer/src/LayerList.h"
 #include "database/net/src/net.h"
@@ -8,16 +10,15 @@
 namespace db {
 
 class ViaData;
+class Setting;
 
 using CostT = double;
 using HistUsageT = double;
-/*
 struct mutex_wrapper : std::mutex {
     mutex_wrapper() = default;
     mutex_wrapper(mutex_wrapper const&) noexcept : std::mutex() {}
     bool operator==(mutex_wrapper const& other) noexcept { return this == &other; }
 };
-*/
 // net index
 // a valid net idx >= 0
 const int OBS_NET_IDX = -1;   // for obstacles
@@ -71,6 +72,7 @@ public:
     using ViaMapT = vector<vector<std::multimap<int, int>>>;
     using NDViaMapT = std::unordered_map<GridPoint, const ViaType*>;
 
+	db::Setting* setting;
     void init(router::parser::Parser& parser);
     void clear();
     void stash();
@@ -247,12 +249,10 @@ protected:
     ViaMapT routedViaMap;          // major version, recorded by lower GridPoint
     ViaMapT routedViaMapUpper;     // recorded by upper GridPoint
     NDViaMapT routedNonDefViaMap;  // TODO: merge into routedViaMap
-	/* rl router:: no need for lock
     vector<vector<mutex_wrapper>> wireLocks;
     vector<vector<mutex_wrapper>> viaLocks;
     vector<vector<mutex_wrapper>> viaLocksUpper;
     std::mutex viaTypeLock;
-	*/
     vector<vector<vector<std::pair<int, ViaData*>>>> poorViaMap;
     vector<bool> usePoorViaMap;
     vector<vector<std::unordered_map<int, HistUsageT>>> histViaMap;
@@ -261,3 +261,4 @@ protected:
 };
 
 }  //   namespace db
+#endif /* ifndef ROUTEGRID_H */

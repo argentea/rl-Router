@@ -1,9 +1,12 @@
 #pragma once
+#ifndef DATABASE_H
+#define DATABASE_H 
 
 #include"database/topo/src/topo.h"
 #include"parser/src/Parser.h"
 #include"database/net/src/net.h"
 #include"database/layer/src/LayerList.h"
+#include"database/grid/src/RouteGrid.h"
 
 using namespace router::parser;
 
@@ -60,3 +63,4 @@ private:
 }  //   namespace db
 
 
+#endif

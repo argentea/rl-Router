@@ -1,5 +1,5 @@
 #include "RouteGrid.h"
-//#include "PoorViaMap.h"
+#include "PoorViaMap.h"
 
 namespace db {
 
@@ -33,13 +33,13 @@ void RouteGrid::init(router::parser::Parser& parser) {
     }
 
     DBU m2Pitch = _layers[1].pitch;
-    unitWireCostRaw = db::Setting::weightWirelength / m2Pitch;
-    unitViaCostRaw = db::Setting::weightViaNum;
+    unitWireCostRaw = setting->weightWirelength / m2Pitch;
+    unitViaCostRaw = setting->weightViaNum;
     unitViaCost = unitViaCostRaw / unitWireCostRaw;
 
-    unitShortVioCostRaw = db::Setting::weightShortArea;
-    unitSpaceVioCostRaw = db::Setting::weightSpaceVioNum;
-    unitMinAreaVioCostRaw = db::Setting::weightMinAreaVioNum;
+    unitShortVioCostRaw = setting->weightShortArea;
+    unitSpaceVioCostRaw = setting->weightSpaceVioNum;
+    unitMinAreaVioCostRaw = setting->weightMinAreaVioNum;
 
     unitShortVioCost.resize(_layers.size());
     for (int i = 0; i < _layers.size(); ++i) {
@@ -129,8 +129,8 @@ CostT RouteGrid::getEdgeVioCost(const GridEdge& edge, const int netIdx, bool his
 CostT RouteGrid::getViaVioCost(const GridPoint& via, const int netIdx, bool histCost, const ViaType* viaType) const {
     unsigned vioWithViaWire = getViaUsageOnVias(via, netIdx) + getViaUsageOnWires(via, netIdx);
     auto viaPoorness = getViaPoorness(via, netIdx);
-    double vioWithObs = (viaPoorness == ViaPoorness::Poor) ? setting.dbPoorViaPenaltyCoeff : 0;
-    double nondefault = (viaPoorness == ViaPoorness::Nondefault && histCost) ? setting.dbNondefaultViaPenaltyCoeff : 0;
+    double vioWithObs = (viaPoorness == ViaPoorness::Poor) ? setting->dbPoorViaPenaltyCoeff : 0;
+    double nondefault = (viaPoorness == ViaPoorness::Nondefault && histCost) ? setting->dbNondefaultViaPenaltyCoeff : 0;
     HistUsageT histUsage = histCost ? getViaHistUsage(via) : 0;
     return (vioWithViaWire + histUsage) * unitSpaceVioCostDiscounted + (vioWithObs + nondefault) * unitSpaceVioCost;
 }
@@ -145,12 +145,12 @@ unsigned RouteGrid::getViaUsageOnWiresPost(const GridPoint& via, const int netId
 }
 
 unsigned RouteGrid::getViaUsageOnBotWires(const GridPoint& via, const int netIdx, const ViaType* viaType) const {
-    if (!viaType) viaType = &cutLayers[via.layerIdx].defaultViaType();
+    if (!viaType) viaType = &_cut_layers[via.layerIdx].defaultViaType();
     return getViaUsageOnWiresHelper(via, netIdx, viaType->viaBotWire[via.crossPointIdx]);
 }
 
 unsigned RouteGrid::getViaUsageOnTopWires(const GridPoint& via, const int netIdx, const ViaType* viaType) const {
-    if (!viaType) viaType = &cutLayers[via.layerIdx].defaultViaType();
+    if (!viaType) viaType = &_cut_layers[via.layerIdx].defaultViaType();
     auto upper = getUpper(via);
     return getViaUsageOnWiresHelper(upper, netIdx, viaType->viaTopWire[upper.crossPointIdx]);
 }
@@ -199,7 +199,7 @@ HistUsageT RouteGrid::getViaHistUsage(const GridPoint& via) const {
 
 const ViaType* RouteGrid::getViaType(const GridPoint& via) const {
     auto it = routedNonDefViaMap.find(via);
-    return (it != routedNonDefViaMap.end()) ? it->second : &cutLayers[via.layerIdx].defaultViaType();
+    return (it != routedNonDefViaMap.end()) ? it->second : &_cut_layers[via.layerIdx].defaultViaType();
 }
 
 unsigned RouteGrid::getViaUsageOnVias(const GridPoint& via, const int netIdx, const ViaType* viaType) const {
@@ -208,7 +208,7 @@ unsigned RouteGrid::getViaUsageOnVias(const GridPoint& via, const int netIdx, co
 }
 
 unsigned RouteGrid::getViaUsageOnSameLayerVias(const GridPoint& via, const int netIdx, const ViaType* viaType) const {
-    if (!viaType) viaType = &cutLayers[via.layerIdx].defaultViaType();
+    if (!viaType) viaType = &_cut_layers[via.layerIdx].defaultViaType();
     unsigned usageOnVias = 0;
     const GridPoint& upper = getUpper(via);
     vector<GridPoint> viaVios;
@@ -240,7 +240,7 @@ unsigned RouteGrid::getViaUsageOnSameLayerVias(const GridPoint& via, const int n
 }
 
 unsigned RouteGrid::getViaUsageOnBotLayerVias(const GridPoint& via, const int netIdx, const ViaType* viaType) const {
-    if (!viaType) viaType = &cut_layers[via.layerIdx].defaultViaType();
+    if (!viaType) viaType = &_cut_layers[via.layerIdx].defaultViaType();
     return via.layerIdx ? getViaUsageOnDiffLayerViasHelper(via,
                                                            netIdx,
                                                            viaType->mergedAllViaBotVia[via.crossPointIdx],
@@ -251,7 +251,7 @@ unsigned RouteGrid::getViaUsageOnBotLayerVias(const GridPoint& via, const int ne
 }
 
 unsigned RouteGrid::getViaUsageOnTopLayerVias(const GridPoint& via, const int netIdx, const ViaType* viaType) const {
-    if (!viaType) viaType = &cutLayers[via.layerIdx].defaultViaType();
+    if (!viaType) viaType = &_cut_layers[via.layerIdx].defaultViaType();
     auto upper = getUpper(via);
     return (via.layerIdx + 2 < _layers.size())
                ? getViaUsageOnDiffLayerViasHelper(upper,
@@ -444,7 +444,7 @@ CostT RouteGrid::getWireSegmentVioCost(const TrackSegment& ts, const int netIdx,
     // 2. Short or space vio with pins/obs
     iteratePoorWireSegments(ts, netIdx, [&](const utils::IntervalT<int>& intvl) {
         DBU dist = _layers[ts.layerIdx].getCrossPointRangeDistCost(intvl);
-        cost += unitShortVioCost[ts.layerIdx] * dist * setting.dbPoorWirePenaltyCoeff;
+        cost += unitShortVioCost[ts.layerIdx] * dist * setting->dbPoorWirePenaltyCoeff;
     });
     // 3. With vias
     cost += (unitSpaceVioCostDiscounted * getWireSegmentUsageOnVias(ts, netIdx).size());
@@ -486,7 +486,7 @@ vector<CostT> RouteGrid::getShortWireSegmentVioCost(const TrackSegment& ts, int 
         DBU dist = _layers[ts.layerIdx].getCrossPointRangeDistCost({cpIdx, cpIdx});
         int i = cpIdx - cps.low;
         crossPointCost[i] += (unitShortVioCostDiscounted[ts.layerIdx] * routedWire[i] +
-                              unitShortVioCost[ts.layerIdx] * poorWire[i] * setting.dbPoorWirePenaltyCoeff) *
+                              unitShortVioCost[ts.layerIdx] * poorWire[i] * setting->dbPoorWirePenaltyCoeff) *
                              dist;
     }
     vector<int> cpLocs = getShortWireSegmentSpaceVioOnWires(ts, netIdx);
@@ -757,7 +757,7 @@ void RouteGrid::useEdge(const GridEdge& edge, int netIdx) {
 
 void RouteGrid::markViaType(const GridPoint& via, const ViaType* viaType) {
     viaTypeLock.lock();
-    if (viaType->idx == cutLayers[via.layerIdx].defaultViaType().idx) {
+    if (viaType->idx == _cut_layers[via.layerIdx].defaultViaType().idx) {
         routedNonDefViaMap.erase(via);
     } else {
         routedNonDefViaMap[via] = viaType;
@@ -813,7 +813,7 @@ void RouteGrid::markFixedMetalBatch(vector<std::pair<BoxOnLayer, int>>& fixedMet
     vector<vector<std::pair<boostBox, int>>> fixedMetalsRtreeItems;
     fixedMetalsRtreeItems.resize(_layers.size());
 
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (setting->dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         log() << "mark fixed metal batch ..." << std::endl;
     }
     const int initMem = utils::mem_use::get_current();
@@ -848,13 +848,13 @@ void RouteGrid::markFixedMetalBatch(vector<std::pair<BoxOnLayer, int>>& fixedMet
         }
     };
 
-    const int numThreads = max(1, db::setting.numThreads);
+    const int numThreads = max(1, setting->numThreads);
     std::thread threads[numThreads];
     for (int i = 0; i < numThreads; i++) threads[i] = std::thread(thread_func);
     for (int i = 0; i < numThreads; i++) threads[i].join();
 
     const int curMem = utils::mem_use::get_current();
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (setting->dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         printflog("MEM(MB): init/cur=%d/%d, incr=%d\n", initMem, curMem, curMem - initMem);
         log() << std::endl;
     }
@@ -928,7 +928,7 @@ double RouteGrid::printAllUsageAndVio() const {
     vector<std::string> items = {"wirelength", "# vias", "short", "space"};
     vector<double> metrics = {wlVia.first, wlVia.second, shortSpace.first, shortSpace.second};
     vector<double> weights = {
-        setting.weightWirelength, setting.weightViaNum, setting.weightShortArea, setting.weightSpaceVioNum};
+        setting->weightWirelength, setting->weightViaNum, setting->weightShortArea, setting->weightSpaceVioNum};
     double totalScore = 0;
     for (int i = 0; i < items.size(); ++i) {
         totalScore += metrics[i] * weights[i];
@@ -954,7 +954,7 @@ double RouteGrid::getScore() {
     vector<std::string> items = {"wirelength", "# vias", "short", "space"};
     vector<double> metrics = {wlVia.first, wlVia.second, shortSpace.first, shortSpace.second};
     vector<double> weights = {
-            setting.weightWirelength, setting.weightViaNum, setting.weightShortArea, setting.weightSpaceVioNum};
+            setting->weightWirelength, setting->weightViaNum, setting->weightShortArea, setting->weightSpaceVioNum};
     double totalScore = 0;
     for (int i = 0; i < items.size(); ++i) {
         totalScore += metrics[i] * weights[i];
@@ -1252,7 +1252,7 @@ std::pair<double, double> RouteGrid::printAllVio() const {
 }
 
 void RouteGrid::addHistCost() {
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (setting->dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         printlog("Add hist cost");
     }
     addWireHistCost();
@@ -1298,8 +1298,8 @@ void RouteGrid::addViaHistCost() {
 }
 
 void RouteGrid::fadeHistCost(const vector<int>& exceptedNets) {
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
-        printlog("Fade hist cost by", setting.rrrFadeCoeff, "...");
+    if (setting->dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+        printlog("Fade hist cost by", setting->rrrFadeCoeff, "...");
     }
     std::unordered_set<int> exceptedNetSet;
     for (int netIdx : exceptedNets) exceptedNetSet.insert(netIdx);
@@ -1310,19 +1310,19 @@ void RouteGrid::fadeHistCost(const vector<int>& exceptedNets) {
             for (auto& intvl : histWireMap[layerIdx][trackIdx]) {
                 auto& histWire = intvl.second;
                 if (histWire.netIdx == OBS_NET_IDX || exceptedNetSet.find(histWire.netIdx) == exceptedNetSet.end()) {
-                    histWire.usage *= setting.rrrFadeCoeff;
+                    histWire.usage *= setting->rrrFadeCoeff;
                 }
             }
             // via
             for (auto& p : histViaMap[layerIdx][trackIdx]) {
-                p.second *= setting.rrrFadeCoeff;
+                p.second *= setting->rrrFadeCoeff;
             }
         }
     }
 }
 
 void RouteGrid::statHistCost() const {
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (setting->dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         std::map<CostT, int> histWireUsage, histViaUsage;
         for (int layerIdx = 0; layerIdx < getLayerNum(); ++layerIdx) {
             for (int trackIdx = 0; trackIdx < _layers[layerIdx].numTracks(); ++trackIdx) {

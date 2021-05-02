@@ -3,7 +3,7 @@ file(GLOB SOURCES
         src/*.cpp
         src/*.cc
         src/*.c)
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../..")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../..", "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 
@@ -11,6 +11,7 @@ add_library(${PROJECT_NAME} STATIC ${SOURCES})
 target_link_libraries(${PROJECT_NAME} PUBLIC parser)
 # topo
 target_link_libraries(${PROJECT_NAME} PUBLIC topo)
+target_link_libraries(${PROJECT_NAME} PUBLIC grid)
 
 
 # test

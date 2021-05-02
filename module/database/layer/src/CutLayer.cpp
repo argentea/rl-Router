@@ -1,5 +1,6 @@
 #include "CutLayer.h"
-#include "Setting.h"
+#include "parser/src/Parser.h"
+#include "database/grid/src/Setting.h"
 
 namespace db {
 
@@ -26,7 +27,7 @@ ViaType::ViaType(Rsyn::PhysicalVia rsynVia) {
     }
 
     if (!bot.IsStrictValid() || !cut.IsStrictValid() || !top.IsStrictValid()) {
-        log() << "Warning in " << __func__ << ": For " << rsynVia.getName()
+		std::cout << "Warning in " << __func__ << ": For " << rsynVia.getName()
               << " , has non strict valid via layer bound... " << std::endl;
     }
 }
