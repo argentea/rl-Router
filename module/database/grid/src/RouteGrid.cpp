@@ -11,24 +11,24 @@ void RouteGrid::init(router::parser::Parser& parser) {
     routedWireMap.resize(_layers.size());
     poorWireMap.resize(_layers.size());
     histWireMap.resize(_layers.size());
-    //wireLocks.resize(_layers.size());
+    wireLocks.resize(_layers.size());
     // Via
     routedViaMap.resize(_layers.size());       // the last layer will not be used
     routedViaMapUpper.resize(_layers.size());  // the first layer will not be used
-    //viaLocks.resize(_layers.size());           // the last layer will not be used
-    //viaLocksUpper.resize(_layers.size());      // the first layer will not be used
+    viaLocks.resize(_layers.size());           // the last layer will not be used
+    viaLocksUpper.resize(_layers.size());      // the first layer will not be used
     histViaMap.resize(_layers.size());         // the last layer will not be used
     for (int i = 0; i < _layers.size(); ++i) {
         // Wire
         routedWireMap[i].resize(_layers[i].numTracks());
         poorWireMap[i].resize(_layers[i].numTracks());
         histWireMap[i].resize(_layers[i].numTracks());
-        //wireLocks[i].resize(_layers[i].numTracks());
+        wireLocks[i].resize(_layers[i].numTracks());
         // Via
         routedViaMap[i].resize(_layers[i].numTracks());
         routedViaMapUpper[i].resize(_layers[i].numTracks());
-        //viaLocks[i].resize(_layers[i].numTracks());
-        //viaLocksUpper[i].resize(_layers[i].numTracks());
+        viaLocks[i].resize(_layers[i].numTracks());
+        viaLocksUpper[i].resize(_layers[i].numTracks());
         histViaMap[i].resize(_layers[i].numTracks());
     }
 
@@ -65,12 +65,12 @@ void RouteGrid::clear() {
     routedWireMap.clear();
     poorWireMap.clear();
     histWireMap.clear();
-//    wireLocks.clear();
+    wireLocks.clear();
     // Via
     routedViaMap.clear();       // the last layer will not be used
     routedViaMapUpper.clear();  // the first layer will not be used
-//    viaLocks.clear();           // the last layer will not be used
-//    viaLocksUpper.clear();      // the first layer will not be used
+    viaLocks.clear();           // the last layer will not be used
+    viaLocksUpper.clear();      // the first layer will not be used
     histViaMap.clear();         // the last layer will not be used
     for (auto& layer : poorViaMap) {
         for (auto& track : layer) {

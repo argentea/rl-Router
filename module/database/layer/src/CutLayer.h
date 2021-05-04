@@ -1,6 +1,7 @@
 #pragma once
 
 #include "database/topo/src/topo.h"
+#include "parser/src/CutLayer.h"
 #include "parser/src/Parser.h"
 
 namespace db {
@@ -37,7 +38,7 @@ public:
     vector<vector<vector<bool>>> mergedAllViaTopVia;
 
     ViaType() {}
-    ViaType(Rsyn::PhysicalVia rsynVia);
+    ViaType(router::parser::ViaType& parserViaType);
 
     // alphabetical score tuple (belowWidth, aboveWidth, belowLength, aboveLength)
     std::tuple<DBU, DBU, DBU, DBU> getDefaultScore(const Dimension botDim, const Dimension topDim) const;
@@ -49,11 +50,7 @@ public:
 
 class CutLayer {
 public:
-    CutLayer(const Rsyn::PhysicalLayer& rsynLayer,
-             const vector<Rsyn::PhysicalVia>& rsynVias,
-             const Dimension botDim,
-             const Dimension topDim,
-             const DBU libDBU);
+    CutLayer(const router::parser::CutLayer& parserLayer);
 
     // Basic infomation
     std::string name;

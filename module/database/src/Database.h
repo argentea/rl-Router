@@ -13,11 +13,13 @@ using namespace router::parser;
 
 namespace db {
 
+class Setting;
+
 class Database : public RouteGrid, public NetList {
 public:
     utils::BoxT<DBU> dieRegion;
 
-    void init(Parser parser);
+    void init(Parser& parser, Setting& settingData);
     void clear() {
 		//todo
 		//RouteGrid::clear();
@@ -45,8 +47,10 @@ public:
 
 private:
 
+	Setting& setting;
+
     // mark pin and obstacle occupancy on RouteGrid
-    void markPinAndObsOccupancy();
+    void markPinAndObsOccupancy(Parser& parser);
     // mark off-grid vias as obstacles
     void addPinViaMetal(std::vector<std::pair<BoxOnLayer, int>>& fixedMetalVec);
 

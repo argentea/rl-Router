@@ -7,14 +7,14 @@ namespace router::parser {
 class ViaType {
 public:
     bool hasMultiCut = false;
-    BoxT<int64_t> bot;// box on bottom metal layer
-    BoxT<int64_t> top;// box on top metal layer
-    BoxT<int64_t> cut;// box on cut layer
+    utils::BoxT<DBU> bot;// box on bottom metal layer
+    utils::BoxT<DBU> top;// box on top metal layer
+    utils::BoxT<DBU> cut;// box on cut layer
     std::string name;
     int idx;
 
     // alphabetical score tuple (belowWidth, aboveWidth, belowLength, aboveLength)
-    std::tuple<int64_t, int64_t, int64_t, int64_t> getDefaultScore(int botDim, int topDim) const {
+    std::tuple<DBU, DBU, DBU, DBU> getDefaultScore(int botDim, int topDim) const {
         return {bot[botDim].range(),     // belowWidth
                 top[topDim].range(),     // aboveWidth
                 bot[1 - botDim].range(), // belowWidth
@@ -29,8 +29,8 @@ public:
     int idx;// layerIdx (consistent with Rsyn::xxx::getRelativeIndex())
 
     // Design rules
-    int64_t width = 0;
-    int64_t spacing = 0;
+    DBU width = 0;
+    DBU spacing = 0;
 
     // Via types
     std::vector<ViaType> allViaTypes;

@@ -69,7 +69,7 @@ class NetList {
 public:
     std::vector<Net> nets;
 
-    void init(Database db);
+    void init(Database& db);
     void writeNetTopo(const std::string& filename);
 };
 

@@ -24,16 +24,15 @@ void LayerList::init(router::parser::Parser& parser) {
 
     _cut_layers.clear();
     for (unsigned i = 0; i != parserCutLayers.size(); ++i) {
-///todo cut layer init        _cut_layers.emplace_back(parserCutLayers[i], rsynVias[i], _layers[i].direction, _layers[i + 1].direction, libDBU);
+        _cut_layers.emplace_back(parserCutLayers[i]);
     }
 
     // via area equivalent length (conservative)
-	/*
     for (int i = 0, sz = parserLayers.size(); i < sz; i++) {
         MetalLayer& layer = _layers[i];
 
-        auto dir = layer._direction;
-        auto width = layer._width;
+        auto dir = layer.direction;
+        auto width = layer.width;
 
         auto getEqLen = [&](const utils::BoxT<DBU>& rect, DBU& viaLenEqLen, DBU& viaWidthEqLen) {
             DBU minViaLen = min(abs(rect[1 - dir].low), abs(rect[1 - dir].high));  // conservative
@@ -74,10 +73,9 @@ void LayerList::init(router::parser::Parser& parser) {
         layer.minLenTwoVia = max((DBU)0, layer.minLenTwoVia);
         layer.minLenRaw = max((DBU)0, layer.minLenRaw);
     }
-*/
-    //  init CutLayer::viaAccess
-///    initViaForbidRegions();
-///    initViaConfLUT();
+    //init CutLayer::viaAccess
+    initViaForbidRegions();
+    initViaConfLUT();
 }
 
 bool LayerList::isValid(const GridPoint& gridPt) const {

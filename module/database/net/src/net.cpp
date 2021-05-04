@@ -108,7 +108,7 @@ void Net::reset() {
 
 
 
-void NetList::init(Database db) {
+void NetList::init(Database& db) {
 
     nets.clear();
     nets.reserve(db._nets.size());
