@@ -13,7 +13,7 @@ std::ostream& operator<<(std::ostream& os, const BoxOnLayer& box) {
     return os;
 }
 
-/*utils::BoxT<int> getBoxFromRsynBounds(const Bounds& bounds) {
+utils::BoxT<int> getBoxFromRsynBounds(const Bounds& bounds) {
     return {bounds.getLower().x, bounds.getLower().y, bounds.getUpper().x, bounds.getUpper().y};
 }
 
@@ -24,7 +24,6 @@ utils::BoxT<int> getBoxFromRsynGeometries(const vector<Rsyn::PhysicalViaGeometry
     }
     return box;
 }
-*/
 // GridPoint
 
 bool GridPoint::operator==(const GridPoint& rhs) const {

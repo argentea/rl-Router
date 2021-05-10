@@ -1,58 +1,49 @@
 #pragma once
-#ifndef DATABASE_H
-#define DATABASE_H 
 
-#include"database/topo/src/topo.h"
-#include"parser/src/Parser.h"
-#include"database/net/src/net.h"
-#include"database/layer/src/LayerList.h"
-#include"database/grid/src/RouteGrid.h"
+#include "RsynService.h"
+#include "database/grid/src/RouteGrid.h"
+#include "database/net/src/net.h"
+#include "database/grid/src/Setting.h"
+#include "Stat.h"
+#include "global.h"
+using namespace std;
 
-using namespace router::parser;
-
+class MTStat {
+public:
+    vector<double> durations;
+    MTStat(int numOfThreads = 0) : durations(numOfThreads, 0.0) {}
+    const MTStat& operator+=(const MTStat& rhs);
+    friend ostream& operator<<(ostream& os, const MTStat mtStat);
+};
 
 namespace db {
-
-class Setting;
 
 class Database : public RouteGrid, public NetList {
 public:
     utils::BoxT<DBU> dieRegion;
 
-    void init(Parser& parser, Setting& settingData);
-    void clear() {
-		//todo
-		//RouteGrid::clear();
-		return;
-	}
-    void reset() {
-		//todo
-		//RouteGrid::reset();
-		return;
-	}
-    void stash() {
-		//todo
-		//RouteGrid::stash();
-		return;
-		}
+    void init();
+    void clear() { RouteGrid::clear(); }
+    void reset() { RouteGrid::reset(); }
+    void stash() { RouteGrid::stash(); }
 
-//    void writeDEFWireSegment(Net& dbNet, const utils::PointT<DBU>& u, const utils::PointT<DBU>& v, int layerIdx);
-//    void writeDEFVia(Net& dbNet, const utils::PointT<DBU>& point, const ViaType& viaType, int layerIdx);
-//    void writeDEFFillRect(Net& dbNet, const utils::BoxT<DBU>& rect, const int layerIdx);
-//    void writeDEF(const std::string& filename);
+    void writeDEFWireSegment(Net& dbNet, const utils::PointT<DBU>& u, const utils::PointT<DBU>& v, int layerIdx);
+    void writeDEFVia(Net& dbNet, const utils::PointT<DBU>& point, const ViaType& viaType, int layerIdx);
+    void writeDEFFillRect(Net& dbNet, const utils::BoxT<DBU>& rect, const int layerIdx);
+    void writeDEF(const std::string& filename);
 
     // get girdPinAccessBoxes
     // TODO: better way to differetiate same-layer and diff-layer girdPinAccessBoxes
     void getGridPinAccessBoxes(const Net& net, vector<vector<db::GridBoxOnLayer>>& gridPinAccessBoxes) const;
 
 private:
-
+    RsynService rsynService;
 	Setting& setting;
 
     // mark pin and obstacle occupancy on RouteGrid
-    void markPinAndObsOccupancy(Parser& parser);
+    void markPinAndObsOccupancy();
     // mark off-grid vias as obstacles
-    void addPinViaMetal(std::vector<std::pair<BoxOnLayer, int>>& fixedMetalVec);
+    void addPinViaMetal(vector<std::pair<BoxOnLayer, int>>& fixedMetalVec);
 
     // init safe margin for multi-thread
     void initMTSafeMargin();
@@ -66,5 +57,24 @@ private:
 
 }  //   namespace db
 
+extern db::Database database;
 
-#endif
+namespace std {
+
+//  hash function for Dimension
+template <>
+struct hash<Dimension> {
+    std::size_t operator()(const Dimension d) const { return (hash<unsigned>()(d)); }
+};
+
+//  hash function for std::tuple<typename t0, typename t1, typename t2>
+template <typename t0, typename t1, typename t2>
+struct hash<std::tuple<t0, t1, t2>> {
+    std::size_t operator()(const std::tuple<t0, t1, t2>& t) const {
+        return (hash<t0>()(std::get<0>(t)) ^ hash<t1>()(std::get<1>(t)) ^ hash<t2>()(std::get<2>(t)));
+    }
+};
+
+}  // namespace std
+
+MTStat runJobsMT(int numJobs, const std::function<void(int)>& handle);
