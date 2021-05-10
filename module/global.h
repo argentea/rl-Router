@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include "utils/utils.h"
+#include "database/topo/src/topo.h"
 // STL libraries
 #include <cstdlib>
 #include <iostream>

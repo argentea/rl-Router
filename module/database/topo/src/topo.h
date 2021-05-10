@@ -1,7 +1,6 @@
 #pragma once
 
 #include "geo.h"
-#include "global.h"
 
 namespace db {
 
