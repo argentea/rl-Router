@@ -13,12 +13,12 @@ std::ostream& operator<<(std::ostream& os, const BoxOnLayer& box) {
     return os;
 }
 
-utils::BoxT<int> getBoxFromRsynBounds(const Bounds& bounds) {
+utils::BoxT<DBU> getBoxFromRsynBounds(const Bounds& bounds) {
     return {bounds.getLower().x, bounds.getLower().y, bounds.getUpper().x, bounds.getUpper().y};
 }
 
-utils::BoxT<int> getBoxFromRsynGeometries(const vector<Rsyn::PhysicalViaGeometry>& geos) {
-    utils::BoxT<int> box;
+utils::BoxT<DBU> getBoxFromRsynGeometries(const vector<Rsyn::PhysicalViaGeometry>& geos) {
+    utils::BoxT<DBU> box;
     for (const Rsyn::PhysicalViaGeometry& geo : geos) {
         box = box.UnionWith(getBoxFromRsynBounds(geo.getBounds()));
     }
