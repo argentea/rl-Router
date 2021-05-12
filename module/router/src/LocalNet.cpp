@@ -1,7 +1,7 @@
 #include "LocalNet.h"
 #include "database/src/Database.h"
 
-void LocalNet::initGridBoxes(db::Database database) {
+void LocalNet::initGridBoxes(db::Database& database) {
     // rangeSearch & slice routeGuides
     vector<vector<db::GridBoxOnLayer>> guides(database.getLayerNum());
     for (auto& guide : routeGuides) {
@@ -45,7 +45,7 @@ void LocalNet::getRouteGuideMapping() {
     }
 }
 
-void LocalNet::initNumOfVertices(db::Database database) {
+void LocalNet::initNumOfVertices(db::Database& database) {
     estimatedNumOfVertices = 0;
     for (unsigned b1 = 0; b1 < gridRouteGuides.size(); b1++) {
         for (unsigned b2 : guideConn[b1]) {
@@ -73,7 +73,7 @@ void LocalNet::initNumOfVertices(db::Database database) {
     }
 }
 
-bool LocalNet::checkPin(db::Database database) const {
+bool LocalNet::checkPin(db::Database& database) const {
     for (const auto& gridAccessBoxes : gridPinAccessBoxes) {
         int isPinValid = false;
         for (const auto& gridBox : gridAccessBoxes) {
@@ -118,7 +118,7 @@ int LocalNet::getViaPenalty(int guideIdx1, int trackIdx1, int cpIdx1, int guideI
     return 1;
 }
 
-double LocalNet::getWireSegmentPenalty(db::Database database, int guideIdx, int trackIdx, int cpIdx1, int cpIdx2) const {
+double LocalNet::getWireSegmentPenalty(db::Database& database, int guideIdx, int trackIdx, int cpIdx1, int cpIdx2) const {
     vector<utils::IntervalT<DBU>> intersections;
 
     db::GridBoxOnLayer segmentGridBox(gridRouteGuides[guideIdx].layerIdx, {trackIdx, trackIdx}, {cpIdx1, cpIdx2});

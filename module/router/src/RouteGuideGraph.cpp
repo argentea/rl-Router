@@ -2,8 +2,8 @@
 #include "database/src/Database.h"
 
 void RouteGuideGraph::initConn(const vector<vector<db::GridBoxOnLayer>>& pinAccessBoxes,
-                               const vector<db::GridBoxOnLayer>& routeGuides,
-							   db::Database database) {
+                               const vector<db::GridBoxOnLayer>& routeGuides
+							   ) {
     pinGuideConn.clear();
     pinGuideConn.resize(pinAccessBoxes.size());
     guidePinConn.clear();

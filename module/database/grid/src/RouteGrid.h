@@ -1,24 +1,22 @@
 #pragma once
-#ifndef ROUTEGRID_H
-#define ROUTEGRID_H 
 
-#include "database/layer/src/LayerList.h"
-#include "database/net/src/net.h"
-#include "parser/src/Parser.h"
+#include "../../layer/src/LayerList.h"
+#include "../../net/src/net.h"
 #include "Setting.h"
+#include <unistd.h>
 
 namespace db {
 
 class ViaData;
-class Setting;
-
 using CostT = double;
 using HistUsageT = double;
+
 struct mutex_wrapper : std::mutex {
     mutex_wrapper() = default;
     mutex_wrapper(mutex_wrapper const&) noexcept : std::mutex() {}
     bool operator==(mutex_wrapper const& other) noexcept { return this == &other; }
 };
+
 // net index
 // a valid net idx >= 0
 const int OBS_NET_IDX = -1;   // for obstacles
@@ -72,8 +70,7 @@ public:
     using ViaMapT = vector<vector<std::multimap<int, int>>>;
     using NDViaMapT = std::unordered_map<GridPoint, const ViaType*>;
 
-	db::Setting* setting;
-    void init(router::parser::Parser& parser);
+    void init();
     void clear();
     void stash();
     void reset();
@@ -120,7 +117,7 @@ public:
     enum class ViaPoorness { Poor, Nondefault, Good };
     ViaPoorness getViaPoorness(const GridPoint& via, int netIdx) const;
     int getViaFixedVio(const GridPoint& via, const ViaType& viaType, int netIdx) const;
-    int getViaFixedVio(const utils::PointT<DBU>& viaLoc, int viaLayerIdx, const ViaType& viaType, int netIdx) const;
+    int getViaFixedVio(const utils::PointT<DBU>& viaLoc, int viaLayerIdx, const db::ViaType& viaType, int netIdx) const;
     int getFixedMetalVio(const BoxOnLayer& box, int netIdx) const;
 
     const ViaType& getBestViaTypeForFixed(const utils::PointT<DBU>& viaLoc,
@@ -235,6 +232,7 @@ protected:
     // (layerIdx, trackIdx) -> all (crossPointRange, netIdxs)
     // TODO: change set to unordered_set or vector or list
     vector<vector<boost::icl::interval_map<int, std::set<int>>>> routedWireMap;
+    vector<vector<mutex_wrapper>> wireLocks;
     // 2. poor wires due to violations with pin/obs
     // (layerIdx, trackIdx) -> all (crossPointRange, netIdx)
     vector<vector<boost::icl::interval_map<int, PoorWire>>> poorWireMap;
@@ -249,7 +247,6 @@ protected:
     ViaMapT routedViaMap;          // major version, recorded by lower GridPoint
     ViaMapT routedViaMapUpper;     // recorded by upper GridPoint
     NDViaMapT routedNonDefViaMap;  // TODO: merge into routedViaMap
-    vector<vector<mutex_wrapper>> wireLocks;
     vector<vector<mutex_wrapper>> viaLocks;
     vector<vector<mutex_wrapper>> viaLocksUpper;
     std::mutex viaTypeLock;
@@ -261,4 +258,3 @@ protected:
 };
 
 }  //   namespace db
-#endif /* ifndef ROUTEGRID_H */

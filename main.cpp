@@ -1,7 +1,7 @@
 #include<iostream>
-#include"router/src/Router.h"
-#include"database/src/Database.h"
-#include"parser/src/Parser.h"
+#include"module/router/src/Router.h"
+#include"module/database/src/Database.h"
+#include"module/parser/src/Parser.h"
 using namespace std;
 int main(int argc, char* argv[]) {
 	if (argc != 2) {

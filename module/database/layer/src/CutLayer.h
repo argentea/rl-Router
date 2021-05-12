@@ -1,11 +1,9 @@
 #pragma once
 
-#include "database/topo/src/topo.h"
-#include "parser/src/CutLayer.h"
-#include "parser/src/Parser.h"
+#include "topo.h"
 
 namespace db {
-using std::vector;
+
 class ViaType {
 public:
     bool hasMultiCut = false;
@@ -15,7 +13,7 @@ public:
     std::string name;
     int idx;
 
-	std::vector<utils::BoxT<DBU>> botForbidRegions;
+    vector<utils::BoxT<DBU>> botForbidRegions;
     vector<utils::BoxT<DBU>> topForbidRegions;
 
     // via-wire conflict (crossPointIdx, trackIdx, crossPointIdx)
@@ -38,7 +36,7 @@ public:
     vector<vector<vector<bool>>> mergedAllViaTopVia;
 
     ViaType() {}
-    ViaType(router::parser::ViaType& parserViaType);
+    ViaType(Rsyn::PhysicalVia rsynVia);
 
     // alphabetical score tuple (belowWidth, aboveWidth, belowLength, aboveLength)
     std::tuple<DBU, DBU, DBU, DBU> getDefaultScore(const Dimension botDim, const Dimension topDim) const;
@@ -50,7 +48,11 @@ public:
 
 class CutLayer {
 public:
-    CutLayer(const router::parser::CutLayer& parserLayer);
+    CutLayer(const Rsyn::PhysicalLayer& rsynLayer,
+             const vector<Rsyn::PhysicalVia>& rsynVias,
+             const Dimension botDim,
+             const Dimension topDim,
+             const DBU libDBU);
 
     // Basic infomation
     std::string name;

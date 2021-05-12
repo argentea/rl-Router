@@ -1,10 +1,7 @@
 #pragma once
 
-#include "parser/src/Net.h"
-#include "parser/src/Parser.h"
-#include "database/topo/src/topo.h"
-#include <cstdlib>
-using namespace router::parser;
+#include "../../src/RsynService.h"
+#include "../../grid/src/GridTopo.h"
 
 namespace db {
 
@@ -13,52 +10,53 @@ public:
     ~NetBase();
 
     int idx;
-    ParserNet parser_net;
-    const std::string& getName() const { return parser_net._net_name; }
+    Rsyn::Net rsynNet;
+    const std::string& getName() const { return rsynNet.getName(); }
 
     // pins
-//    std::vector<Rsyn::Pin> rsynPins;
-    std::vector<std::vector<BoxOnLayer>> pinAccessBoxes;  // (pinIdx, accessBoxIdx) -> BoxOnLayer
+    vector<Rsyn::Pin> rsynPins;
+    vector<vector<BoxOnLayer>> pinAccessBoxes;  // (pinIdx, accessBoxIdx) -> BoxOnLayer
     unsigned numOfPins() const noexcept { return pinAccessBoxes.size(); }
     BoxOnLayer getMaxAccessBox(int pinIdx) const;
 
     // route guides
-    std::vector<BoxOnLayer> routeGuides;
-    std::vector<GridBoxOnLayer> gridRouteGuides;
+    vector<BoxOnLayer> routeGuides;
+    vector<GridBoxOnLayer> gridRouteGuides;
 
     // on-grid route result
-//    std::vector<std::shared_ptr<GridSteiner>> gridTopo;
-//    std::vector<std::shared_ptr<GridSteiner>> gridTopo_copy;
-//    void postOrderVisitGridTopo(const std::function<void(std::shared_ptr<GridSteiner>)>& visit) const;
+    vector<std::shared_ptr<GridSteiner>> gridTopo;
+    vector<std::shared_ptr<GridSteiner>> gridTopo_copy;
+    void postOrderVisitGridTopo(const std::function<void(std::shared_ptr<GridSteiner>)>& visit) const;
 
     // print
     void printBasics(ostream& os) const;
-//    void printResult(ostream& os) const;
-//    void print(ostream& os = std::cout) const {
-//        printBasics(os);
-//        printResult(os);
-//    }
+    void printResult(ostream& os) const;
+    void print(ostream& os = std::cout) const {
+        printBasics(os);
+        printResult(os);
+    }
 };
 
 class Net : public NetBase {
 public:
-    Net(int i, router::parser::ParserNet net);
+    Net(int i, Rsyn::Net net, RsynService& rsynService);
 
     // more route guide information
-    std::vector<int> routeGuideVios;
+    vector<int> routeGuideVios;
     RTrees routeGuideRTrees;
-    std::vector<int> routeGuideVios_copy;
-//    RTrees routeGuideRTrees_copy;
-//
+    vector<int> routeGuideVios_copy;
+    RTrees routeGuideRTrees_copy;
+
     // for initialization
-    static void getPinAccessBoxes(Rsyn::PhysicalPort phPort, std::vector<BoxOnLayer>& accessBoxes);
+    void initPinAccessBoxes(Rsyn::Pin rsynPin, RsynService& rsynService, vector<BoxOnLayer>& accessBoxes, const DBU libDBU);
+    static void getPinAccessBoxes(Rsyn::PhysicalPort phPort, vector<BoxOnLayer>& accessBoxes);
     static void getPinAccessBoxes(Rsyn::PhysicalLibraryPin phLibPin,
                                   Rsyn::PhysicalCell phCell,
-                                  std::vector<BoxOnLayer>& accessBoxes,
+                                  vector<BoxOnLayer>& accessBoxes,
                                   const DBUxy& origin);
 
     // final route result
-    std::vector<DefWireSegmentDscp> defWireSegments;
+    vector<DefWireSegmentDscp> defWireSegments;
     void clearPostRouteResult();
     void clearResult();
     void stash();
@@ -67,10 +65,10 @@ public:
 
 class NetList {
 public:
-    std::vector<Net> nets;
+    vector<Net> nets;
 
-    void init(Database& db);
+    void init(RsynService& rsynService);
     void writeNetTopo(const std::string& filename);
 };
 
-}
+}  // namespace db

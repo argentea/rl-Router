@@ -1,14 +1,15 @@
 #pragma once
-#include "Layer.h"
+
 #include "CutLayer.h"
-#include "parser/src/Parser.h"
-#include <vector>
+#include "MetalLayer.h"
+#include "../../src/RsynService.h"
 
 namespace db {
 
 class LayerList {
 public:
-	void init(router::parser::Parser& parser);
+    void init();
+
     // Check whether a geo primitive is valid
     bool isValid(const GridPoint& gridPt) const;
     bool isValid(const GridBoxOnLayer& gridBox) const;
@@ -31,14 +32,10 @@ public:
     utils::IntervalT<int> getSurroundingCrossPoint(int layerIdx, DBU loc) const;
     GridBoxOnLayer getSurroundingGrid(int layerIdx, utils::PointT<DBU> loc) const;
 
-
-
-    Dimension getLayerDir(int layerIdx) const { return _layers[layerIdx].direction; }
-
-    const MetalLayer &getLayer(int layerIdx) const { return _layers[layerIdx]; }
-
-    const CutLayer& getCutLayer(int cutLayerIdx) const { return _cut_layers[cutLayerIdx]; }
-    unsigned getLayerNum() const noexcept { return _layers.size(); }
+    // Search by location range
+    // input: layer (a valid one is assumed), location range [min, max] (inclusive)
+    // output: index range of Track/CrossPoint
+    // note: if out of range, assign the nearest endpoint
     utils::IntervalT<int> rangeSearchTrack(int layerIdx,
                                            const utils::IntervalT<DBU>& locRange,
                                            bool includeBound = true) const;
@@ -46,6 +43,8 @@ public:
                                                 const utils::IntervalT<DBU>& locRange,
                                                 bool includeBound = true) const;
     GridBoxOnLayer rangeSearch(const BoxOnLayer& box, bool includeBound = true) const;
+
+    // Get (x, y) location of GridPoint/GridBoxOnLayer
     utils::PointT<DBU> getLoc(const GridPoint& gridPt) const;
     BoxOnLayer getLoc(const GridBoxOnLayer& gridBox) const;
     std::pair<utils::PointT<DBU>, utils::PointT<DBU>> getLoc(const GridEdge& edge) const;
@@ -66,23 +65,42 @@ public:
     bool isConnected(const GridBoxOnLayer& lhs, const GridBoxOnLayer& rhs);
     bool isAdjacent(const GridBoxOnLayer& lhs, const GridBoxOnLayer& rhs);
 
+    Dimension getLayerDir(int layerIdx) const { return layers[layerIdx].direction; }
+    const MetalLayer& getLayer(int layerIdx) const { return layers[layerIdx]; }
+    const CutLayer& getCutLayer(int cutLayerIdx) const { return cutLayers[cutLayerIdx]; }
+    unsigned getLayerNum() const noexcept { return layers.size(); }
+
+    // Merge LUTs
     void mergeLUT(vector<vector<bool>>& lhs, const vector<vector<bool>>& rhs);
     vector<vector<bool>> mergeLUTs(const vector<vector<vector<bool>>>& LUTs);
     vector<vector<vector<bool>>> mergeLUTsCP(const vector<vector<vector<vector<bool>>>>& LUTs);
 
-
 protected:
-    std::vector<MetalLayer> _layers;
-	std::vector<CutLayer> _cut_layers;
+    vector<MetalLayer> layers;
+    vector<CutLayer> cutLayers;
 
     int numGridPoints;
-    int64_t totalTrackLength;
+    DBU totalTrackLength;
     int numVias;
-	void initCrossPoints(router::parser::Parser parser);
+
+    void initCrossPoints();
+    static void initOppLUT(const vector<vector<vector<bool>>>& ori, vector<vector<vector<bool>>>& opp);
     void initViaWire(const int layerIdx, const utils::BoxT<DBU>& viaMetal, vector<vector<vector<bool>>>& viaWireLUT);
+    void initSameLayerViaConfLUT(const int layerIdx,
+                                 ViaType& viaT1,
+                                 ViaType& viaT2,
+                                 vector<vector<bool>>& viaCut,
+                                 vector<vector<bool>>& viaMetal,
+                                 vector<vector<int>>& viaMetalNum);
+    void initDiffLayerViaConfLUT(const int layerIdx,
+                                 ViaType& viaT1,
+                                 ViaType& viaT2,
+                                 vector<vector<vector<bool>>>& viaBotVia,
+                                 vector<vector<vector<bool>>>& viaTopVia);
     void initViaConfLUT();
     void initViaForbidRegions();
-
+    void print();
+    void writeDefConflictLUTs(const std::string& debugFileName) const;
 };
 
-}// namespace router::db
+}  //   namespace db

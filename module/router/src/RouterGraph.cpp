@@ -1,56 +1,8 @@
 #include "RouterGraph.h"
 #include "database/grid/src/RouteGrid.h"
-#include "database/layer/src/Layer.h"
+#include "database/layer/src/MetalLayer.h"
 
 #include <fstream>
-
-
-Solution::Solution(int vertexdata, RouterGraph& graph) {
-	len = graph.isFakePin(vertexdata) ? 0 : graph.database.getLayer(graph.getGridPoint(vertexdata).layerIdx).getMinLen();
-	cost = graph.getVertexCost(vertexdata);
-	costUB = graph.getVertexCost(vertexdata);
-	vertex = vertexdata;
-	prev = nullptr;
-}
-
-Solution::Solution(db::CostT newCost, int v, std::shared_ptr<Solution> &prevdata, RouterGraph& graph) {
-	DBU newLen;            
-	vertex = v;
-	prev = prevdata;
-	int u = prev->vertex;
-	const db::MetalLayer &uLayer = graph.database.getLayer(graph.getGridPoint(u).layerIdx);
-	const db::MetalLayer &vLayer = graph.database.getLayer(graph.getGridPoint(v).layerIdx);
-	const db::GridPoint &vPoint = graph.getGridPoint(v);
-	if (graph.getGridPoint(u).layerIdx == graph.getGridPoint(v).layerIdx) {
-		const db::GridPoint &uPoint = graph.getGridPoint(u);
-		newLen = prev->len;
-		utils::IntervalT<int> cpRange =
-			uPoint.crossPointIdx < vPoint.crossPointIdx
-				? utils::IntervalT<int>(uPoint.crossPointIdx, vPoint.crossPointIdx)
-				: utils::IntervalT<int>(vPoint.crossPointIdx, uPoint.crossPointIdx);
-		utils::IntervalT<int> trackRange = uPoint.trackIdx < vPoint.trackIdx
-											   ? utils::IntervalT<int>(uPoint.trackIdx, vPoint.trackIdx)
-											   : utils::IntervalT<int>(vPoint.trackIdx, uPoint.trackIdx);
-		newLen += uLayer.getCrossPointRangeDist(cpRange);
-		newLen += uLayer.pitch * trackRange.range();
-	} else {
-		newLen = 0;
-	}
-	newLen = min(newLen, graph.database.getLayer(graph.getGridPoint(v).layerIdx).getMinLen());
-
-	// potential minArea penalty
-	db::CostT potentialPenalty = 0;
-	if (vLayer.hasMinLenVioAcc(newLen)) {
-		if (graph.isMinAreaFixable(v) || graph.getPinIdx(v) != -1) {
-			potentialPenalty = vLayer.getMinLen() - newLen;
-		} else {
-			potentialPenalty = graph.database.getUnitMinAreaVioCost();
-		}
-	}
-	len = newLen;
-	costUB = newCost + potentialPenalty;
-
-}
 
 void RouterGraph::init(int nNodes) {
     conn.resize(nNodes, {-1, -1, -1, -1, -1, -1});

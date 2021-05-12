@@ -4,13 +4,14 @@ file(GLOB SOURCES
         src/*.cc
         src/*.c)
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/..")
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/src")
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/)
 
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 
 # database
+target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ../database)
 target_link_libraries(${PROJECT_NAME} PUBLIC database)
 
 # test

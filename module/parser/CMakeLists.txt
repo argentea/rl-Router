@@ -10,9 +10,6 @@ add_library(${PROJECT_NAME} STATIC ${SOURCES})
 ## logger
 target_link_libraries(${PROJECT_NAME} PUBLIC logger)
 
-## topo
-## they should use the same basic topo class
-target_link_libraries(${PROJECT_NAME} PUBLIC topo)
 # boost
 target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES})

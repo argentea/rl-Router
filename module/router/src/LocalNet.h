@@ -17,12 +17,12 @@ public:
 
     int estimatedNumOfVertices = 0;
 
-    void initGridBoxes(db::Database database);
-    void initNumOfVertices(db::Database database);
-    bool checkPin(db::Database database) const;
+    void initGridBoxes(db::Database& database);
+    void initNumOfVertices(db::Database& database);
+    bool checkPin(db::Database& database) const;
 
     int getViaPenalty(int guideIdx1, int trackIdx1, int cpIdx1, int guideIdx2, int trackIdx2, int cpIdx2) const;
-    double getWireSegmentPenalty(db::Database database, int guideIdx, int trackIdx, int cpIdx1, int cpIdx2) const;
+    double getWireSegmentPenalty(db::Database& database, int guideIdx, int trackIdx, int cpIdx1, int cpIdx2) const;
     int getCrossPointPenalty(int guideIdx, int trackIdx, int cpIdx) const;
 
     void print() const;  // db::NetBase::print() + RouteGuideGraph::print()

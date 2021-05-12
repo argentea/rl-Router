@@ -1,9 +1,9 @@
 #pragma once
 
 #include "RsynService.h"
-#include "database/grid/src/RouteGrid.h"
-#include "database/net/src/net.h"
-#include "database/grid/src/Setting.h"
+#include "../grid/src/RouteGrid.h"
+#include "../net/src/net.h"
+#include "../grid/src/Setting.h"
 #include "Stat.h"
 #include "global.h"
 using namespace std;

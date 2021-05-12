@@ -1,8 +1,7 @@
 #pragma once
 
-#include "database/src/Database.h"
-//todo
-//#include "SingleNetRouter.h"
+#include "../../database/src/Database.h"
+#include "SingleNetRouter.h"
 
 class Router {
 public:
@@ -10,14 +9,13 @@ public:
 
 private:
     int iter = 0;
-	std::vector<float> _netsCost;
-//    vector<db::RouteStatus> allNetStatus;
-	db::Database Database;
+    vector<float> _netsCost;
+    vector<db::RouteStatus> allNetStatus;
 
-	std::vector<int> getNetsToRoute();
-    void ripup(const std::vector<int>& netsToRoute);
-    void updateCost(const std::vector<int>& netsToRoute);
-    void route(const std::vector<int>& netsToRoute);
+    vector<int> getNetsToRoute();
+    void ripup(const vector<int>& netsToRoute);
+    void updateCost(const vector<int>& netsToRoute);
+    void route(const vector<int>& netsToRoute);
     void finish();
     void unfinish();
 

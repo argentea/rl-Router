@@ -6,6 +6,11 @@
 #include <vector>
 #include "utils/utils.h"
 #include "database/topo/src/topo.h"
+
+using utils::log;
+using utils::print;
+using utils::printflog;
+using utils::printlog;
 // STL libraries
 #include <cstdlib>
 #include <iostream>

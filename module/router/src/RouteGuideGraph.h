@@ -15,8 +15,7 @@ public:
     vector<vector<std::pair<int, int>>> guidePinConn;  // routeGuideIdx -> ovlp (pinIdx, accessBoxIdx)
 
     void initConn(const vector<vector<db::GridBoxOnLayer>>& pinAccessBoxes,
-                  const vector<db::GridBoxOnLayer>& routeGuides,
-				  db::Database database);
+                  const vector<db::GridBoxOnLayer>& routeGuides);
     bool checkGuideConn() const;
     bool checkPinGuideConn() const;
 };

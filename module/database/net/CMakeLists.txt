@@ -9,7 +9,11 @@ add_library(${PROJECT_NAME} STATIC ${SOURCES})
 
 # parser
 target_link_libraries(${PROJECT_NAME} PUBLIC parser)
-
+# grid
+target_link_libraries(${PROJECT_NAME} PUBLIC grid)
+# Rsyn
+target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC ../../thirdparty/rsyn/src)
+target_link_libraries(${PROJECT_NAME} PUBLIC rsyn)
 
 # test
 add_executable(${PROJECT_NAME}_test test.cpp)

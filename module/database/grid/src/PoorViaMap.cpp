@@ -235,9 +235,6 @@ void PoorViaMapRegionBuilder::genViaData(utils::IntervalT<int> regionTrackRange)
 }
 
 void PoorViaMapBuilder::initPoorViaMapFast(const vector<std::pair<BoxOnLayer, int>>& fixObjects) {
-    if (setting->dbVerbose >= +db::VerboseLevelT::MIDDLE) {
-        log() << "Init poorViaMapFast ..." << std::endl;
-    }
     const int initMem = utils::mem_use::get_current();
 
     int numCutLayer = routeGrid.getLayerNum() - 1;
@@ -314,10 +311,6 @@ void PoorViaMapBuilder::initPoorViaMapFast(const vector<std::pair<BoxOnLayer, in
 
     printPoorViaMapInfo();
     const int curMem = utils::mem_use::get_current();
-    if (setting->dbVerbose >= +db::VerboseLevelT::MIDDLE) {
-        printflog("MEM(MB): init/cur=%d/%d, incr=%d\n", initMem, curMem, curMem - initMem);
-        log() << std::endl;
-    }
 }
 
 void PoorViaMapBuilder::printPoorViaMapInfo() {
@@ -347,17 +340,6 @@ void PoorViaMapBuilder::printPoorViaMapInfo() {
         }
 
         int totVia = botLayer.tracks.size() * topLayer.tracks.size();
-        if (setting->dbVerbose >= +db::VerboseLevelT::MIDDLE) {
-            printflog("cutlayer%d: poor=%d, one=%d, multi=%d, good=%d, nInterv=%d, totVia=%d, ratio=%.3f\n",
-                      i,
-                      poor,
-                      one,
-                      multi,
-                      good,
-                      nInterv,
-                      totVia,
-                      nInterv * 1.0 / totVia);
-        }
     }
 }
 

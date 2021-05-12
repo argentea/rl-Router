@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RouteGrid.h"
+#include "global.h"
 
 namespace db {
 
