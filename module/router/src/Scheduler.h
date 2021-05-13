@@ -2,10 +2,12 @@
 
 #include "database/src/Database.h"
 #include "SingleNetRouter.h"
+#include <Setting.h>
 
 class Scheduler {
 public:
-    Scheduler(const vector<SingleNetRouter>& routersToExec) : routers(routersToExec){};
+    Scheduler(const vector<SingleNetRouter>& routersToExec, db::Setting& settingData) : setting{settingData}, routers(routersToExec) {};
+	db::Setting& setting;
     vector<vector<int>>& schedule();
 
 private:

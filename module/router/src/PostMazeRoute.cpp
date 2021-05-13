@@ -529,8 +529,10 @@ void PostMazeRoute::getExtendWireRects(const std::vector<std::shared_ptr<db::Gri
         }
     }
 
+	//RL ToDo
     // convert min-area violations to space/short violations for generating history cost
-    if (db::rrrIterSetting.converMinAreaToOtherVio && !succ) {
+    //if (db::rrrIterSetting.converMinAreaToOtherVio && !succ) {
+    if (!succ) {
         for (bool moveLeft = false, leftStop = false, rightStop = false;;) {
             if (begin < low) {
                 leftStop = true;

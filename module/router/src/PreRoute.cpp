@@ -4,22 +4,22 @@ db::RouteStatus PreRoute::run(int numPitchForGuideExpand) {
     // expand guides uniformally
     auto& guides = localNet.routeGuides;
     for (int i = 0; i < guides.size(); ++i) {
-        int expand = localNet.dbNet.routeGuideVios[i] ? numPitchForGuideExpand : db::setting.defaultGuideExpand;
+        int expand = localNet.dbNet.routeGuideVios[i] ? numPitchForGuideExpand : localNet.setting.defaultGuideExpand;
 		//he doesn't use it at all
         database.expandBox(guides[i], numPitchForGuideExpand);
     }
 
     // add diff-layer guides
-    if (db::rrrIterSetting.addDiffLayerGuides) {
+    if (localNet.rrrIterSetting.addDiffLayerGuides) {
         int oriSize = guides.size();
         for (int i = 0; i < oriSize; ++i) {
             int j = guides[i].layerIdx;
-            if (localNet.dbNet.routeGuideVios[i] >= db::setting.diffLayerGuideVioThres) {
+            if (localNet.dbNet.routeGuideVios[i] >= localNet.setting.diffLayerGuideVioThres) {
                 if (j > 2) guides.emplace_back(j - 1, guides[i]);  // do not add to layers 0, 1
                 if ((j + 1) < database.getLayerNum()) guides.emplace_back(j + 1, guides[i]);
                 db::routeStat.increment(db::RouteStage::PRE, db::MiscRouteEvent::ADD_DIFF_LAYER_GUIDE_1, 1);
             }
-            if (localNet.dbNet.routeGuideVios[i] >= db::setting.diffLayerGuideVioThres * 2) {
+            if (localNet.dbNet.routeGuideVios[i] >= localNet.setting.diffLayerGuideVioThres * 2) {
                 if (j > 3) guides.emplace_back(j - 2, guides[i]);  // do not add to layers 0, 1
                 if ((j + 2) < database.getLayerNum()) guides.emplace_back(j + 2, guides[i]);
                 db::routeStat.increment(db::RouteStage::PRE, db::MiscRouteEvent::ADD_DIFF_LAYER_GUIDE_2, 1);
@@ -57,12 +57,12 @@ db::RouteStatus PreRoute::run(int numPitchForGuideExpand) {
 }
 
 db::RouteStatus PreRoute::runIterative() {
-    db::RouteStatus status = run(db::rrrIterSetting.defaultGuideExpand);
+    db::RouteStatus status = run(localNet.rrrIterSetting.defaultGuideExpand);
 
     int iter = 0;
-    int numPitchForGuideExpand = db::rrrIterSetting.defaultGuideExpand;
+    int numPitchForGuideExpand = localNet.rrrIterSetting.defaultGuideExpand;
     utils::timer singleNetTimer;
-    while (status == +db::RouteStatus::FAIL_DETACHED_GUIDE && iter < db::setting.guideExpandIterLimit) {
+    while (status == +db::RouteStatus::FAIL_DETACHED_GUIDE && iter < localNet.setting.guideExpandIterLimit) {
         iter++;
         numPitchForGuideExpand += iter;
 

@@ -1,4 +1,5 @@
 #include "UpdateDB.h"
+#include <Setting.h>
 
 void UpdateDB::commitRouteResult(LocalNet &localNet, db::Net &dbNet) {
     // update db::Net
@@ -53,7 +54,7 @@ void UpdateDB::commitViaTypes(db::Net& dbNet) {
     });
 };
 
-bool UpdateDB::checkViolation(db::Net &dbNet) {
+bool UpdateDB::checkViolation(db::Net &dbNet, db::RrrIterSetting rrrIterSetting) {
     bool hasVio = false;
     auto checkEdge = [&](const db::GridEdge& edge) {
         if (database.getEdgeVioCost(edge, dbNet.idx, false)) {
@@ -63,7 +64,7 @@ bool UpdateDB::checkViolation(db::Net &dbNet) {
             std::vector<std::pair<boostBox, int>> relatedGuides;
             auto checkBox = [&](const db::BoxOnLayer& boxOnLayer) {
                 auto box = boxOnLayer;
-                database.expandBox(box, db::rrrIterSetting.defaultGuideExpand);
+                database.expandBox(box, rrrIterSetting.defaultGuideExpand);
                 boostBox query_box(boostPoint(box.x.low, box.y.low), boostPoint(box.x.high, box.y.high));
                 dbNet.routeGuideRTrees[box.layerIdx].query(bgi::intersects(query_box), std::back_inserter(relatedGuides));
             };

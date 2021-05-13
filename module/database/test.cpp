@@ -12,10 +12,11 @@ int main() {
 	
 	cout << "Database test\n";
 
-	setting.numThreads = 20;
+	Setting setting;
+	globalDetails.numThreads = 20;
 	setting.tat = 300;
 	setting.outputFile = "home/kunpengjiang/project/rl-router/toys/ispd2018/ispd18_sample/ans";
-	setting.dbVerbose = db::VerboseLevelT::HIGH;
+	globalDetails.dbVerbose = db::VerboseLevelT::HIGH;
 
 
 	RsynService service;
@@ -29,11 +30,11 @@ int main() {
     };
 	reader.load(&session, params);
 	service.init();
-	log() << "som";
+	log() << "som\n";
 
 	Database database(setting, service);
 //	database.init();
-	if(setting.dbVerbose >= +db::VerboseLevelT::LOW)
+	if(globalDetails.dbVerbose >= +db::VerboseLevelT::LOW)
 	{
 		cout << "You should get this line.\n";
 	}

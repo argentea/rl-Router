@@ -90,10 +90,10 @@ void GridGraphBuilder::addAdjGuideWrongWayConn() {
 
                 auto cpRange = box1.crossPointRange.IntersectWith(box2.crossPointRange);
 
-                int numWrongWayPoint = (cpRange.range() + 1) * db::rrrIterSetting.wrongWayPointDensity;
+                int numWrongWayPoint = (cpRange.range() + 1) * graph.rrrIterSetting.wrongWayPointDensity;
 
                 DBU pitch = database.getLayer(box1.layerIdx).pitch;
-                db::CostT wrongWayCost = db::setting.wrongWayPenaltyCoeff * pitch;
+                db::CostT wrongWayCost = graph.setting.wrongWayPenaltyCoeff * pitch;
 
                 auto setEdgeCost = [&](int crossPointIdx) {
                     int u = guideToVertex(loGuideIdx, loTrackIdx, crossPointIdx);
@@ -142,7 +142,7 @@ void GridGraphBuilder::addPinWrongWayConn() {
             utils::IntervalT<int> trackInterval = accessBox.trackRange.IntersectWith(guideBox.trackRange);
 
             DBU pitch = database.getLayer(guideBox.layerIdx).pitch;
-            db::CostT wrongWayCost = db::setting.wrongWayPenaltyCoeff * pitch;
+            db::CostT wrongWayCost = graph.setting.wrongWayPenaltyCoeff * pitch;
 
             for (int c = cpInterval.low; c <= cpInterval.high; c++) {
                 for (int t = trackInterval.low; t < trackInterval.high; t++) {
@@ -163,10 +163,10 @@ void GridGraphBuilder::addRegWrongWayConn(int guideIdx) {
     const auto &cpRange = box.crossPointRange;
     const auto &trackRange = box.trackRange;
 
-    int numWrongWayPoint = (cpRange.range() + 1) * db::rrrIterSetting.wrongWayPointDensity;
+    int numWrongWayPoint = (cpRange.range() + 1) * graph.rrrIterSetting.wrongWayPointDensity;
 
     int pitch = database.getLayer(box.layerIdx).pitch;
-    db::CostT wrongWayCost = db::setting.wrongWayPenaltyCoeff * pitch;
+    db::CostT wrongWayCost = graph.setting.wrongWayPenaltyCoeff * pitch;
 
     auto setEdgeCost = [&](int crossPointIdx, int beginTrack, int endTrack) {
         int u = guideToVertex(guideIdx, beginTrack, crossPointIdx);

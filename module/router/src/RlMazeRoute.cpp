@@ -1,5 +1,6 @@
 #include "RlMazeRoute.h"
 #include "UpdateDB.h"
+#include <Setting.h>
 
 ostream &operator<<(ostream &os, const Solution &sol) {
     os << "cost=" << sol.cost << ", len=" << sol.len << ", vertex=" << sol.vertex
@@ -203,7 +204,7 @@ void MazeRoute::getResult() {
                 if (prevS) {
                     db::GridSteiner::setParent(prevS, curS);
                 }
-                if (curVisited.find(cur->vertex) != curVisited.end() && db::setting.singleNetVerbose >= +db::VerboseLevelT::MIDDLE) {
+                if (curVisited.find(cur->vertex) != curVisited.end() && db::globalDetails.singleNetVerbose >= +db::VerboseLevelT::MIDDLE) {
                     printlog("Warning: self loop found in a path for net", localNet.getName(), "for pin", p);
                 }
                 curVisited.emplace(cur->vertex, curS);

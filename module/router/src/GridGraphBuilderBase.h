@@ -28,7 +28,7 @@ protected:
 
     // Besides wrong-way wire cost itself, discourage out-of-pin taps slightly more
     // Because violations between link and via/wire are out of control now
-    double outOfPinWireLengthPenalty = db::setting.weightWrongWayWirelength / db::setting.weightWirelength + 1;
+    double outOfPinWireLengthPenalty = graph.setting.weightWrongWayWirelength / graph.setting.weightWirelength + 1;
 
     // TODO: replace getPinPointCost() by PinTapConnector
     double getPinPointCost(const vector<db::BoxOnLayer> &accessBoxes, const db::GridPoint &grid);

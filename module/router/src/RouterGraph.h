@@ -1,6 +1,8 @@
 #pragma once
 
 #include "database/src/Database.h"
+#include <RouteGrid.h>
+#include <Setting.h>
 
 enum EdgeDirection { BACKWARD = 0, FORWARD = 1, UP = 2, DOWN = 3, LEFT = 4, RIGHT = 5 };
 
@@ -41,6 +43,8 @@ public:
 class RouterGraph {
 public:
 	//TODO
+	db::Setting& setting;
+	db::RrrIterSetting rrrIterSetting;
     int getPinIdx(int u) const;
 	db::CostT getCost(std::shared_ptr<Solution> sol, int v);
 	db::CostT getPotentialPenalty(std::shared_ptr<Solution> sol, int v);
@@ -48,6 +52,7 @@ public:
 	//End TODO
     vector<int>& getVertices(int pinIdx) { return pinToVertex[pinIdx]; }
     void writeDebugFile(const std::string& fn) const;
+	RouterGraph(db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData): setting{settingData}, rrrIterSetting{rrrIterSettingData} {}
 
 private:
     int edgeCount;

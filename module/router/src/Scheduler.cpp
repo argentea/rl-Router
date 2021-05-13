@@ -1,4 +1,5 @@
 #include "Scheduler.h"
+#include <Setting.h>
 
 vector<vector<int>> &Scheduler::schedule() {
     // init assigned table
@@ -14,13 +15,13 @@ vector<vector<int>> &Scheduler::schedule() {
     for (int id = 0; id < routers.size(); ++id) {
         routerIds.push_back(id);
     }
-    if (db::setting.multiNetScheduleSortAll) {
+    if (setting.multiNetScheduleSortAll) {
         std::sort(routerIds.begin(), routerIds.end(), [&](int lhs, int rhs) {
             return routers[lhs].localNet.estimatedNumOfVertices > routers[rhs].localNet.estimatedNumOfVertices;
         });
     }
 
-    if (db::setting.numThreads == 0) {
+    if (db::globalDetails.numThreads == 0) {
         // simple case
         for (int routerId : routerIds) {
             if (!assigned[routerId]) {
@@ -50,7 +51,7 @@ vector<vector<int>> &Scheduler::schedule() {
         }
 
         // sort within batches by NumOfVertices
-        if (db::setting.multiNetScheduleSort) {
+        if (setting.multiNetScheduleSort) {
             for (auto &batch : batches) {
                 std::sort(batch.begin(), batch.end(), [&](int lhs, int rhs) {
                     return routers[lhs].localNet.estimatedNumOfVertices > routers[rhs].localNet.estimatedNumOfVertices;
@@ -59,7 +60,7 @@ vector<vector<int>> &Scheduler::schedule() {
         }
     }
 
-    if (db::setting.multiNetScheduleReverse) {
+    if (setting.multiNetScheduleReverse) {
         reverse(batches.begin(), batches.end());
     }
 
@@ -103,7 +104,7 @@ bool Scheduler::hasConflict(int jobIdx) {
 vector<vector<int>> &PostScheduler::schedule() {
     // init assigned table
     vector<bool> assigned(dbNets.size(), false);
-    if (db::setting.numThreads == 0) {
+    if (db::globalDetails.numThreads == 0) {
         // simple case
         for (int i = 0; i < dbNets.size(); ++i) {
             batches.push_back({i});

@@ -4,8 +4,8 @@
 #include "UpdateDB.h"
 #include "PostRoute.h"
 
-SingleNetRouter::SingleNetRouter(db::Net& databaseNet)
-    : localNet(databaseNet), dbNet(databaseNet), status(db::RouteStatus::SUCC_NORMAL) {}
+SingleNetRouter::SingleNetRouter(db::Net& databaseNet, db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData)
+    : setting{settingData}, rrrIterSetting{rrrIterSettingData}, localNet(databaseNet, settingData, rrrIterSettingData), dbNet(databaseNet), status(db::RouteStatus::SUCC_NORMAL) {}
 
 void SingleNetRouter::preRoute() {
     // Pre-route (obtain proper grid boxes)
@@ -14,7 +14,7 @@ void SingleNetRouter::preRoute() {
 
 void SingleNetRouter::mazeRoute() {
     // Maze route (working on grid only)
-    status &= MazeRoute(localNet).run();
+    status &= MazeRoute(localNet, setting, rrrIterSetting).run();
     PostMazeRoute(localNet).run();
 }
 

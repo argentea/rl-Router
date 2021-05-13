@@ -66,7 +66,7 @@ public:
     int defaultGuideExpand;
     double wrongWayPointDensity;
     bool addDiffLayerGuides;
-    bool converMinAreaToOtherVio;
+    bool converMinAreaToOtherVio = true;
 
 	RrrIterSetting(Setting& settingData): setting{settingData} {}
     void update(int iter, Database& database);

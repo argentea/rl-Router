@@ -43,4 +43,5 @@ set_target_properties(test PROPERTIES LINK_FLAGS "-Wl,--whole-archive -rdynamic 
 target_link_libraries(test parser)
 target_link_libraries(test database)
 target_link_libraries(test router)
+target_link_libraries(test utils)
 
