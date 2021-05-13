@@ -250,7 +250,7 @@ void PoorViaMapBuilder::initPoorViaMapFast(const vector<std::pair<BoxOnLayer, in
 
         poorViaMap[i].resize(botLayer.tracks.size());
 
-        const int numThreads = max(1, setting->numThreads);
+        const int numThreads = max(1, globalDetails.numThreads);
         int numRegions = 40;
 
         int numTrackPerRegion = ceil(botLayer.tracks.size() * 1.0 / numRegions);

@@ -1,21 +1,19 @@
 #pragma once
 
 #include "global.h"
-
 namespace db {
 
 BETTER_ENUM(VerboseLevelT, int, LOW = 0, MIDDLE = 1, HIGH = 2);
 
 // global setting
+class Database;
 class Setting {
 public:
     // basic
     std::string outputFile;
-    int numThreads = 1;  // 0 for simple scheduling
     int tat = std::numeric_limits<int>::max();
 
     // multi_net
-    VerboseLevelT multiNetVerbose = VerboseLevelT::MIDDLE;
     bool multiNetScheduleSortAll = true;
     bool multiNetScheduleSort = true;
     bool multiNetScheduleReverse = true;
@@ -26,7 +24,6 @@ public:
     double rrrFadeCoeff = 0.01;  // should be <= 0.5 to make sure fade/(1-fade) <= 1
 
     // single_net
-    VerboseLevelT singleNetVerbose = VerboseLevelT::MIDDLE;
     int defaultGuideExpand = 2;  // route guide expansion in pitch for all nets
     int guideExpandIterLimit = 9;
     int diffLayerGuideVioThres = 4;
@@ -35,9 +32,6 @@ public:
     bool fixOpenBySST = true;
 
     // db
-    VerboseLevelT dbVerbose = VerboseLevelT::MIDDLE;
-    int maxNumWarnForEachRouteStatus = 5;
-    bool dbWriteDebugFile = false;
     int dbUsePoorViaMapThres = 100000;
     double dbPoorWirePenaltyCoeff = 8;
     double dbPoorViaPenaltyCoeff = 8;
@@ -62,24 +56,35 @@ public:
     static constexpr int weightSpaceVioNum = 500;
     static constexpr int weightMinAreaVioNum = 500;
 
-    void makeItSilent();
-    void adapt();
+    void adapt(Database& database);
 };
-
-extern Setting setting;
 
 // setting that changes in each rrr iteration
 class RrrIterSetting {
 public:
+	Setting& setting;
     int defaultGuideExpand;
     double wrongWayPointDensity;
     bool addDiffLayerGuides;
     bool converMinAreaToOtherVio;
 
-    void update(int iter);
+	RrrIterSetting(Setting& settingData): setting{settingData} {}
+    void update(int iter, Database& database);
     void print() const;
 };
 
-extern RrrIterSetting rrrIterSetting;
+
+class GlobalDetails {
+public:
+    VerboseLevelT dbVerbose = VerboseLevelT::MIDDLE;
+    VerboseLevelT multiNetVerbose = VerboseLevelT::MIDDLE;
+    VerboseLevelT singleNetVerbose = VerboseLevelT::MIDDLE;
+    int numThreads = 4;  // 0 for simple scheduling
+    int maxNumWarnForEachRouteStatus = 5;
+    bool dbWriteDebugFile = false;
+    void makeItSilent();
+};
+
+extern GlobalDetails globalDetails;
 
 }  //   namespace db

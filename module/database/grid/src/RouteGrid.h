@@ -70,6 +70,8 @@ public:
     using ViaMapT = vector<vector<std::multimap<int, int>>>;
     using NDViaMapT = std::unordered_map<GridPoint, const ViaType*>;
 
+	Setting& setting;
+	RouteGrid(Setting& settingData): setting{settingData}{}
     void init();
     void clear();
     void stash();

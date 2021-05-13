@@ -1,3 +1,4 @@
+#include <Setting.h>
 #include<iostream>
 #include"module/router/src/Router.h"
 #include"module/database/src/Database.h"
@@ -8,10 +9,9 @@ int main(int argc, char* argv[]) {
 		cerr << "bad argument\n";
 	}
 	else {
-		router::parser::Parser p;
-		p.read(argv[1], argv[2], argv[3]);
-		db::Database db;
-		db.init(p);
+		db::Setting bsetting;
+		db::Setting& setting = bsetting;
+		db::Database db(db::Setting& setting);
 	}
 	return 0;
 }

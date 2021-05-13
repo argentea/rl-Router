@@ -1,4 +1,5 @@
 #include "net.h"
+#include "global.h"
 
 #include <fstream>
 
@@ -180,7 +181,7 @@ void Net::getPinAccessBoxes(Rsyn::PhysicalLibraryPin phLibPin,
 }
 
 void NetList::init(RsynService& rsynService) {
-    if (db::setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         log() << "Init NetList ..." << std::endl;
     }
     nets.clear();
@@ -198,7 +199,7 @@ void NetList::init(RsynService& rsynService) {
         nets.emplace_back(nets.size(), net, rsynService);
         numPins += nets.back().pinAccessBoxes.size();
     }
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         log() << "The number of nets is " << nets.size() << std::endl;
         log() << "The number of pins is " << numPins << std::endl;
         log() << std::endl;
@@ -206,7 +207,7 @@ void NetList::init(RsynService& rsynService) {
 }
 
 void NetList::writeNetTopo(const std::string& filename) {
-    if (!setting.dbWriteDebugFile) {
+    if (!globalDetails.dbWriteDebugFile) {
         return;
     }
     log() << "Write net topologies to " << filename << " ..." << std::endl;

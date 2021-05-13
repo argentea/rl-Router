@@ -36,13 +36,13 @@ std::unordered_map<int, std::string> descriptions = {
 std::mutex printWarnMsgMutex;
 
 void printWarnMsg(RouteStatus status, const Net& net) {
-    if (setting.dbVerbose < +db::VerboseLevelT::MIDDLE || isSucc(status)) {
+    if (globalDetails.dbVerbose < +db::VerboseLevelT::MIDDLE || isSucc(status)) {
         return;
     }
     printWarnMsgMutex.lock();
     static std::unordered_map<int, int> counts;
     int& count = counts[status._to_integral()];
-    if (count >= db::setting.maxNumWarnForEachRouteStatus) {
+    if (count >= db::globalDetails.maxNumWarnForEachRouteStatus) {
         printWarnMsgMutex.unlock();
         return;
     }
@@ -53,7 +53,7 @@ void printWarnMsg(RouteStatus status, const Net& net) {
     }
     log() << "Warning: Net " << net.getName() << " gets " << status._to_string() << desc << std::endl;
     ++count;
-    if (count == db::setting.maxNumWarnForEachRouteStatus) {
+    if (count == db::globalDetails.maxNumWarnForEachRouteStatus) {
         log() << "More warnings on " << status._to_string() << " will be suppressed" << std::endl;
         log() << std::endl;
     }

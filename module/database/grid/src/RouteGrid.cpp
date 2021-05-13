@@ -56,7 +56,7 @@ void RouteGrid::init() {
 
     setUnitVioCost();
 
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         LayerList::print();
         std::cout << "ROUTE GRID COST" << std::endl;
         std::cout << "unitWireCostRaw (score / DBU) = " << unitWireCostRaw << std::endl;
@@ -111,7 +111,7 @@ void RouteGrid::reset() {
 }
 
 void RouteGrid::setUnitVioCost(double discount) {
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         std::cerr << "Set unit vio cost with discount of" << discount << std::endl;
     }
     unitShortVioCostDiscounted.resize(unitShortVioCost.size());
@@ -833,7 +833,7 @@ void RouteGrid::markFixedMetalBatch(vector<std::pair<BoxOnLayer, int>>& fixedMet
     vector<vector<std::pair<boostBox, int>>> fixedMetalsRtreeItems;
     fixedMetalsRtreeItems.resize(layers.size());
 
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         std::cout << "mark fixed metal batch ..." << std::endl;
     }
     const int initMem = utils::mem_use::get_current();
@@ -868,13 +868,13 @@ void RouteGrid::markFixedMetalBatch(vector<std::pair<BoxOnLayer, int>>& fixedMet
         }
     };
 
-    const int numThreads = max(1, db::setting.numThreads);
+    const int numThreads = max(1, globalDetails.numThreads);
     std::thread threads[numThreads];
     for (int i = 0; i < numThreads; i++) threads[i] = std::thread(thread_func);
     for (int i = 0; i < numThreads; i++) threads[i].join();
 
     const int curMem = utils::mem_use::get_current();
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         printf("MEM(MB): init/cur=%d/%d, incr=%d\n", initMem, curMem, curMem - initMem);
         std::cout << std::endl;
     }
@@ -1272,7 +1272,7 @@ std::pair<double, double> RouteGrid::printAllVio() const {
 }
 
 void RouteGrid::addHistCost() {
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         std::cerr << "Add hist cost";
     }
     addWireHistCost();
@@ -1318,7 +1318,7 @@ void RouteGrid::addViaHistCost() {
 }
 
 void RouteGrid::fadeHistCost(const vector<int>& exceptedNets) {
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         std::cerr << "Fade hist cost by" <<  setting.rrrFadeCoeff <<  "..." << std::endl;
     }
     std::unordered_set<int> exceptedNetSet;
@@ -1342,7 +1342,7 @@ void RouteGrid::fadeHistCost(const vector<int>& exceptedNets) {
 }
 
 void RouteGrid::statHistCost() const {
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         std::map<CostT, int> histWireUsage, histViaUsage;
         for (int layerIdx = 0; layerIdx < getLayerNum(); ++layerIdx) {
             for (int trackIdx = 0; trackIdx < layers[layerIdx].numTracks(); ++trackIdx) {

@@ -6,6 +6,7 @@ namespace db {
 
 class RsynService {
 public:
+    Rsyn::Session session;
     Rsyn::PhysicalService* physicalService;
     Rsyn::RoutingGuide* routeGuideService;
     Rsyn::PhysicalDesign physicalDesign;
@@ -13,7 +14,6 @@ public:
     Rsyn::Module module;
 
     void init() {
-        Rsyn::Session session;
 
         physicalService = session.getService("rsyn.physical");
         routeGuideService = session.getService("rsyn.routingGuide");

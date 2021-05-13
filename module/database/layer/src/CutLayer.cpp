@@ -110,10 +110,9 @@ CutLayer::CutLayer(const Rsyn::PhysicalLayer& rsynLayer,
         if ((rsynVia.allBottomGeometries().size() != 1 ||
              rsynVia.allCutGeometries().size() != 1 ||
              rsynVia.allTopGeometries().size() != 1)) {
-            if (setting.dbVerbose >= +VerboseLevelT::MIDDLE) {
+			//Global detail print setting
                 log() << "Warning in " << __func__ << ": For " << rsynVia.getName()
                       << " , has not exactly one metal layer bound or more than one cut layer bound... " << std::endl;
-            }
             continue;
         }
 

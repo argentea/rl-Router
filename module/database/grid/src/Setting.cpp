@@ -3,13 +3,13 @@
 
 namespace db {
 
-void Setting::makeItSilent() {
+void GlobalDetails::makeItSilent() {
     singleNetVerbose = VerboseLevelT::LOW;
     multiNetVerbose = VerboseLevelT::LOW;
     dbVerbose = VerboseLevelT::LOW;
 }
 
-void Setting::adapt() {
+void Setting::adapt(Database& database) {
     if (database.nets.size() < 10000) {
         ++rrrIterLimit;
     }
@@ -18,9 +18,7 @@ void Setting::adapt() {
     }
 }
 
-Setting setting;
-
-void RrrIterSetting::update(int iter) {
+void RrrIterSetting::update(int iter, Database& database) {
     if (iter == 0) {
         defaultGuideExpand = setting.defaultGuideExpand;
         wrongWayPointDensity = setting.wrongWayPointDensity;
@@ -37,11 +35,11 @@ void RrrIterSetting::update(int iter) {
 }
 
 void RrrIterSetting::print() const {
-    printf("defaultGuideExpand =", defaultGuideExpand);
-    printf("wrongWayPointDensity =", wrongWayPointDensity);
-    printf("addDiffLayerGuides =", addDiffLayerGuides);
+    printf("defaultGuideExpand = %d", defaultGuideExpand);
+    printf("wrongWayPointDensity = %f", wrongWayPointDensity);
+    printf("addDiffLayerGuides = %d", addDiffLayerGuides);
 }
 
-RrrIterSetting rrrIterSetting;
+GlobalDetails globalDetails;
 
 }  // namespace db

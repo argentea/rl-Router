@@ -5,14 +5,15 @@
 namespace db {
 
 void Database::init() {
-    rsynService.init();
 
+	return;
     auto dieBound = rsynService.physicalDesign.getPhysicalDie().getBounds();
     dieRegion = getBoxFromRsynBounds(dieBound);
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
-        log() << "Die region (in DBU): " << dieRegion << std::endl;
-        log() << std::endl;
+    if (globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+		std::cout << "Die region (in DBU): " << dieRegion << std::endl;
+        std::cout << std::endl;
     }
+	return;
 
     RouteGrid::init();
 
@@ -273,7 +274,7 @@ void Database::writeDEF(const std::string& filename) {
 }
 
 void Database::markPinAndObsOccupancy() {
-    if (db::setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (db::globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         log() << "Mark pin & obs occupancy on RouteGrid ..." << std::endl;
     }
     vector<std::pair<BoxOnLayer, int>> fixedMetalVec;
@@ -420,7 +421,7 @@ void Database::markPinAndObsOccupancy() {
         layerNumFixedObjects[fixedMetal.first.layerIdx]++;
     }
     // Print
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         log() << "The number of unused pins is " << numUnusedPins << std::endl;
         log() << "The number of OBS is " << numObs << std::endl;
         log() << "The number of special net OBS is " << numSNetObs << std::endl;
@@ -432,7 +433,7 @@ void Database::markPinAndObsOccupancy() {
     log() << std::endl;
 
     // STEP 2: mark
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         printlog("mark fixed metal rtrees...");
     }
 
@@ -441,7 +442,7 @@ void Database::markPinAndObsOccupancy() {
     addPinViaMetal(fixedMetalVec);
 
     // Mark poor wire
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         printlog("mark poor wire map...");
     }
     for (const auto& fixedMetal : fixedMetalVec) {
@@ -467,10 +468,10 @@ void Database::markPinAndObsOccupancy() {
         if (fixedMetal.second >=0) {
             // add initial hist cost to help pin access
             if (gridBox.layerIdx != 0) {
-                useHistWireSegments(getLower(gridBox), fixedMetal.second, db::setting.dbInitHistUsageForPinAccess);
+                useHistWireSegments(getLower(gridBox), fixedMetal.second, setting.dbInitHistUsageForPinAccess);
             }
             if (gridBox.layerIdx != getLayerNum() - 1) {
-                useHistWireSegments(getUpper(gridBox), fixedMetal.second, db::setting.dbInitHistUsageForPinAccess);
+                useHistWireSegments(getUpper(gridBox), fixedMetal.second, setting.dbInitHistUsageForPinAccess);
             }
         }
     }
@@ -479,7 +480,7 @@ void Database::markPinAndObsOccupancy() {
         usePoorViaMap[i] = (layerNumFixedObjects[i] >= setting.dbUsePoorViaMapThres ||
                             layerNumFixedObjects[i + 1] >= setting.dbUsePoorViaMapThres);
     }
-    if (setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         printlog("mark poor via map...");
         printlog("usePoorViaMap", usePoorViaMap);
     }
@@ -516,7 +517,7 @@ void Database::addPinViaMetal(vector<std::pair<BoxOnLayer, int>>& fixedMetalVec)
             metalMutex.unlock();
         }
     });
-    if (db::setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (db::globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         printlog("pinViaMT", pinViaMT);
     }
 
@@ -526,14 +527,14 @@ void Database::addPinViaMetal(vector<std::pair<BoxOnLayer, int>>& fixedMetalVec)
 void Database::initMTSafeMargin() {
     for (auto& layer : layers) {
         layer.mtSafeMargin = max({layer.minAreaMargin, layer.confLutMargin, layer.fixedMetalQueryMargin});
-        if (db::setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+        if (db::globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
             printlog(layer.name, "mtSafeMargin = max {", layer.minAreaMargin, layer.confLutMargin, layer.fixedMetalQueryMargin, "} =", layer.mtSafeMargin);
         }
     }
 }
 
 void Database::sliceRouteGuides() {
-    if (db::setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (db::globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         log() << "Slice RouteGuides ..." << std::endl;
         log() << std::endl;
     }
@@ -554,7 +555,7 @@ void Database::sliceRouteGuides() {
 }
 
 void Database::constructRouteGuideRTrees() {
-    if (db::setting.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+    if (db::globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         log() << "Construct r-trees for route guides of each net ..." << std::endl;
         log() << std::endl;
     }
@@ -725,8 +726,8 @@ void Database::getGridPinAccessBoxes(const Net& net, vector<vector<db::GridBoxOn
 }  // namespace db
 
 MTStat runJobsMT(int numJobs, const std::function<void(int)>& handle) {
-    int numThreads = min(numJobs, db::setting.numThreads);
-    MTStat mtStat(max(1, db::setting.numThreads));
+    int numThreads = min(numJobs, db::globalDetails.numThreads);
+    MTStat mtStat(max(1, db::globalDetails.numThreads));
     if (numThreads <= 1) {
         utils::timer threadTimer;
         for (int i = 0; i < numJobs; ++i) {
