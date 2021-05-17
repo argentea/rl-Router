@@ -71,7 +71,7 @@ public:
     using NDViaMapT = std::unordered_map<GridPoint, const ViaType*>;
 
 	Setting& setting;
-	RouteGrid(Setting& settingData): setting{settingData}{}
+	RouteGrid(Setting& settingData, RsynService& serviceData): LayerList(serviceData), setting{settingData}{}
     void init();
     void clear();
     void stash();

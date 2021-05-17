@@ -60,4 +60,4 @@ private:
     int layerIdx;
 };
 
-void connectBySTT(db::Net& net);
+void connectBySTT(db::Net& net, db::Database& database);

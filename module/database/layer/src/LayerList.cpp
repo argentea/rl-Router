@@ -5,7 +5,7 @@
 namespace db {
 
 void LayerList::init() {
-    Rsyn::Session session;
+    Rsyn::Session session = rsynService.session;
     Rsyn::PhysicalDesign physicalDesign =
         static_cast<Rsyn::PhysicalService*>(session.getService("rsyn.physical"))->getPhysicalDesign();
     const DBU libDBU = physicalDesign.getDatabaseUnits(Rsyn::LIBRARY_DBU);

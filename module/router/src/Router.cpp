@@ -261,7 +261,7 @@ void Router::finish() {
         int count = 0;
         for (auto& net : database.nets) {
             if (net.defWireSegments.empty() && net.numOfPins() > 1) {
-                connectBySTT(net);
+                connectBySTT(net, database);
                 count++;
             }
         }

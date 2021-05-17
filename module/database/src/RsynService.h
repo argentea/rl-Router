@@ -14,7 +14,6 @@ public:
     Rsyn::Module module;
 
     void init() {
-
         physicalService = session.getService("rsyn.physical");
         routeGuideService = session.getService("rsyn.routingGuide");
 

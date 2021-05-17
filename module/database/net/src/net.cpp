@@ -76,7 +76,7 @@ Net::Net(int i, Rsyn::Net net, RsynService& rsynService) {
 
     // pins
     pinAccessBoxes.reserve(net.getNumPins());
-   	Rsyn::Session session;
+   	Rsyn::Session session = rsynService.session;
     const Rsyn::PhysicalDesign& physicalDesign = static_cast<Rsyn::PhysicalService*>(session.getService("rsyn.physical"))->getPhysicalDesign();
     const DBU libDBU = physicalDesign.getDatabaseUnits(Rsyn::LIBRARY_DBU);
     for (auto RsynPin : net.allPins()) {

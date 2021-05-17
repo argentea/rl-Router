@@ -9,9 +9,9 @@ public:
     void run();
 	db::Setting& setting;
 	db::RrrIterSetting& rrrIterSetting;
+	Router(db::Database& databaseData, db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData): rrrIterSetting{rrrIterSettingData}, setting{settingData}, database{databaseData} {}
 
 private:
-	Router(db::Database& databaseData, db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData): rrrIterSetting{rrrIterSettingData}, setting{settingData}, database{databaseData} {}
 	db::Database& database;
     int iter = 0;
     vector<float> _netsCost;

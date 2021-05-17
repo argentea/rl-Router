@@ -8,6 +8,7 @@ namespace db {
 
 class LayerList {
 public:
+	LayerList(RsynService& serviceData): rsynService(serviceData) {}
     void init();
 
     // Check whether a geo primitive is valid
@@ -76,6 +77,7 @@ public:
     vector<vector<vector<bool>>> mergeLUTsCP(const vector<vector<vector<vector<bool>>>>& LUTs);
 
 protected:
+    RsynService& rsynService;
     vector<MetalLayer> layers;
     vector<CutLayer> cutLayers;
 

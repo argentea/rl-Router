@@ -6,7 +6,6 @@ namespace db {
 
 void RouteGrid::init() {
     LayerList::init();
-	std::cout << "LayerList::init end" << std::endl;exit(0);
     // Fixed metal
     fixedMetals.resize(layers.size());
     // Wire

@@ -21,7 +21,7 @@ namespace db {
 class Database : public RouteGrid, public NetList {
 public:
     utils::BoxT<DBU> dieRegion;
-	Database(Setting& settingData, RsynService& serviceData) :RouteGrid(settingData), rsynService{serviceData}{}
+	Database(Setting& settingData, RsynService& serviceData) :RouteGrid(settingData, serviceData){}
 
     void init();
     void clear() { RouteGrid::clear(); }
@@ -38,7 +38,6 @@ public:
     void getGridPinAccessBoxes(const Net& net, vector<vector<db::GridBoxOnLayer>>& gridPinAccessBoxes) const;
 
 private:
-    RsynService& rsynService;
 
     // mark pin and obstacle occupancy on RouteGrid
     void markPinAndObsOccupancy();
