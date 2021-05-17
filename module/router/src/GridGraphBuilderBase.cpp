@@ -1,5 +1,5 @@
 #include "GridGraphBuilderBase.h"
-#include "PinTapConnector.h"
+#include "../../database/src/PinTapConnector.h"
 
 double GridGraphBuilderBase::getPinPointCost(const vector<db::BoxOnLayer> &accessBoxes, const db::GridPoint &grid) {
     auto point = database.getLoc(grid);
@@ -61,7 +61,7 @@ void GridGraphBuilderBase::addOutofPinPenalty() {
     for (unsigned p = 0; p < localNet.numOfPins(); p++) {
         for (auto vertex : graph.pinToVertex[p]) {
             graph.vertexCost[vertex] += getPinPointCost(localNet.dbNet.pinAccessBoxes[p], vertexToGridPoint[vertex]);
-            PinTapConnector pinTapConnector(vertexToGridPoint[vertex], localNet.dbNet, p);
+            PinTapConnector pinTapConnector(vertexToGridPoint[vertex], localNet.dbNet, p, database);
             pinTapConnector.run();
             if (pinTapConnector.bestVio > 0) {
                 graph.vertexCost[vertex] += database.getUnitSpaceVioCost();
