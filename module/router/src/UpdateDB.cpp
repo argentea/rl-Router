@@ -7,7 +7,7 @@ void UpdateDB::commitRouteResult(LocalNet &localNet, db::Net &dbNet, db::Databas
     // update RouteGrid
     dbNet.postOrderVisitGridTopo([&](std::shared_ptr<db::GridSteiner> node) {
         if (node->parent) {
-            database.useEdge({*node, *(node->parent)}, dbNet.idx);
+            database.useEdge({*node, *(node->parent), database}, dbNet.idx);
         }
         if (node->extWireSeg) {
             database.useEdge(*(node->extWireSeg), dbNet.idx);
@@ -19,7 +19,7 @@ void UpdateDB::clearRouteResult(db::Net &dbNet, db::Database& database) {
     // update RouteGrid
     dbNet.postOrderVisitGridTopo([&](std::shared_ptr<db::GridSteiner> node) {
         if (node->parent) {
-            database.removeEdge({*node, *(node->parent)}, dbNet.idx);
+            database.removeEdge({*node, *(node->parent), database}, dbNet.idx);
         }
         if (node->extWireSeg) {
             database.removeEdge(*(node->extWireSeg), dbNet.idx);
@@ -48,7 +48,7 @@ void UpdateDB::clearMinAreaRouteResult(db::Net& dbNet, db::Database& database) {
 void UpdateDB::commitViaTypes(db::Net& dbNet, db::Database& database) {
     dbNet.postOrderVisitGridTopo([&](std::shared_ptr<db::GridSteiner> node) {
         if (!(node->parent)) return;
-        db::GridEdge edge(*node, *(node->parent));
+        db::GridEdge edge(*node, *(node->parent), database);
         if (!edge.isVia())  return;
         database.markViaType(edge.lowerGridPoint(), node->viaType);
     });
@@ -81,7 +81,7 @@ bool UpdateDB::checkViolation(db::Net &dbNet, db::RrrIterSetting rrrIterSetting,
         }
     };
     dbNet.postOrderVisitGridTopo([&](std::shared_ptr<db::GridSteiner> node) {
-        if (node->parent) checkEdge({*node, *(node->parent)});
+        if (node->parent) checkEdge({*node, *(node->parent), database});
         if (node->extWireSeg) checkEdge(*(node->extWireSeg));
     });
     return hasVio;
@@ -94,7 +94,7 @@ double UpdateDB::getNetVioCost(const db::Net &dbNet, db::Database& database) {
         net_cost += edge_cost;
     };
     dbNet.postOrderVisitGridTopo([&](std::shared_ptr<db::GridSteiner> node) {
-        if (node->parent) checkEdge({*node, *(node->parent)});
+        if (node->parent) checkEdge({*node, *(node->parent), database});
         if (node->extWireSeg) checkEdge(*(node->extWireSeg));
     });
     return net_cost;

@@ -378,7 +378,7 @@ void PostMazeRoute::extendMinAreaWires() {
     // assume wrong-way segments make min area rule satisfied...
     std::unordered_set<std::shared_ptr<db::GridSteiner>> hasWrongWaySeg;
     net.postOrderVisitGridTopo([&](std::shared_ptr<db::GridSteiner> node) {
-        if (node->parent && db::GridEdge(*node, *(node->parent)).isWrongWaySegment()) {
+        if (node->parent && db::GridEdge(*node, *(node->parent), database).isWrongWaySegment()) {
             hasWrongWaySeg.insert(node);
             hasWrongWaySeg.insert(node->parent);
         }
@@ -387,17 +387,17 @@ void PostMazeRoute::extendMinAreaWires() {
     // 2. Process track segments (may be pieced)
     net.postOrderVisitGridTopo([&](std::shared_ptr<db::GridSteiner> node) {
         if (node->isRealPin() || hasWrongWaySeg.find(node) != hasWrongWaySeg.end()) return;
-        if (node->parent && db::GridEdge(*node, *(node->parent)).isTrackSegment()) return;
+        if (node->parent && db::GridEdge(*node, *(node->parent), database).isTrackSegment()) return;
         vector<std::shared_ptr<db::GridSteiner>> descendants;
         for (auto c : node->children) {
-            if (db::GridEdge(*node, *c).isTrackSegment()) {
+            if (db::GridEdge(*node, *c, database).isTrackSegment()) {
                 if (c->isRealPin() || hasWrongWaySeg.find(c) != hasWrongWaySeg.end()) return;
                 // extend track segment along node -> c -> cc
                 bool extended = true;
                 while (extended) {
                     extended = false;
                     for (auto cc : c->children) {
-                        if (db::GridEdge(*cc, *c).isTrackSegment()) {
+                        if (db::GridEdge(*cc, *c, database).isTrackSegment()) {
                             if (cc->isRealPin() || hasWrongWaySeg.find(cc) != hasWrongWaySeg.end()) return;
                             extended = true;
                             c = cc;
@@ -421,11 +421,11 @@ void PostMazeRoute::extendMinAreaWires() {
     // 3. Process vias (1. two vias only, 2. single via with fake pin)
     net.postOrderVisitGridTopo([&](std::shared_ptr<db::GridSteiner> node) {
         if (!(node->parent)) return;
-        db::GridEdge edge(*node, *(node->parent));
+        db::GridEdge edge(*node, *(node->parent), database);
         if (edge.isVia()) {
             if (!node->isRealPin()) {
                 if (node->children.size() == 1 &&
-                    db::GridEdge(*node, *(node->children[0])).isVia()) {  // case 1: both are vias
+                    db::GridEdge(*node, *(node->children[0]), database).isVia()) {  // case 1: both are vias
                     candidateEdges.push_back({node});
                 } else if (node->children.empty()) {  // case 2.1: node end by a via (should be a fakePin)
                     candidateEdges.push_back({node});
@@ -565,16 +565,17 @@ void PostMazeRoute::getExtendWireRects(const std::vector<std::shared_ptr<db::Gri
         if (candEdge.size() == 1) {
             // a long wire ext
             candEdge[0]->extWireSeg = std::make_unique<db::GridEdge>(db::GridPoint(layer.idx, trackIdx, begin),
-                                                                     db::GridPoint(layer.idx, trackIdx, end));
+                                                                     db::GridPoint(layer.idx, trackIdx, end),
+																	 database);
         } else {
             // one or two short wire ext
             for (const auto &gridSteiner : candEdge) {
                 if (gridSteiner->crossPointIdx == leftCP && begin != leftCP) {
                     gridSteiner->extWireSeg = std::make_unique<db::GridEdge>(
-                        db::GridPoint(layer.idx, trackIdx, begin), db::GridPoint(layer.idx, trackIdx, leftCP));
+                        db::GridPoint(layer.idx, trackIdx, begin), db::GridPoint(layer.idx, trackIdx, leftCP), database);
                 } else if (gridSteiner->crossPointIdx == rightCP && end != rightCP) {
                     gridSteiner->extWireSeg = std::make_unique<db::GridEdge>(
-                        db::GridPoint(layer.idx, trackIdx, rightCP), db::GridPoint(layer.idx, trackIdx, end));
+                        db::GridPoint(layer.idx, trackIdx, rightCP), db::GridPoint(layer.idx, trackIdx, end), database);
                 }
             }
         }

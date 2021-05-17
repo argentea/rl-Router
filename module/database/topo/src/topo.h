@@ -65,12 +65,13 @@ struct hash<db::GridPoint> {
 namespace db {
 
 // GridEdge
-
+class Database;
 class GridEdge {
 public:
     GridPoint u, v;
+	Database& database;
 
-    GridEdge(const GridPoint& nodeU, const GridPoint& nodeV) : u(nodeU), v(nodeV) {}
+    GridEdge(const GridPoint& nodeU, const GridPoint& nodeV, Database& db);
 
     // two types of GridEdge: 1. via, 2. track segment
     bool isVia() const;

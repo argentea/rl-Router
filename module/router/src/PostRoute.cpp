@@ -60,7 +60,7 @@ void PostRoute::getViaTypes() {
     }
     dbNet.postOrderVisitGridTopo([&](std::shared_ptr<db::GridSteiner> node) {
         if (node->parent) {
-            db::GridEdge edge(*node, *(node->parent));
+            db::GridEdge edge(*node, *(node->parent), database);
             if (edge.isVia()) {
                 // get pinIdx (consider a neighbor vertex of node-parent edge)
                 auto steinerU = node, steinerV = node->parent;
@@ -89,7 +89,7 @@ void PostRoute::getTopo() {
     // 1. from gridTopo
     dbNet.postOrderVisitGridTopo([&](std::shared_ptr<db::GridSteiner> node) {
         if (node->parent) {
-            db::GridEdge edge(*node, *(node->parent));
+            db::GridEdge edge(*node, *(node->parent), database);
             if (edge.isVia()) {
                 const db::GridPoint &via = edge.lowerGridPoint();
                 database.writeDEFVia(dbNet, database.getLoc(edge.u), *(node->viaType), edge.u.layerIdx);
@@ -162,14 +162,14 @@ void PostRoute::getTopo() {
             }
         }
         for (auto child : node->children) {
-            std::get<2>(subTreeMetals[subTreeIdx]).push_back(getEdgeLayerMetal({*node, *child}, child->viaType));
+            std::get<2>(subTreeMetals[subTreeIdx]).push_back(getEdgeLayerMetal({*node, *child, database}, child->viaType));
             if (layerIdx == child->layerIdx)
                 updateSubTreeMetals(child, subTreeIdx);
             else {
                 subTreeMetals.emplace_back(
                     child->layerIdx,
                     std::unordered_set<unsigned>(),
-                    vector<utils::BoxT<DBU>>(1, getEdgeLayerMetal({*child, *node}, child->viaType)));
+                    vector<utils::BoxT<DBU>>(1, getEdgeLayerMetal({*child, *node, database}, child->viaType)));
                 updateSubTreeMetals(child, subTreeMetals.size() - 1);
             }
         }

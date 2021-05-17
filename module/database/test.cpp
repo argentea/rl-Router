@@ -48,9 +48,8 @@ int main() {
 	{
 		cout << "You should get this line.\n";
 	}
-//	std::cerr << "RL::database init end" << std::endl;
-//  db::setting.adapt();
-//	std::cerr << "RL::database setting adapt end" << std::endl;
+	std::cerr << "RL::database init end" << std::endl;
+	std::cerr << "RL::database setting adapt end" << std::endl;
 
     return 0;
 }

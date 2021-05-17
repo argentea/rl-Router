@@ -2,7 +2,8 @@
 
 #include "RouterGraph.h"
 #include "LocalNet.h"
-#include "src/Database.h"
+#include "../../database/src/Database.h"
+#include <math.h>
 
 class GridGraphBuilderBase {
 public:

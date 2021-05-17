@@ -1,4 +1,5 @@
 #include"topo.h"
+#include "database/src/Database.h"
 
 namespace db {
 
@@ -45,9 +46,10 @@ std::ostream& operator<<(std::ostream& os, const GridEdge& edge) {
     os << "gEdge(" << edge.u << " " << edge.v << ")";
     return os;
 }
-//todo 判断isVia需要database提供layer关系的信息. 考虑到database不止一个.这里留给未来处理
 
-/*bool GridEdge::isVia() const {
+GridEdge::GridEdge(const GridPoint& nodeU, const GridPoint& nodeV, Database& db): database(db), u(nodeU), v(nodeV) {}
+
+bool GridEdge::isVia() const {
     const auto& lower = (u.layerIdx <= v.layerIdx) ? u : v;
     const auto& upper = (u.layerIdx > v.layerIdx) ? u : v;
     if ((lower.layerIdx + 1) == database.getLayerNum()) {
@@ -55,7 +57,7 @@ std::ostream& operator<<(std::ostream& os, const GridEdge& edge) {
     }
     return database.getUpper(lower) == upper;
 }
-*/
+
 bool GridEdge::isTrackSegment() const { return u.layerIdx == v.layerIdx && u.trackIdx == v.trackIdx; }
 
 bool GridEdge::isWrongWaySegment() const { return u.layerIdx == v.layerIdx && u.crossPointIdx == v.crossPointIdx; }

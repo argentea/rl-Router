@@ -184,7 +184,7 @@ vector<std::pair<boostBox, int>> PostScheduler::getNetBoxes(const db::Net &dbNet
     vector<std::pair<boostBox, int>> boostBoxes;
     dbNet.postOrderVisitGridTopo([&](std::shared_ptr<db::GridSteiner> node) {
         if (node->parent) {
-            db::GridEdge edge(*node, *(node->parent));
+            db::GridEdge edge(*node, *(node->parent), database);
             if (edge.isVia()) {
                 boostBoxes.emplace_back(getBoostBox(edge.u), edge.u.layerIdx);
                 boostBoxes.emplace_back(getBoostBox(edge.v), edge.v.layerIdx);

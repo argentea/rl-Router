@@ -517,9 +517,6 @@ void Database::addPinViaMetal(vector<std::pair<BoxOnLayer, int>>& fixedMetalVec)
             metalMutex.unlock();
         }
     });
-    if (db::globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
-        printlog("pinViaMT", pinViaMT);
-    }
 
     markFixedMetalBatch(fixedMetalVec, beginIdx, fixedMetalVec.size());  // TODO: may not be needed
 }
