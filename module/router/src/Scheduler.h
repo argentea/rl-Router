@@ -6,7 +6,8 @@
 
 class Scheduler {
 public:
-    Scheduler(const vector<SingleNetRouter>& routersToExec, db::Setting& settingData) : setting{settingData}, routers(routersToExec) {};
+    Scheduler(const vector<SingleNetRouter>& routersToExec, db::Setting& settingData, db::Database& db) : database(db), setting{settingData}, routers(routersToExec) {};
+	db::Database& database;
 	db::Setting& setting;
     vector<vector<int>>& schedule();
 
@@ -23,8 +24,9 @@ private:
 
 class PostScheduler {
 public:
-    PostScheduler(const vector<db::Net>& netsToExec) : dbNets(netsToExec){};
+    PostScheduler(const vector<db::Net>& netsToExec, db::Database& db) : database(db), dbNets(netsToExec){};
     vector<vector<int>>& schedule();
+	db::Database& database;
 
 private:
     const vector<db::Net>& dbNets;

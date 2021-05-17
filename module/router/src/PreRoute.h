@@ -4,7 +4,8 @@
 
 class PreRoute {
 public:
-    PreRoute(LocalNet& localNetData) : localNet(localNetData) {}
+	db::Database& database;
+    PreRoute(LocalNet& localNetData, db::Database& db) :  database(db), localNet(localNetData) {}
 
     db::RouteStatus runIterative();
 

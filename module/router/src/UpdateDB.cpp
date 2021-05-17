@@ -1,7 +1,7 @@
 #include "UpdateDB.h"
 #include <Setting.h>
 
-void UpdateDB::commitRouteResult(LocalNet &localNet, db::Net &dbNet) {
+void UpdateDB::commitRouteResult(LocalNet &localNet, db::Net &dbNet, db::Database& database) {
     // update db::Net
     dbNet.gridTopo = move(localNet.gridTopo);
     // update RouteGrid
@@ -15,7 +15,7 @@ void UpdateDB::commitRouteResult(LocalNet &localNet, db::Net &dbNet) {
     });
 }
 
-void UpdateDB::clearRouteResult(db::Net &dbNet) {
+void UpdateDB::clearRouteResult(db::Net &dbNet, db::Database& database) {
     // update RouteGrid
     dbNet.postOrderVisitGridTopo([&](std::shared_ptr<db::GridSteiner> node) {
         if (node->parent) {
@@ -29,7 +29,7 @@ void UpdateDB::clearRouteResult(db::Net &dbNet) {
     dbNet.clearResult();
 }
 
-void UpdateDB::commitMinAreaRouteResult(db::Net& dbNet) {
+void UpdateDB::commitMinAreaRouteResult(db::Net& dbNet, db::Database& database) {
     dbNet.postOrderVisitGridTopo([&](std::shared_ptr<db::GridSteiner> node) {
         if (node->extWireSeg) {
             database.useEdge(*(node->extWireSeg), dbNet.idx);
@@ -37,7 +37,7 @@ void UpdateDB::commitMinAreaRouteResult(db::Net& dbNet) {
     });
 };
 
-void UpdateDB::clearMinAreaRouteResult(db::Net& dbNet) {
+void UpdateDB::clearMinAreaRouteResult(db::Net& dbNet, db::Database& database) {
     dbNet.postOrderVisitGridTopo([&](std::shared_ptr<db::GridSteiner> node) {
         if (node->extWireSeg) {
             database.removeEdge(*(node->extWireSeg), dbNet.idx);
@@ -45,7 +45,7 @@ void UpdateDB::clearMinAreaRouteResult(db::Net& dbNet) {
     });
 };
 
-void UpdateDB::commitViaTypes(db::Net& dbNet) {
+void UpdateDB::commitViaTypes(db::Net& dbNet, db::Database& database) {
     dbNet.postOrderVisitGridTopo([&](std::shared_ptr<db::GridSteiner> node) {
         if (!(node->parent)) return;
         db::GridEdge edge(*node, *(node->parent));
@@ -54,7 +54,7 @@ void UpdateDB::commitViaTypes(db::Net& dbNet) {
     });
 };
 
-bool UpdateDB::checkViolation(db::Net &dbNet, db::RrrIterSetting rrrIterSetting) {
+bool UpdateDB::checkViolation(db::Net &dbNet, db::RrrIterSetting rrrIterSetting, db::Database& database) {
     bool hasVio = false;
     auto checkEdge = [&](const db::GridEdge& edge) {
         if (database.getEdgeVioCost(edge, dbNet.idx, false)) {
@@ -87,7 +87,7 @@ bool UpdateDB::checkViolation(db::Net &dbNet, db::RrrIterSetting rrrIterSetting)
     return hasVio;
 }
 
-double UpdateDB::getNetVioCost(const db::Net &dbNet) {
+double UpdateDB::getNetVioCost(const db::Net &dbNet, db::Database& database) {
     double net_cost{0};
     auto checkEdge = [&](const db::GridEdge& edge) {
         double edge_cost = database.getEdgeVioCost(edge, dbNet.idx, false);

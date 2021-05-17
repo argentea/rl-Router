@@ -7,7 +7,8 @@
 
 class MazeRoute {
 public:
-    MazeRoute(LocalNet &localNetData, db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData) : localNet(localNetData), graph(settingData, rrrIterSettingData) {}
+    MazeRoute(LocalNet &localNetData, db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData, db::Database& db) : database(db), localNet(localNetData), graph(settingData, rrrIterSettingData, database) {}
+	db::Database& database;
 
     db::RouteStatus run();
 

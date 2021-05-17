@@ -6,7 +6,6 @@ namespace db {
 
 void Database::init() {
 
-	return;
     auto dieBound = rsynService.physicalDesign.getPhysicalDie().getBounds();
     dieRegion = getBoxFromRsynBounds(dieBound);
     if (globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
@@ -219,7 +218,7 @@ void Database::writeDEF(const std::string& filename) {
                     }
                 }
             }
-            for (const std::pair<std::tuple<string, Dimension, DBU>, vector<std::pair<DBU, bool>>>& p : tracks) {
+            for (const std::pair<std::tuple<string, Dimension, DBU>, vector<std::pair<DBU, bool>>> p : tracks) {
                 vector<std::pair<DBU, bool>> pts = p.second;
                 std::sort(pts.begin(), pts.end());
                 unsigned isWire = 0;
@@ -492,8 +491,8 @@ void Database::addPinViaMetal(vector<std::pair<BoxOnLayer, int>>& fixedMetalVec)
     int beginIdx = fixedMetalVec.size();
 
     std::mutex metalMutex;
-    auto pinViaMT = runJobsMT(database.nets.size(), [&](int netIdx) { 
-        const auto& net = database.nets[netIdx];
+    auto pinViaMT = runJobsMT(nets.size(), [&](int netIdx) { 
+        const auto& net = nets[netIdx];
         vector<vector<db::GridBoxOnLayer>> gridPinAccessBoxes;
         getGridPinAccessBoxes(net, gridPinAccessBoxes);
         for (int pinIdx = 0; pinIdx < net.numOfPins(); pinIdx++) {
@@ -505,12 +504,13 @@ void Database::addPinViaMetal(vector<std::pair<BoxOnLayer, int>>& fixedMetalVec)
             const auto& gridBox = accessBoxes[lastIdx];
             db::GridPoint tap(gridBox.layerIdx, gridBox.trackRange.low, gridBox.crossPointRange.low);
             db::BoxOnLayer bestBox;
+			PinTapConnector pinTapConnector(tap, net, pinIdx, *this);
             db::RouteStatus status =
-                PinTapConnector::getBestPinAccessBox(getLoc(tap), tap.layerIdx, net.pinAccessBoxes[pinIdx], bestBox);
+                pinTapConnector.getBestPinAccessBox(getLoc(tap), tap.layerIdx, net.pinAccessBoxes[pinIdx], bestBox);
             if (status != +db::RouteStatus::SUCC_CONN_EXT_PIN || bestBox.layerIdx == tap.layerIdx) continue;
             utils::PointT<DBU> viaLoc(bestBox.cx(), bestBox.cy());
             int layerIdx = min(bestBox.layerIdx, tap.layerIdx);
-            auto viaType = database.getBestViaTypeForFixed(viaLoc, layerIdx, net.idx);
+            auto viaType = getBestViaTypeForFixed(viaLoc, layerIdx, net.idx);
             metalMutex.lock();
             fixedMetalVec.emplace_back(db::BoxOnLayer(layerIdx, viaType.getShiftedBotMetal(viaLoc)), net.idx);
             fixedMetalVec.emplace_back(db::BoxOnLayer(layerIdx + 1, viaType.getShiftedTopMetal(viaLoc)), net.idx);

@@ -57,8 +57,6 @@ private:
 
 }  //   namespace db
 
-extern db::Database database;
-
 namespace std {
 
 //  hash function for Dimension

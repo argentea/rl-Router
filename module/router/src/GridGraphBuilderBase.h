@@ -2,11 +2,14 @@
 
 #include "RouterGraph.h"
 #include "LocalNet.h"
+#include "src/Database.h"
 
 class GridGraphBuilderBase {
 public:
-    GridGraphBuilderBase(LocalNet &localNetData, RouterGraph &gridGraph)
-        : localNet(localNetData),
+	db::Database& database;
+    GridGraphBuilderBase(LocalNet &localNetData, RouterGraph &gridGraph, db::Database& db)
+        : database(db),
+		  localNet(localNetData),
           graph(gridGraph),
           vertexToGridPoint(graph.vertexToGridPoint),
           minAreaFixable(graph.minAreaFixable) {

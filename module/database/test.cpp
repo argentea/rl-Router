@@ -13,6 +13,8 @@ int main() {
 	cout << "Database test\n";
 
 	Setting setting;
+	RrrIterSetting rrrIterSetting(setting);
+	
 	globalDetails.numThreads = 20;
 	setting.tat = 300;
 	setting.outputFile = "home/kunpengjiang/project/rl-router/toys/ispd2018/ispd18_sample/ans";
@@ -30,10 +32,18 @@ int main() {
     };
 	reader.load(&session, params);
 	service.init();
-	log() << "som\n";
+	log() << "service inited\n";
 
 	Database database(setting, service);
-//	database.init();
+    auto dieBound = service.physicalDesign.getPhysicalDie().getBounds();
+    auto dieRegion = getBoxFromRsynBounds(dieBound);
+    if (globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
+		std::cout << "Die region (in DBU): " << dieRegion << std::endl;
+        std::cout << std::endl;
+    }
+
+	database.init();
+//
 	if(globalDetails.dbVerbose >= +db::VerboseLevelT::LOW)
 	{
 		cout << "You should get this line.\n";

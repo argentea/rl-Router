@@ -44,6 +44,7 @@ class RouterGraph {
 public:
 	//TODO
 	db::Setting& setting;
+	db::Database& database;
 	db::RrrIterSetting rrrIterSetting;
     int getPinIdx(int u) const;
 	db::CostT getCost(std::shared_ptr<Solution> sol, int v);
@@ -52,7 +53,7 @@ public:
 	//End TODO
     vector<int>& getVertices(int pinIdx) { return pinToVertex[pinIdx]; }
     void writeDebugFile(const std::string& fn) const;
-	RouterGraph(db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData): setting{settingData}, rrrIterSetting{rrrIterSettingData} {}
+	RouterGraph(db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData, db::Database& db): setting{settingData}, database(db), rrrIterSetting{rrrIterSettingData} {}
 
 private:
     int edgeCount;

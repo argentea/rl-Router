@@ -101,9 +101,9 @@ vector<int> Router::getNetsToRoute() {
         }
     } else {
         for (auto& net : database.nets) {
-            if (UpdateDB::checkViolation(net, rrrIterSetting)) {
+            if (UpdateDB::checkViolation(net, rrrIterSetting, database)) {
                 netsToRoute.push_back(net.idx);
-                _netsCost.push_back(UpdateDB::getNetVioCost(net));
+                _netsCost.push_back(UpdateDB::getNetVioCost(net, database));
             }
         }
     }
@@ -113,7 +113,7 @@ vector<int> Router::getNetsToRoute() {
 
 void Router::ripup(const vector<int>& netsToRoute) {
     for (auto netIdx : netsToRoute) {
-        UpdateDB::clearRouteResult(database.nets[netIdx]);
+        UpdateDB::clearRouteResult(database.nets[netIdx], database);
         allNetStatus[netIdx] = db::RouteStatus::FAIL_UNPROCESSED;
     }
 }
@@ -128,7 +128,7 @@ void Router::route(const vector<int>& netsToRoute) {
     vector<SingleNetRouter> routers;
     routers.reserve(netsToRoute.size());
     for (int netIdx : netsToRoute) {
-        routers.emplace_back(database.nets[netIdx], setting, rrrIterSetting);
+        routers.emplace_back(database.nets[netIdx], setting, rrrIterSetting, database);
     }
 
     // pre route
@@ -142,7 +142,7 @@ void Router::route(const vector<int>& netsToRoute) {
     if (db::globalDetails.multiNetVerbose >= +db::VerboseLevelT::MIDDLE) {
         log() << "Start multi-thread scheduling. There are " << netsToRoute.size() << " nets to route." << std::endl;
     }
-    Scheduler scheduler(routers, setting);
+    Scheduler scheduler(routers, setting, database);
     const vector<vector<int>>& batches = scheduler.schedule();
     if (db::globalDetails.multiNetVerbose >= +db::VerboseLevelT::MIDDLE) {
         log() << "Finish multi-thread scheduling" << ((db::globalDetails.numThreads == 0) ? " using simple mode" : "")
@@ -172,13 +172,13 @@ void Router::route(const vector<int>& netsToRoute) {
         allGetViaTypesMT += runJobsMT(batch.size(), [&](int jobIdx) {
             auto& router = routers[batch[jobIdx]];
             if (!db::isSucc(router.status)) return;
-            PostRoute postRoute(router.dbNet);
+            PostRoute postRoute(router.dbNet, database);
             postRoute.getViaTypes();
         });
         allCommitViaTypesMT += runJobsMT(batch.size(), [&](int jobIdx) {
             auto& router = routers[batch[jobIdx]];
             if (!db::isSucc(router.status)) return;
-            UpdateDB::commitViaTypes(router.dbNet);
+            UpdateDB::commitViaTypes(router.dbNet, database);
         });
         // 4 stat
         if (db::globalDetails.multiNetVerbose >= +db::VerboseLevelT::HIGH && db::globalDetails.numThreads != 0) {
@@ -198,7 +198,7 @@ void Router::route(const vector<int>& netsToRoute) {
 }
 
 void Router::finish() {
-    PostScheduler postScheduler(database.nets);
+    PostScheduler postScheduler(database.nets, database);
     const vector<vector<int>>& batches = postScheduler.schedule();
     if (db::globalDetails.multiNetVerbose >= +db::VerboseLevelT::MIDDLE) {
         printlog("There will be", batches.size(), "batches for getting via types.");
@@ -209,17 +209,17 @@ void Router::finish() {
         runJobsMT(batch.size(), [&](int jobIdx) {
             int netIdx = batch[jobIdx];
             if (!db::isSucc(allNetStatus[netIdx])) return;
-            UpdateDB::clearMinAreaRouteResult(database.nets[netIdx]);
+            UpdateDB::clearMinAreaRouteResult(database.nets[netIdx], database);
         });
         allPostMaze2MT += runJobsMT(batch.size(), [&](int jobIdx) {
             int netIdx = batch[jobIdx];
             if (!db::isSucc(allNetStatus[netIdx])) return;
-            PostMazeRoute(database.nets[netIdx]).run2();
+            PostMazeRoute(database.nets[netIdx], database).run2();
         });
         runJobsMT(batch.size(), [&](int jobIdx) {
             int netIdx = batch[jobIdx];
             if (!db::isSucc(allNetStatus[netIdx])) return;
-            UpdateDB::commitMinAreaRouteResult(database.nets[netIdx]);
+            UpdateDB::commitMinAreaRouteResult(database.nets[netIdx], database);
         });
     }
     if (db::globalDetails.multiNetVerbose >= +db::VerboseLevelT::MIDDLE) {
@@ -232,14 +232,14 @@ void Router::finish() {
             allGetViaTypesMT += runJobsMT(batch.size(), [&](int jobIdx) {
                 int netIdx = batch[jobIdx];
                 if (!db::isSucc(allNetStatus[netIdx])) return;
-                PostRoute postRoute(database.nets[netIdx]);
+                PostRoute postRoute(database.nets[netIdx], database);
                 if (iter == 0) postRoute.considerViaViaVio = false;
                 postRoute.getViaTypes();
             });
             allCommitViaTypesMT += runJobsMT(batch.size(), [&](int jobIdx) {
                 int netIdx = batch[jobIdx];
                 if (!db::isSucc(allNetStatus[netIdx])) return;
-                UpdateDB::commitViaTypes(database.nets[netIdx]);
+                UpdateDB::commitViaTypes(database.nets[netIdx], database);
             });
         }
         if (db::globalDetails.multiNetVerbose >= +db::VerboseLevelT::MIDDLE) {
@@ -250,7 +250,7 @@ void Router::finish() {
     // 3. post route
     auto postMT = runJobsMT(database.nets.size(), [&](int netIdx) {
         if (!db::isSucc(allNetStatus[netIdx])) return;
-        PostRoute postRoute(database.nets[netIdx]);
+        PostRoute postRoute(database.nets[netIdx], database);
         postRoute.run();
     });
     if (db::globalDetails.multiNetVerbose >= +db::VerboseLevelT::MIDDLE) {

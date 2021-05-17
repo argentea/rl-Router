@@ -9,7 +9,7 @@ ostream &operator<<(ostream &os, const Solution &sol) {
 }
 
 db::RouteStatus MazeRoute::run() {
-    GridGraphBuilder graphBuilder(localNet, graph);
+    GridGraphBuilder graphBuilder(localNet, graph, database);
     graphBuilder.run();
 
     vertexCostUBs.assign(graph.getNodeNum(), std::numeric_limits<db::CostT>::max());

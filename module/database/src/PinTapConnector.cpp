@@ -1,4 +1,6 @@
 #include "PinTapConnector.h"
+#include <database/layer/src/MetalLayer.h>
+#include <database/src/Database.h>
 
 db::RouteStatus PinTapConnector::run() {
     // 1 Get bestBox
@@ -83,7 +85,7 @@ vector<utils::SegmentT<DBU>> PinTapConnector::getLinkFromPts(const vector<utils:
 int PinTapConnector::getLinkPinSpaceVio(const vector<utils::SegmentT<DBU>> &link, int layerIdx) {
     int numVio = 0;
     for (const auto &linkSeg : link) {
-        auto linkMetal = getLinkMetal(linkSeg, layerIdx);
+        auto linkMetal = getLinkMetal(linkSeg, layerIdx, database);
         numVio += database.getFixedMetalVio({layerIdx, linkMetal}, dbNet.idx);
     }
     return numVio;
@@ -127,7 +129,7 @@ db::RouteStatus PinTapConnector::getBestPinAccessBox(const utils::PointT<DBU> &t
     return db::RouteStatus::SUCC_CONN_EXT_PIN;
 }
 
-utils::BoxT<DBU> PinTapConnector::getLinkMetal(const utils::SegmentT<DBU> &link, int layerIdx) {
+utils::BoxT<DBU> PinTapConnector::getLinkMetal(const utils::SegmentT<DBU> &link, int layerIdx, db::Database& database) {
     utils::BoxT<DBU> box(link.x, link.y);  // copy
     int dir = (box[0].range() == 0) ? 0 : 1;
     if (box[1 - dir].low > box[1 - dir].high) {

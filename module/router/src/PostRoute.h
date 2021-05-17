@@ -1,12 +1,14 @@
 #pragma once
 
 #include "LocalNet.h"
+#include <src/Database.h>
 
 class PostRoute {
 public:
-    PostRoute(db::Net& databaseNet) : dbNet(databaseNet) {}
+    PostRoute(db::Net& databaseNet, db::Database& db) : database(db), dbNet(databaseNet) {}
     
     db::RouteStatus run();
+	db::Database& database;
     void getViaTypes();
     bool considerViaViaVio = true;
 
@@ -42,12 +44,14 @@ class MetalFiller {
 public:
     MetalFiller(const vector<utils::BoxT<DBU>>& targetMetalRects,
                 int layerIndex,
+				db::Database& db,
                 db::AggrParaRunSpace aggressiveSpacing = db::AggrParaRunSpace::DEFAULT)
-        : targetMetals(targetMetalRects), layerIdx(layerIndex), aggrSpace(aggressiveSpacing) {}
+        : aggrSpace(aggressiveSpacing), database(db), targetMetals(targetMetalRects), layerIdx(layerIndex) {}
 
     void run();
     vector<utils::BoxT<DBU>> fillMetals;
     db::AggrParaRunSpace aggrSpace;
+	db::Database& database;
 
 private:
     void getFillRect(utils::BoxT<DBU> targetMetal);  // by value as the vector may be reallocated

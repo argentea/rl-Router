@@ -30,7 +30,7 @@ db::RouteStatus PostRoute::connectPins() {
 
     vector<vector<std::shared_ptr<db::GridSteiner>>> samePinTaps(dbNet.numOfPins());
     for (auto tap : pinTaps) {
-        PinTapConnector pinTapConnector(*tap, dbNet, tap->pinIdx);
+        PinTapConnector pinTapConnector(*tap, dbNet, tap->pinIdx, database);
         netStatus &= pinTapConnector.run();
         if (!pinTapConnector.bestLink.empty()) {
             linkToPins[tap] = move(pinTapConnector.bestLink);
@@ -134,7 +134,7 @@ void PostRoute::getTopo() {
             if (linkIt != linkToPins.end()) {
                 for (const utils::SegmentT<DBU> &link : linkIt->second) {
                     database.writeDEFWireSegment(dbNet, {link.lx(), link.ly()}, {link.hx(), link.hy()}, layerIdx);
-                    std::get<2>(subTreeMetals[subTreeIdx]).push_back(PinTapConnector::getLinkMetal(link, layerIdx));
+                    std::get<2>(subTreeMetals[subTreeIdx]).push_back(PinTapConnector::getLinkMetal(link, layerIdx, database));
                 }
             }
             const std::unordered_map<std::shared_ptr<db::GridSteiner>,
@@ -214,7 +214,7 @@ void PostRoute::getTopo() {
         if (std::get<2>(subTreeMetal).empty()) continue;
         const db::AggrParaRunSpace aggressiveSpacing =
             std::get<1>(subTreeMetal).empty() ? db::AggrParaRunSpace::DEFAULT : db::AggrParaRunSpace::LARGER_WIDTH;
-        MetalFiller metalFiller(std::get<2>(subTreeMetal), std::get<0>(subTreeMetal), aggressiveSpacing);
+        MetalFiller metalFiller(std::get<2>(subTreeMetal), std::get<0>(subTreeMetal), database, aggressiveSpacing);
         metalFiller.run();
         for (const utils::BoxT<DBU> &rect : metalFiller.fillMetals)
             database.writeDEFFillRect(dbNet, rect, std::get<0>(subTreeMetal));
@@ -279,7 +279,7 @@ void PostRoute::processAllSameLayerSameNetBoxes(const vector<db::BoxOnLayer> &pi
     // link to pins
     for (const auto &link : linkToPin) {
         // assme same layer
-        handle(PinTapConnector::getLinkMetal(link, layerIdx));
+        handle(PinTapConnector::getLinkMetal(link, layerIdx, database));
     }
 }
 
@@ -399,7 +399,7 @@ void MetalFiller::iterateAllMetals(const std::function<void(const utils::BoxT<DB
     for (const auto &metal : fillMetals) handle(metal);
 }
 
-void connectBySTT(db::Net &net) {
+void connectBySTT(db::Net &net, db::Database& database) {
     using PointOnLayer = std::pair<utils::PointT<DBU>, int>;
 
     int numPin = net.numOfPins();

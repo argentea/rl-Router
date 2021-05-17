@@ -13,10 +13,11 @@ public:
 	db::Setting& setting;
 	db::RrrIterSetting& rrrIterSetting;
     db::Net& dbNet;
+	db::Database& database;
 
     db::RouteStatus status;
 
-    SingleNetRouter(db::Net& dbNet, db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData);
+    SingleNetRouter(db::Net& dbNet, db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData, db::Database& db);
 
     void preRoute();
     void mazeRoute();

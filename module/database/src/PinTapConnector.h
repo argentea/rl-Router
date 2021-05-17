@@ -6,11 +6,12 @@ class PinTapConnector {
 public:
     vector<utils::SegmentT<DBU>> bestLink;
     std::pair<int, utils::PointT<DBU>> bestLinkVia = {-1, {}};
+	db::Database& database;
 
     int bestVio = 0;
 
-    PinTapConnector(const db::GridPoint& pinTap, const db::Net& databaseNet, int pinIndex)
-        : tap(pinTap), dbNet(databaseNet), pinIdx(pinIndex) {}
+    PinTapConnector(const db::GridPoint& pinTap, const db::Net& databaseNet, int pinIndex, db::Database& db)
+        : database{db}, tap(pinTap), dbNet(databaseNet), pinIdx(pinIndex) {}
 
     db::RouteStatus run();
 
@@ -19,7 +20,7 @@ public:
                                                const std::vector<db::BoxOnLayer>& pinAccessBoxes,
                                                db::BoxOnLayer& bestBox);
 
-    static utils::BoxT<DBU> getLinkMetal(const utils::SegmentT<DBU>& link, int layerIdx);
+    static utils::BoxT<DBU> getLinkMetal(const utils::SegmentT<DBU>& link, int layerIdx, db::Database& database);
 
 private:
     const db::GridPoint& tap;

@@ -4,7 +4,8 @@
 
 class PostMazeRoute {
 public:
-    PostMazeRoute(db::NetBase& netBase) : net(netBase) {}
+    PostMazeRoute(db::NetBase& netBase, db::Database& db) : database(db), net(netBase) {}
+	db::Database& database;
     void run();
     void run2();  // rerun extendMinAreaWires
 
