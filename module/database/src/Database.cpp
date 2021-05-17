@@ -12,11 +12,11 @@ void Database::init() {
 		std::cout << "Die region (in DBU): " << dieRegion << std::endl;
         std::cout << std::endl;
     }
-	return;
 
     RouteGrid::init();
 
     NetList::init(rsynService);
+	cout << "end" << std::endl;return;
 
     markPinAndObsOccupancy();
 

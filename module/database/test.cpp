@@ -43,6 +43,7 @@ int main() {
     }
 
 	database.init();
+	setting.adapt(database);
 //
 	if(globalDetails.dbVerbose >= +db::VerboseLevelT::LOW)
 	{
