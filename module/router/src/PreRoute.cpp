@@ -1,6 +1,7 @@
 #include "PreRoute.h"
 
 db::RouteStatus PreRoute::run(int numPitchForGuideExpand) {
+	std::cerr << "\nPreroute run" << std::endl;
     // expand guides uniformally
     auto& guides = localNet.routeGuides;
     for (int i = 0; i < guides.size(); ++i) {
@@ -57,6 +58,7 @@ db::RouteStatus PreRoute::run(int numPitchForGuideExpand) {
 }
 
 db::RouteStatus PreRoute::runIterative() {
+	std::cerr << "\nPreroute runIterative" << std::endl;
     db::RouteStatus status = run(localNet.rrrIterSetting.defaultGuideExpand);
 
     int iter = 0;
@@ -189,6 +191,13 @@ bool PreRoute::checkGuideConnTrack() const {
                 utils::IntervalT<int> upperCpInterval =
                     database.getLayer(localNet.gridRouteGuides[guideIdx].layerIdx).getUpperCrossPointRange(trackRange);
                 if (localNet.gridRouteGuides[adjGuideIdx].crossPointRange.IntersectWith(upperCpInterval).IsValid()) {
+
+					//RL::DEBUG
+					if((localNet.gridRouteGuides[guideIdx].layerIdx + 1) != localNet.gridRouteGuides[adjGuideIdx].layerIdx)	{
+						std::cerr << "lower: " << localNet.gridRouteGuides[guideIdx].layerIdx << "  upper:" << localNet.gridRouteGuides[adjGuideIdx].layerIdx << std::endl;
+						exit(0);
+					}
+					//
                     db::ViaBox viaBox = database.getViaBoxBetween(localNet.gridRouteGuides[guideIdx],
                                                                   localNet.gridRouteGuides[adjGuideIdx]);
                     bool isVisited = true;
@@ -210,6 +219,13 @@ bool PreRoute::checkGuideConnTrack() const {
                 utils::IntervalT<int> lowerCpInterval =
                     database.getLayer(localNet.gridRouteGuides[guideIdx].layerIdx).getLowerCrossPointRange(trackRange);
                 if (localNet.gridRouteGuides[adjGuideIdx].crossPointRange.IntersectWith(lowerCpInterval).IsValid()) {
+					//RL::DEBUG
+					if((localNet.gridRouteGuides[guideIdx].layerIdx + 1) != localNet.gridRouteGuides[adjGuideIdx].layerIdx)	{
+						std::cerr << "lower: " << localNet.gridRouteGuides[guideIdx].layerIdx << "  upper:" << localNet.gridRouteGuides[adjGuideIdx].layerIdx << std::endl;
+						exit(0);
+					}
+					//
+
                     db::ViaBox viaBox = database.getViaBoxBetween(localNet.gridRouteGuides[adjGuideIdx],
                                                                   localNet.gridRouteGuides[guideIdx]);
                     bool isVisited = true;

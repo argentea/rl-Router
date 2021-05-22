@@ -64,6 +64,7 @@ void Router::run() {
             rrrIterSetting.print();
         }
         route(netsToRoute);
+		std::cerr << "\nend" << std::endl;exit(0);
         log() << std::endl;
         log() << "Finish RRR iteration " << iter << std::endl;
         log() << "MEM: cur=" << utils::mem_use::get_current() << "MB, peak=" << utils::mem_use::get_peak() << "MB"
@@ -124,6 +125,7 @@ void Router::updateCost(const vector<int>& netsToRoute) {
 }
 
 void Router::route(const vector<int>& netsToRoute) {
+
     // init SingleNetRouters
     vector<SingleNetRouter> routers;
     routers.reserve(netsToRoute.size());
@@ -137,6 +139,7 @@ void Router::route(const vector<int>& netsToRoute) {
         printlog("preMT", preMT);
         printStat();
     }
+	std::cerr << "\nroute" << std::endl;exit(0);
 
     // schedule
     if (db::globalDetails.multiNetVerbose >= +db::VerboseLevelT::MIDDLE) {

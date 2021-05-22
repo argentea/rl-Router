@@ -18,7 +18,6 @@ void Database::init() {
     NetList::init(rsynService);
 
     markPinAndObsOccupancy();
-	std::cout << "end" << std::endl;exit(0);
 
     initMTSafeMargin();
 
@@ -273,7 +272,6 @@ void Database::writeDEF(const std::string& filename) {
 }
 
 void Database::markPinAndObsOccupancy() {
-	std::cout << "MarkPinAndObsOccupancy end" << std::endl;exit(0);
     if (db::globalDetails.dbVerbose >= +db::VerboseLevelT::MIDDLE) {
         log() << "Mark pin & obs occupancy on RouteGrid ..." << std::endl;
     }
@@ -290,7 +288,7 @@ void Database::markPinAndObsOccupancy() {
     }
     // Mark dangling pins
     // minor TODO: port?
-    Rsyn::Session session;
+    Rsyn::Session session = rsynService.session;
     const Rsyn::PhysicalDesign& physicalDesign =
         static_cast<Rsyn::PhysicalService*>(session.getService("rsyn.physical"))->getPhysicalDesign();
     const DBU libDBU = physicalDesign.getDatabaseUnits(Rsyn::LIBRARY_DBU);
