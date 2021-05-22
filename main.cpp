@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
 	
 	globalDetails.numThreads = 20;
 	setting.tat = 300;
-	setting.outputFile = "home/kunpengjiang/project/rl-router/toys/ispd2018/ispd18_sample/ans";
+	setting.outputFile = "/home/kunpengjiang/project/rl-router/toys/ispd2018/ispd18_sample/ans";
 	globalDetails.dbVerbose = db::VerboseLevelT::HIGH;
 
 
@@ -26,11 +26,12 @@ int main(int argc, char* argv[]) {
 	Rsyn::Session& session = service.session;
 	session.init();
     Rsyn::ISPD2018Reader reader;
-    const Rsyn::Json params = {
+    const Rsyn::Json params({
         {"lefFile", lefFile},
         {"defFile", defFile},
         {"guideFile", guideFile},
-    };
+    });
+	vector<vector<int>> testjson = {{3,4}, {1,4}};
 	reader.load(&session, params);
 	service.init();
 	log() << "service inited\n";

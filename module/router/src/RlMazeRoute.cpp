@@ -39,7 +39,6 @@ db::RouteStatus MazeRoute::route(int startPin) {
         solComp);
 
     auto updateSol = [&](const std::shared_ptr<Solution> &sol) {
-		printf("RL::updateSol: sol: %d\n", sol->vertex);
         solQueue.push(sol);
         if (sol->costUB < vertexCostUBs[sol->vertex]) {
             vertexCostUBs[sol->vertex] = sol->costUB;
@@ -49,20 +48,16 @@ db::RouteStatus MazeRoute::route(int startPin) {
     // init from startPin
     for (auto vertex : graph.getVertices(startPin)) {
         DBU minLen = graph.isFakePin(vertex) ? 0 : database.getLayer(graph.getGridPoint(vertex).layerIdx).getMinLen();
-		printf("RL::minLen: %ld\n", database.getLayer(graph.getGridPoint(vertex).layerIdx).getMinLen());
         updateSol(std::make_shared<Solution>(
             graph.getVertexCost(vertex), minLen, graph.getVertexCost(vertex), vertex, nullptr));
     }
     std::unordered_set<int> visitedPin = {startPin};
     int nPinToConnect = localNet.numOfPins() - 1;
 	for (int i = 0; i < localNet.numOfPins(); ++i) {
-		printf("RL::");
 		localNet.printBasics(std::cout);
 	}
-	printf("%d", graph.getNodeNum());
 
     while (nPinToConnect != 0) {
-		printf("RL::pinLeft: %d\n", nPinToConnect);
         std::shared_ptr<Solution> dstVertex;
         int dstPinIdx = -1;
 
@@ -75,7 +70,6 @@ db::RouteStatus MazeRoute::route(int startPin) {
             // reach a pin?
             dstPinIdx = graph.getPinIdx(u);
             if (dstPinIdx != -1 && visitedPin.find(dstPinIdx) == visitedPin.end()) {
-				printf("RL::reach pin: %d\n", dstPinIdx);
                 dstVertex = newSol;
                 break;
             }
@@ -102,13 +96,11 @@ db::RouteStatus MazeRoute::route(int startPin) {
                 // minArea penalty
                 db::CostT penalty = 0;
                 if (!areOverlappedVertexes && switchLayer(direction)) {
-					printf("RL:: Ulayer hasMinLenVioAcc: %d\n",uLayer.hasMinLenVioAcc(newSol->len));
                     if (uLayer.hasMinLenVioAcc(newSol->len)) {
                         if (graph.isMinAreaFixable(u) || dstPinIdx != -1) {
                             penalty = uLayer.getMinLen() - newSol->len;
                         } else {
                             penalty = database.getUnitMinAreaVioCost();
-							printf("RL:: minArea vio cost%lf\n", database.getUnitMinAreaVioCost());
                         }
                     }
                 }

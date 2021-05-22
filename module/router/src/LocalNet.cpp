@@ -62,7 +62,6 @@ void LocalNet::initNumOfVertices(db::Database& database) {
 
             const int upperIdx = box1.layerIdx > box2.layerIdx ? b1 : b2;
             const int lowerIdx = box1.layerIdx < box2.layerIdx ? b1 : b2;
-
             const db::ViaBox viaBox = database.getViaBoxBetween(gridRouteGuides[lowerIdx], gridRouteGuides[upperIdx]);
             if (!database.isValid(viaBox)) {
                 continue;

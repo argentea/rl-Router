@@ -10,6 +10,7 @@ public:
     // Two priciples:
     // 1. fast std::pair query (whether A & B are connected)
     // 2. fast relation query (who overlap/adjacent with A)
+	db::Database& database;
     vector<vector<int>> guideConn;                // routeGuideIdx -> ovlp routeGuideIdx
     vector<vector<int>> guideAdj;                 // routeGuideIdx -> adj routeGuideIdx
     vector<vector<std::pair<int, int>>> pinGuideConn;  // pinIdx -> ovlp (routeGuideIdx, accessBoxIdx)
@@ -17,7 +18,7 @@ public:
 	db::Setting& setting;
 	db::RrrIterSetting& rrrIterSetting;
 
-	RouteGuideGraph(db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData): setting{settingData}, rrrIterSetting{rrrIterSettingData}{}
+	RouteGuideGraph(db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData, db::Database& DB): database{DB}, setting{settingData}, rrrIterSetting{rrrIterSettingData}{}
     void initConn(const vector<vector<db::GridBoxOnLayer>>& pinAccessBoxes,
                   const vector<db::GridBoxOnLayer>& routeGuides);
     bool checkGuideConn() const;

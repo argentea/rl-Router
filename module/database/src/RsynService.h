@@ -13,14 +13,7 @@ public:
     Rsyn::Design design;
     Rsyn::Module module;
 
-    void init() {
-        physicalService = session.getService("rsyn.physical");
-        routeGuideService = session.getService("rsyn.routingGuide");
-
-        physicalDesign = physicalService->getPhysicalDesign();
-        design = session.getDesign();
-        module = design.getTopModule();
-    }
+    void init();
 };
 
 }

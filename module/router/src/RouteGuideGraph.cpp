@@ -12,11 +12,10 @@ void RouteGuideGraph::initConn(const vector<vector<db::GridBoxOnLayer>>& pinAcce
         const auto& accessBoxes = pinAccessBoxes[p];
         for (unsigned a = 0; a < accessBoxes.size(); a++) {
             for (unsigned g = 0; g < routeGuides.size(); g++) {
-//todo 3处定义
-//                if (database.isConnected(routeGuides[g], accessBoxes[a])) {
+                if (database.isConnected(routeGuides[g], accessBoxes[a])) {
                     pinGuideConn[p].emplace_back(g, a);
                     guidePinConn[g].emplace_back(p, a);
-//             }
+	            }
             }
         }
     }
@@ -25,10 +24,10 @@ void RouteGuideGraph::initConn(const vector<vector<db::GridBoxOnLayer>>& pinAcce
     guideConn.resize(routeGuides.size());
     for (unsigned g1 = 0; g1 < routeGuides.size(); g1++) {
         for (unsigned g2 = g1 + 1; g2 < routeGuides.size(); g2++) {
-//            if (database.isConnected(routeGuides[g1], routeGuides[g2])) {
+            if (database.isConnected(routeGuides[g1], routeGuides[g2])) {
                 guideConn[g2].push_back(g1);
                 guideConn[g1].push_back(g2);
-//            }
+            }
         }
     }
 
@@ -36,11 +35,11 @@ void RouteGuideGraph::initConn(const vector<vector<db::GridBoxOnLayer>>& pinAcce
     guideAdj.resize(routeGuides.size());
     for (unsigned g1 = 0; g1 < routeGuides.size(); g1++) {
         for (unsigned g2 = g1 + 1; g2 < routeGuides.size(); g2++) {
-//            if (database.isAdjacent(routeGuides[g1], routeGuides[g2])) {
+            if (database.isAdjacent(routeGuides[g1], routeGuides[g2])) {
                 guideAdj[g2].push_back(g1);
                 guideAdj[g1].push_back(g2);
             }
-//        }
+        }
     }
 }
 

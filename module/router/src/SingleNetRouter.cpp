@@ -5,7 +5,7 @@
 #include "PostRoute.h"
 
 SingleNetRouter::SingleNetRouter(db::Net& databaseNet, db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData, db::Database& db)
-    : localNet(databaseNet, settingData, rrrIterSettingData), setting{settingData}, rrrIterSetting{rrrIterSettingData}, dbNet(databaseNet), database(db), status(db::RouteStatus::SUCC_NORMAL) {}
+    : localNet(databaseNet, settingData, rrrIterSettingData, db), setting{settingData}, rrrIterSetting{rrrIterSettingData}, dbNet(databaseNet), database(db), status(db::RouteStatus::SUCC_NORMAL) {}
 
 void SingleNetRouter::preRoute() {
     // Pre-route (obtain proper grid boxes)

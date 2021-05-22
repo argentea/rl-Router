@@ -1,7 +1,11 @@
 #include "PreRoute.h"
+#include <Setting.h>
+#include <layer/src/CutLayer.h>
 
 db::RouteStatus PreRoute::run(int numPitchForGuideExpand) {
-	std::cerr << "\nPreroute run" << std::endl;
+	if (db::globalDetails.dbVerbose >= +db::VerboseLevelT::HIGH) {
+		std::cerr << "\nPreroute run" << std::endl;
+	}
     // expand guides uniformally
     auto& guides = localNet.routeGuides;
     for (int i = 0; i < guides.size(); ++i) {
@@ -41,6 +45,7 @@ db::RouteStatus PreRoute::run(int numPitchForGuideExpand) {
             // init localNet and check
             localNet.initGridBoxes(database);
             localNet.initConn(localNet.gridPinAccessBoxes, localNet.gridRouteGuides);
+
             localNet.initNumOfVertices(database);
 
             if (!localNet.checkPin(database)) {
@@ -58,7 +63,9 @@ db::RouteStatus PreRoute::run(int numPitchForGuideExpand) {
 }
 
 db::RouteStatus PreRoute::runIterative() {
-	std::cerr << "\nPreroute runIterative" << std::endl;
+	if (db::globalDetails.dbVerbose >= +db::VerboseLevelT::HIGH) {
+		std::cerr << "\nPreroute runIterative" << std::endl;
+	}
     db::RouteStatus status = run(localNet.rrrIterSetting.defaultGuideExpand);
 
     int iter = 0;
@@ -92,6 +99,7 @@ db::RouteStatus PreRoute::runIterative() {
     return status;
 }
 
+//相邻层且相交的两个guide, 分别在该层的另一方向上扩展到对方的尺度
 void PreRoute::expandGuidesToMargin() {
     vector<db::BoxOnLayer>& guides = localNet.routeGuides;
     vector<vector<int>> crossLayerConn(guides.size());
@@ -192,12 +200,6 @@ bool PreRoute::checkGuideConnTrack() const {
                     database.getLayer(localNet.gridRouteGuides[guideIdx].layerIdx).getUpperCrossPointRange(trackRange);
                 if (localNet.gridRouteGuides[adjGuideIdx].crossPointRange.IntersectWith(upperCpInterval).IsValid()) {
 
-					//RL::DEBUG
-					if((localNet.gridRouteGuides[guideIdx].layerIdx + 1) != localNet.gridRouteGuides[adjGuideIdx].layerIdx)	{
-						std::cerr << "lower: " << localNet.gridRouteGuides[guideIdx].layerIdx << "  upper:" << localNet.gridRouteGuides[adjGuideIdx].layerIdx << std::endl;
-						exit(0);
-					}
-					//
                     db::ViaBox viaBox = database.getViaBoxBetween(localNet.gridRouteGuides[guideIdx],
                                                                   localNet.gridRouteGuides[adjGuideIdx]);
                     bool isVisited = true;
@@ -219,13 +221,6 @@ bool PreRoute::checkGuideConnTrack() const {
                 utils::IntervalT<int> lowerCpInterval =
                     database.getLayer(localNet.gridRouteGuides[guideIdx].layerIdx).getLowerCrossPointRange(trackRange);
                 if (localNet.gridRouteGuides[adjGuideIdx].crossPointRange.IntersectWith(lowerCpInterval).IsValid()) {
-					//RL::DEBUG
-					if((localNet.gridRouteGuides[guideIdx].layerIdx + 1) != localNet.gridRouteGuides[adjGuideIdx].layerIdx)	{
-						std::cerr << "lower: " << localNet.gridRouteGuides[guideIdx].layerIdx << "  upper:" << localNet.gridRouteGuides[adjGuideIdx].layerIdx << std::endl;
-						exit(0);
-					}
-					//
-
                     db::ViaBox viaBox = database.getViaBoxBetween(localNet.gridRouteGuides[adjGuideIdx],
                                                                   localNet.gridRouteGuides[guideIdx]);
                     bool isVisited = true;

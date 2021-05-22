@@ -5,7 +5,7 @@
 
 class LocalNet : public RouteGuideGraph, public db::NetBase {
 public:
-    LocalNet(const db::Net& databaseNet, db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData) :RouteGuideGraph(settingData, rrrIterSettingData), db::NetBase(databaseNet), dbNet(databaseNet) {}
+    LocalNet(const db::Net& databaseNet, db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData, db::Database& DB) :RouteGuideGraph(settingData, rrrIterSettingData, DB), db::NetBase(databaseNet), dbNet(databaseNet) {}
 
     const db::Net& dbNet;
 

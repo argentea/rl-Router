@@ -9,7 +9,7 @@ public:
     void run();
 	db::Setting& setting;
 	db::RrrIterSetting& rrrIterSetting;
-	Router(db::Database& databaseData, db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData): rrrIterSetting{rrrIterSettingData}, setting{settingData}, database{databaseData} {}
+	Router(db::Database& databaseData, db::Setting& settingData, db::RrrIterSetting& rrrIterSettingData): setting{settingData}, rrrIterSetting{rrrIterSettingData}, database{databaseData} {}
 
 private:
 	db::Database& database;
